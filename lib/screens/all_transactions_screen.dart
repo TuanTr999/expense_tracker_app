@@ -1,11 +1,13 @@
+import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker_app/widgets/transaction_item.dart';
 
 class AllTransactionsScreen extends StatelessWidget {
-  const AllTransactionsScreen({super.key, required this.transactions});
+  const AllTransactionsScreen({super.key, required this.transactions, required this.filterType});
 
   final List<TransactionModel> transactions;
+  final FilterType filterType;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,7 @@ class AllTransactionsScreen extends StatelessWidget {
         padding: EdgeInsets.all(20),
         child: ListView.separated(
           itemBuilder: (context, index) {
-            return TransactionItem(item: transactions[index]);
+            return TransactionItem(item: transactions[index], filterType: filterType);
           },
           separatorBuilder: (context, index) {
             return SizedBox(height: 10);

@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -61,7 +62,7 @@ class BudgetCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Ngan sach',
+                        'Vượt chi',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
@@ -86,10 +87,27 @@ class BudgetCard extends StatelessWidget {
           Positioned(
             top: 22.5,
             right: 10,
-            child: Text(
-              formatDate(state.type, state.selectedDate),
-              style: TextStyle(color: Colors.blue, fontSize: 12),
-            ),
+            child: state.type != FilterType.custom
+                ? Text(
+                    formatDate(state.type, state.selectedDate),
+                    style: TextStyle(color: Colors.blue, fontSize: 12),
+                  )
+                : (state.fromDate == null || state.toDate == null)
+                ? SizedBox()
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        formatDate(state.type, state.fromDate!),
+                        style: TextStyle(color: Colors.blue, fontSize: 12),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        formatDate(state.type, state.toDate!),
+                        style: TextStyle(color: Colors.blue, fontSize: 12),
+                      ),
+                    ],
+                  ),
           ),
         ],
       ),

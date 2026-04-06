@@ -63,7 +63,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
               child: Center(
                 child: Text(
-                  formatDate(state.type, currentDate),
+                  state.type != FilterType.custom ?
+                  formatDate(state.type, currentDate)
+                  : "Tùy chỉnh",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,

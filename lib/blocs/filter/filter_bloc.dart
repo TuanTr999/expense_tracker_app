@@ -12,6 +12,8 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
           selectedDate: DateTime.now(),
           allTransactions: [],
           filteredTransactions: [],
+          fromDate: null,
+          toDate: null,
         ),
       ) {
     List<TransactionModel> _filter(
@@ -42,7 +44,14 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         case FilterType.all:
           return list;
         case FilterType.custom:
-          return list;
+          if (state.fromDate == null || state.toDate == null) {
+            return list;
+          }
+
+          return list.where((t) {
+            return !t.date.isBefore(state.fromDate!) &&
+                !t.date.isAfter(state.toDate!);
+          }).toList();
       }
     }
 
@@ -53,19 +62,30 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         state.selectedDate,
       );
 
-      emit(state.copyWith(
-        allTransactions: event.transactions,
-        filteredTransactions: filtered,
-      ));
+      emit(
+        state.copyWith(
+          allTransactions: event.transactions,
+          filteredTransactions: filtered,
+        ),
+      );
     });
 
     on<ChangeFilterType>((event, emit) {
+      final fromDate = event.fromDate ?? state.fromDate;
+      final toDate = event.toDate ?? state.toDate;
+
       final filtered = _filter(
         state.allTransactions,
         event.type,
         state.selectedDate,
       );
-      emit(state.copyWith(type: event.type, filteredTransactions: filtered));
+
+      emit(state.copyWith(
+        type: event.type,
+        fromDate: fromDate,
+        toDate: toDate,
+        filteredTransactions: filtered,
+      ));
     });
 
     on<PreviousPressed>((event, emit) {
@@ -93,7 +113,11 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       final filtered = _filter(state.allTransactions, state.type, newDate);
 
       emit(
-        state.copyWith(selectedDate: newDate, reset: true, filteredTransactions: filtered),
+        state.copyWith(
+          selectedDate: newDate,
+          reset: true,
+          filteredTransactions: filtered,
+        ),
       );
     });
 
@@ -123,7 +147,11 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       final filtered = _filter(state.allTransactions, state.type, newDate);
 
       emit(
-        state.copyWith(selectedDate: newDate, reset: true, filteredTransactions: filtered),
+        state.copyWith(
+          selectedDate: newDate,
+          reset: true,
+          filteredTransactions: filtered,
+        ),
       );
     });
 
@@ -133,7 +161,13 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
 
       final filtered = _filter(state.allTransactions, state.type, now);
 
-      emit(state.copyWith(selectedDate: now,reset: false, filteredTransactions: filtered));
+      emit(
+        state.copyWith(
+          selectedDate: now,
+          reset: false,
+          filteredTransactions: filtered,
+        ),
+      );
     });
   }
 }

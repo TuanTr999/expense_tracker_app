@@ -9,7 +9,14 @@ class ResetPressed extends FilterEvent {}
 
 class ChangeFilterType extends FilterEvent {
   final FilterType type;
-  ChangeFilterType(this.type);
+  final DateTime? fromDate;
+  final DateTime? toDate;
+
+  ChangeFilterType(
+      this.type, {
+        this.fromDate,
+        this.toDate,
+      });
 }
 
 class LoadTransactions extends FilterEvent {

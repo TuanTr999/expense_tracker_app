@@ -10,6 +10,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../blocs/filter/filter_bloc.dart';
 import '../../blocs/filter/filter_event.dart';
+import '../../core/utils/current_date.dart';
 import '../../core/utils/transaction_util.dart';
 import '../../core/utils/format.dart';
 import '../../models/transaction_model.dart';
@@ -44,16 +45,14 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    context.read<FilterBloc>().add(
-      LoadTransactions(transactions),
-    );
+    context.read<FilterBloc>().add(LoadTransactions(transactions));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
-      appBar: CustomAppBar(selected: selected,),
+      appBar: CustomAppBar(),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
@@ -66,19 +65,123 @@ class _HomeTabState extends State<HomeTab> {
               ),
               child: Padding(
                 padding: EdgeInsets.only(left: 20, right: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    filterItem('Ngày', FilterType.day),
-                    filterItem('Tháng', FilterType.month),
-                    filterItem('Năm', FilterType.year),
-                    filterItem('Tất cả', FilterType.all),
-                    filterItem('Tùy chỉnh', FilterType.custom)
-                  ],
+                child: BlocBuilder<FilterBloc, FilterState>(
+                  builder: (context, state) {
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        filterItem('Ngày', FilterType.day, state),
+                        filterItem('Tháng', FilterType.month, state),
+                        filterItem('Năm', FilterType.year, state),
+                        filterItem('Tất cả', FilterType.all, state),
+                        filterItem('Tùy chỉnh', FilterType.custom, state),
+                      ],
+                    );
+                  },
                 ),
               ),
             ),
             SizedBox(height: 20),
+            BlocBuilder<FilterBloc, FilterState>(
+              builder: (context, state) {
+                if (state.type != FilterType.custom) {
+                  return Container();
+                }
+                return Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        InkWell(
+                          onTap: () async {
+                            final fromDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                            );
+
+                            if (fromDate != null) {
+                              context.read<FilterBloc>().add(
+                                ChangeFilterType(
+                                  FilterType.custom,
+                                  fromDate: fromDate,
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 110,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                formatDate(state.type, state.fromDate),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        Text(
+                          '-',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 15),
+                        InkWell(
+                          onTap: () async {
+                            final toDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                            );
+
+                            if (toDate != null) {
+                              context.read<FilterBloc>().add(
+                                ChangeFilterType(
+                                  FilterType.custom,
+                                  toDate: toDate,
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 110,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Center(
+                              child: Text(
+                                formatDate(state.type, state.toDate),
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                );
+              },
+            ),
             BudgetCard(),
             SizedBox(height: 20),
             Row(
@@ -128,7 +231,7 @@ class _HomeTabState extends State<HomeTab> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => AllTransactionsScreen(
-                              transactions: state.filteredTransactions,
+                              transactions: state.filteredTransactions, filterType: state.type,
                             ),
                           ),
                         );
@@ -150,7 +253,7 @@ class _HomeTabState extends State<HomeTab> {
                     itemCount: state.filteredTransactions.length,
                     itemBuilder: (context, index) {
                       return TransactionItem(
-                        item: state.filteredTransactions[index],
+                        item: state.filteredTransactions[index],filterType: state.type,
                       );
                     },
                     separatorBuilder: (context, index) => SizedBox(height: 10),
@@ -158,32 +261,24 @@ class _HomeTabState extends State<HomeTab> {
                 );
               },
             ),
-
           ],
         ),
       ),
     );
   }
 
-  Widget filterItem(String title, FilterType type) {
-    final state = context.watch<FilterBloc>().state;
-
+  Widget filterItem(String title, FilterType type, FilterState state) {
     return InkWell(
       onTap: () {
-        context.read<FilterBloc>().add(
-          ChangeFilterType(type),
-        );
+        context.read<FilterBloc>().add(ChangeFilterType(type));
       },
       child: Text(
         title,
         style: TextStyle(
-          color: state.type == type
-              ? Colors.black
-              : Colors.grey,
+          color: state.type == type ? Colors.black : Colors.grey,
           fontWeight: FontWeight.bold,
         ),
       ),
     );
   }
 }
-
