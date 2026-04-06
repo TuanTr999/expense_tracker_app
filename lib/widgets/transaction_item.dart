@@ -1,7 +1,7 @@
 import 'package:expense_tracker_app/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/format.dart';
+import '../core/utils/format.dart';
 
 class TransactionItem extends StatelessWidget {
   TransactionItem({super.key, required this.item});
@@ -39,7 +39,7 @@ class TransactionItem extends StatelessWidget {
               ),
               SizedBox(height: 5),
               Text(
-                TimeOfDay.now().format(context),
+                '${item.date.hour}:${item.date.minute}',
                 style: TextStyle(fontSize: 14, color: Colors.grey),
               ),
             ],
