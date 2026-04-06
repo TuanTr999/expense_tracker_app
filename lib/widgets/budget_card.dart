@@ -41,7 +41,7 @@ class BudgetCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Ngan sach',
+                        'Ngân sách',
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
