@@ -42,7 +42,7 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
-      appBar: CustomAppBar(),
+      appBar: CustomAppBar(selected: selected,),
       body: Padding(
         padding: EdgeInsets.all(20),
         child: Column(
