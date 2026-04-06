@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'blocs/filter/filter_bloc.dart';
+import 'blocs/navigation/navigation_bloc.dart';
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -25,10 +26,13 @@ class MyApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: BlocProvider(
-        create: (context) => FilterBloc(),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (_) => NavigationBloc()),
+          BlocProvider(create: (_) => FilterBloc()),
+        ],
         child: MainScreen(),
-      ),
+      )
     );
   }
 }

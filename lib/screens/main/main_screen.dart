@@ -1,4 +1,8 @@
+import 'package:expense_tracker_app/blocs/navigation/navigation_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../blocs/navigation/navigation_event.dart';
+import '../../blocs/navigation/navigation_state.dart';
 import '../home/home_tab.dart';
 import '../wallet/wallet_screen.dart';
 import '../budget/budget_screen.dart';
@@ -12,20 +16,28 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  int _currentIndex = 0;
-
-  final List<Widget> pages = [
-    HomeTab(),
-    WalletScreen(),
-    BudgetScreen(),
-    SettingsScreen(),
-  ];
+  // final List<Widget> pages = [
+  //   HomeTab(),
+  //   WalletScreen(),
+  //   BudgetScreen(),
+  //   SettingsScreen(),
+  // ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: pages),
+      body: BlocBuilder<NavigationBloc, NavigationState>(
+        builder: (context, state) {
+          final pages = [
+            HomeTab(),
+            WalletScreen(),
+            BudgetScreen(),
+            SettingsScreen(),
+          ];
 
+          return IndexedStack(index: state.currentIndex, children: pages);
+        },
+      ),
       bottomNavigationBar: BottomAppBar(
         color: Color(0xFFF5F5F5),
         padding: EdgeInsets.only(bottom: 0, left: 20, right: 20),
@@ -55,28 +67,33 @@ class _MainScreenState extends State<MainScreen> {
         elevation: 3,
         backgroundColor: Colors.blue,
         onPressed: () {},
-          child: Icon(Icons.add, color: Colors.white),
-        ),
+        child: Icon(Icons.add, color: Colors.white),
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
   Widget _item(IconData icon, int index) {
-    final isSelected = _currentIndex == index;
-
     return IconButton(
       onPressed: () {
-        setState(() => _currentIndex = index);
+        context.read<NavigationBloc>().add(ChangePageEvent(index));
       },
-      icon: Container(
-        width: 60,
-        height: 60,
-        decoration: BoxDecoration(
-          color: isSelected ? Colors.blue.withOpacity(0.1) : Colors.transparent,
-          shape: BoxShape.circle,
-        ),
-        child: Icon(icon),
-      )
+      icon: BlocBuilder<NavigationBloc, NavigationState>(
+        builder: (context, state) {
+
+          return Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: state.currentIndex == index
+                  ? Colors.blue.withOpacity(0.1)
+                  : Colors.transparent,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: state.currentIndex == index ? Colors.blue : Colors.grey),
+          );
+        },
+      ),
     );
   }
 }
