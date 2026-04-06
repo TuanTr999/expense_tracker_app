@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/screens/all_transactions_screen.dart';
 import 'package:expense_tracker_app/widgets/app_bar/custom_app_bar.dart';
 import 'package:expense_tracker_app/widgets/budget_card.dart';
@@ -5,8 +6,11 @@ import 'package:expense_tracker_app/widgets/summary_card.dart';
 import 'package:expense_tracker_app/widgets/transaction_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/utils/transaction_utill.dart';
+import '../../blocs/filter/filter_bloc.dart';
+import '../../blocs/filter/filter_event.dart';
+import '../../core/utils/transaction_util.dart';
 import '../../core/utils/format.dart';
 import '../../models/transaction_model.dart';
 
@@ -18,7 +22,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  int selected = 0;
   final List<TransactionModel> transactions = [
     TransactionModel(
       id: '1',
@@ -37,6 +40,14 @@ class _HomeTabState extends State<HomeTab> {
       type: TransactionType.income,
     ),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<FilterBloc>().add(
+      LoadTransactions(transactions),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,76 +69,11 @@ class _HomeTabState extends State<HomeTab> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          selected = 0;
-                        });
-                      },
-                      child: Text(
-                        'Ngày',
-                        style: TextStyle(
-                          color: selected == 0 ? Colors.black : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          selected = 1;
-                        });
-                      },
-                      child: Text(
-                        'Tháng',
-                        style: TextStyle(
-                          color: selected == 1 ? Colors.black : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          selected = 2;
-                        });
-                      },
-                      child: Text(
-                        'Năm',
-                        style: TextStyle(
-                          color: selected == 2 ? Colors.black : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          selected = 3;
-                        });
-                      },
-                      child: Text(
-                        'Tất cả',
-                        style: TextStyle(
-                          color: selected == 3 ? Colors.black : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    InkWell(
-                      onTap: () {
-                        setState(() {
-                          selected = 4;
-                        });
-                      },
-                      child: Text(
-                        'Tùy chỉnh',
-                        style: TextStyle(
-                          color: selected == 4 ? Colors.black : Colors.grey,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                    filterItem('Ngày', FilterType.day),
+                    filterItem('Tháng', FilterType.month),
+                    filterItem('Năm', FilterType.year),
+                    filterItem('Tất cả', FilterType.all),
+                    filterItem('Tùy chỉnh', FilterType.custom)
                   ],
                 ),
               ),
@@ -137,28 +83,32 @@ class _HomeTabState extends State<HomeTab> {
             SizedBox(height: 20),
             Row(
               children: [
-                Expanded(
-                  child: SummaryCard(
-                    title: 'Chi tiêu',
-                    amount: AppFormat.currency(
-                      calculateTotalExpense(
-                        filteredTransactions(selected, transactions),
+                BlocBuilder<FilterBloc, FilterState>(
+                  builder: (context, state) {
+                    return Expanded(
+                      child: SummaryCard(
+                        title: 'Chi tiêu',
+                        amount: AppFormat.currency(
+                          calculateTotalExpense(state.filteredTransactions),
+                        ),
+                        color: Colors.red,
                       ),
-                    ),
-                    color: Colors.red,
-                  ),
+                    );
+                  },
                 ),
                 SizedBox(width: 20),
-                Expanded(
-                  child: SummaryCard(
-                    title: 'Thu nhập',
-                    amount: AppFormat.currency(
-                      calculateTotalIncome(
-                        filteredTransactions(selected, transactions),
+                BlocBuilder<FilterBloc, FilterState>(
+                  builder: (context, state) {
+                    return Expanded(
+                      child: SummaryCard(
+                        title: 'Thu nhập',
+                        amount: AppFormat.currency(
+                          calculateTotalIncome(state.filteredTransactions),
+                        ),
+                        color: Colors.green,
                       ),
-                    ),
-                    color: Colors.green,
-                  ),
+                    );
+                  },
                 ),
               ],
             ),
@@ -170,42 +120,70 @@ class _HomeTabState extends State<HomeTab> {
                   'Danh sách giao dịch',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AllTransactionsScreen(
-                          transactions: filteredTransactions(
-                            selected,
-                            transactions,
+                BlocBuilder<FilterBloc, FilterState>(
+                  builder: (context, state) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AllTransactionsScreen(
+                              transactions: state.filteredTransactions,
+                            ),
                           ),
-                        ),
+                        );
+                      },
+                      child: Text(
+                        'Xem tất cả',
+                        style: TextStyle(fontSize: 16, color: Colors.blue),
                       ),
                     );
                   },
-                  child: Text(
-                    'Xem tất cả',
-                    style: TextStyle(fontSize: 16, color: Colors.blue),
-                  ),
                 ),
               ],
             ),
             SizedBox(height: 15),
-            Expanded(
-              child: ListView.separated(
-                itemCount: filteredTransactions(selected, transactions).length,
-                itemBuilder: (context, index) {
-                  return TransactionItem(
-                    item: filteredTransactions(selected, transactions)[index],
-                  );
-                },
-                separatorBuilder: (context, index) => SizedBox(height: 10),
-              ),
+            BlocBuilder<FilterBloc, FilterState>(
+              builder: (context, state) {
+                return Expanded(
+                  child: ListView.separated(
+                    itemCount: state.filteredTransactions.length,
+                    itemBuilder: (context, index) {
+                      return TransactionItem(
+                        item: state.filteredTransactions[index],
+                      );
+                    },
+                    separatorBuilder: (context, index) => SizedBox(height: 10),
+                  ),
+                );
+              },
             ),
+
           ],
         ),
       ),
     );
   }
+
+  Widget filterItem(String title, FilterType type) {
+    final state = context.watch<FilterBloc>().state;
+
+    return InkWell(
+      onTap: () {
+        context.read<FilterBloc>().add(
+          ChangeFilterType(type),
+        );
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          color: state.type == type
+              ? Colors.black
+              : Colors.grey,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
 }
+

@@ -1,35 +1,25 @@
-DateTime currentDate(int index){
-  final now = DateTime.now();
 
-  switch (index) {
-    case 0: // Today
-      return DateTime(now.year, now.month, now.day);
+import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
 
-    case 1: // Month
-      return DateTime(now.year, now.month);
+String formatDate(FilterType type, DateTime date) {
+  switch (type) {
+    case FilterType.day:
+      return "${_twoDigits(date.day)}/${_twoDigits(date.month)}/${date.year}";
 
-    case 2: // Year
-      return DateTime(now.year);
+    case FilterType.month:
+      return "${_twoDigits(date.month)}/${date.year}";
 
-    default:
-      return DateTime(0);
-  }
-}
-String currentDateString(int index, DateTime date){
-  switch (index) {
-    case 0: // Today
-      return "${date.day}/${date.month}/${date.year}";
-
-    case 1: // Month
-      return "${date.month}/${date.year}";
-
-    case 2: // Year
+    case FilterType.year:
       return "${date.year}";
 
-    case 3:
+    case FilterType.all:
       return "Tất cả";
 
     default:
-      return 'Tuỳ chỉnh';
+      return "Tuỳ chỉnh";
   }
+}
+
+String _twoDigits(int n) {
+  return n.toString().padLeft(2, '0');
 }

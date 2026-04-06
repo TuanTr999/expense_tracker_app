@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../blocs/filter/filter_bloc.dart';
+import '../core/utils/current_date.dart';
 
 class BudgetCard extends StatelessWidget {
   const BudgetCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<FilterBloc>().state;
     return Container(
       height: 100,
       decoration: BoxDecoration(
@@ -77,11 +82,12 @@ class BudgetCard extends StatelessWidget {
               ),
             ],
           ),
+
           Positioned(
             top: 22.5,
             right: 10,
             child: Text(
-              DateTime.now().toString().substring(0, 10),
+              formatDate(state.type, state.selectedDate),
               style: TextStyle(color: Colors.blue, fontSize: 12),
             ),
           ),

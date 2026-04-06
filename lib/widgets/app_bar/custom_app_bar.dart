@@ -1,10 +1,14 @@
+import 'package:expense_tracker_app/blocs/filter/filter_event.dart';
+import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../blocs/filter/filter_bloc.dart';
+import '../../blocs/filter/filter_event.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
-  CustomAppBar({super.key, required this.selected});
-
-  final int selected;
+  CustomAppBar({super.key});
 
   @override
   State<CustomAppBar> createState() => _CustomAppBarState();
@@ -15,56 +19,25 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _CustomAppBarState extends State<CustomAppBar> {
-  DateTime currentDate = DateTime.now();
-
-  int currentOffset = 0;
-
   @override
   Widget build(BuildContext context) {
+    final state = context.watch<FilterBloc>().state;
+    final currentDate = state.selectedDate;
     return AppBar(
       backgroundColor: Color(0xFFF5F5F5),
       title: Row(
-        mainAxisAlignment: (widget.selected != 3 && widget.selected != 4)
+        mainAxisAlignment:
+            (state.type != FilterType.all && state.type != FilterType.custom)
             ? MainAxisAlignment.spaceBetween
             : MainAxisAlignment.center,
         children: [
-          if (widget.selected != 3 && widget.selected != 4)
+          if (state.type != FilterType.all && state.type != FilterType.custom)
             Material(
               color: Colors.white,
               shape: CircleBorder(),
               child: InkWell(
                 onTap: () {
-                  setState(() {
-                    currentOffset = 1;
-                  });
-                  switch (widget.selected) {
-                    case 0:
-                      setState(() {
-                        currentDate = currentDate.subtract(Duration(days: 1));
-                        currentOffset = 1;
-                      });
-                      break;
-                    case 1:
-                      setState(() {
-                        currentDate = DateTime(
-                          currentDate.year,
-                          currentDate.month - 1,
-                          currentDate.day,
-                        );
-                        currentOffset = 1;
-                      });
-                      break;
-                    case 2:
-                      setState(() {
-                        currentDate = DateTime(
-                          currentDate.year - 1,
-                          currentDate.month,
-                          currentDate.day,
-                        );
-                        currentOffset = 1;
-                      });
-                      break;
-                  }
+                  context.read<FilterBloc>().add(PreviousPressed());
                 },
                 customBorder: CircleBorder(),
                 child: SizedBox(
@@ -78,20 +51,19 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
             ),
           Padding(
-            padding: (currentOffset == 0)
+            padding: (!state.reset)
                 ? EdgeInsets.zero
                 : EdgeInsets.only(left: 50),
             child: Container(
-              width: 100,
+              width: 120,
               height: 40,
               decoration: BoxDecoration(
                 color: Colors.grey.shade300,
                 borderRadius: BorderRadius.circular(20),
               ),
-
               child: Center(
                 child: Text(
-                  currentDateString(widget.selected, currentDate),
+                  formatDate(state.type, currentDate),
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -103,16 +75,13 @@ class _CustomAppBarState extends State<CustomAppBar> {
           ),
           Row(
             children: [
-              if (currentOffset != 0)
+              if (state.reset)
                 Material(
                   color: Colors.white,
                   shape: CircleBorder(),
                   child: InkWell(
                     onTap: () {
-                      setState(() {
-                        currentOffset = 0;
-                        currentDate = DateTime.now();
-                      });
+                      context.read<FilterBloc>().add(ResetPressed());
                     },
                     customBorder: CircleBorder(),
                     child: SizedBox(
@@ -123,40 +92,14 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   ),
                 ),
               SizedBox(width: 10),
-              if (widget.selected != 3 && widget.selected != 4)
+              if (state.type != FilterType.all &&
+                  state.type != FilterType.custom)
                 Material(
                   color: Colors.white,
                   shape: CircleBorder(),
                   child: InkWell(
                     onTap: () {
-                      switch (widget.selected) {
-                        case 0:
-                          setState(() {
-                            currentDate = currentDate.add(Duration(days: 1));
-                            currentOffset = 1;
-                          });
-                          break;
-                        case 1:
-                          setState(() {
-                            currentDate = DateTime(
-                              currentDate.year,
-                              currentDate.month + 1,
-                              currentDate.day,
-                            );
-                            currentOffset = 1;
-                          });
-                          break;
-                        case 2:
-                          setState(() {
-                            currentDate = DateTime(
-                              currentDate.year + 1,
-                              currentDate.month,
-                              currentDate.day,
-                            );
-                            currentOffset = 1;
-                          });
-                          break;
-                      }
+                      context.read<FilterBloc>().add(NextPressed());
                     },
                     customBorder: CircleBorder(),
                     child: SizedBox(
