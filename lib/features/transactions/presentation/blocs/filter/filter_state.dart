@@ -1,12 +1,13 @@
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 
+import '../../../../../core/enums/app_type.dart';
 import '../../../../../core/utils/transaction_group.dart';
 
 enum FilterType { day, month, year, all, custom }
 
 class FilterState {
   final FilterType filterType;
-  final TransactionType? transactionType;
+  final AppType? transactionType;
   final bool reset;
   final DateTime selectedDate;
   final List<TransactionModel> allTransactions;
@@ -29,7 +30,7 @@ class FilterState {
 
   FilterState copyWith({
     FilterType? filterType,
-    TransactionType? transactionType,
+    AppType? transactionType,
     bool? reset,
     DateTime? selectedDate,
     List<TransactionModel>? allTransactions,

@@ -43,4 +43,15 @@ class CategoryLocalDataSource {
       whereArgs: [id],
     );
   }
+
+  Future<List<CategoryModel>> getCategoriesByType(String type) async {
+    final db = await database;
+    final maps = await db.query(
+      'categories',
+      where: 'type = ?',
+      whereArgs: [type],
+    );
+
+    return maps.map((e) => CategoryModel.fromMap(e)).toList();
+  }
 }

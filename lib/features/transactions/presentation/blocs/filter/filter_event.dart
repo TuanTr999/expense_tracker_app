@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
+import '../../../../../core/enums/app_type.dart';
 import 'filter_state.dart';
 
 abstract class FilterEvent {}
@@ -18,7 +19,7 @@ class ChangeFilterType extends FilterEvent {
 }
 
 class ChangeTransactionType extends FilterEvent {
-  final TransactionType? transactionType;
+  final AppType? transactionType;
 
   ChangeTransactionType({this.transactionType});
 }

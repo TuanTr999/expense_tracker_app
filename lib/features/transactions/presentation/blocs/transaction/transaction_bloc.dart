@@ -7,21 +7,24 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository repository;
 
   TransactionBloc(this.repository) : super(TransactionState(transactions: [])) {
-    // 🔹 Load data ban đầu (optional)
     on<LoadTransactionEvent>((event, emit) async {
       final data = await repository.getTransactions();
       emit(state.copyWith(transactions: data));
     });
 
-    // 🔹 Add
     on<AddTransactionEvent>((event, emit) async {
       await repository.addTransaction(event.transaction);
 
+      // print("✅ INSERT OK: ${event.transaction.title}");
+
       final data = await repository.getTransactions();
+
+      // print("📦 TOTAL AFTER INSERT: ${data.length}");
+      // print("📦 LAST ITEM: ${data.last.title}");
+
       emit(state.copyWith(transactions: data));
     });
 
-    // 🔹 Update
     on<UpdateTransactionEvent>((event, emit) async {
       await repository.updateTransaction(event.transaction);
 
@@ -29,8 +32,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       emit(state.copyWith(transactions: data));
     });
 
-    // 🔹 Delete
-    on<DeleteTransactionEvent>((event, emit) async {
+   on<DeleteTransactionEvent>((event, emit) async {
       await repository.deleteTransaction(event.id);
 
       final data = await repository.getTransactions();

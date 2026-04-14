@@ -1,22 +1,20 @@
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/pages/transaction_detail.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/pages/transaction_detail_page.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../core/enums/app_type.dart';
+import '../../features/categories/presentation/blocs/category/category_bloc.dart';
 import '../../features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 
 class TransactionItem extends StatelessWidget {
-  const TransactionItem({
-    super.key,
-    required this.item,
-    required this.filterType,
-  });
+  const TransactionItem({super.key, required this.transaction});
 
-  final TransactionModel item;
-  final FilterType filterType;
+  final TransactionModel transaction;
 
   @override
   Widget build(BuildContext context) {
@@ -25,9 +23,12 @@ class TransactionItem extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => BlocProvider.value(
-              value: context.read<TransactionBloc>(),
-              child: TransactionDetail(transaction: item),
+            builder: (_) => MultiBlocProvider(
+              providers: [
+                BlocProvider.value(value: context.read<TransactionBloc>()),
+                BlocProvider.value(value: context.read<CategoryBloc>()),
+              ],
+              child: TransactionDetail(transactionId: transaction.id),
             ),
           ),
         );
@@ -51,7 +52,9 @@ class TransactionItem extends StatelessWidget {
                     color: Colors.orange,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.shopping_cart, color: Colors.yellowAccent),
+                  child: Image.asset(
+                    'assets/icons/${transaction.type.name}/${transaction.categoryIcon}',
+                  ),
                 ),
                 SizedBox(width: 10),
                 Column(
@@ -59,16 +62,16 @@ class TransactionItem extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      item.title,
+                      transaction.title,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 5),
-                    (item.date.hour != 0)
+                    (transaction.date.hour != 0)
                         ? Text(
-                            '${item.date.hour}:${item.date.minute}',
+                            '${transaction.date.hour}:${transaction.date.minute}',
                             style: TextStyle(fontSize: 14, color: Colors.grey),
                           )
                         : SizedBox(),
@@ -77,13 +80,13 @@ class TransactionItem extends StatelessWidget {
                 Spacer(),
                 Text(
                   AppFormat.currencyWithSign(
-                    item.amount,
-                    item.type == TransactionType.income,
+                    transaction.amount,
+                    transaction.type == AppType.income,
                   ),
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: item.type == TransactionType.income
+                    color: transaction.type == AppType.income
                         ? Colors.green
                         : Colors.red,
                   ),

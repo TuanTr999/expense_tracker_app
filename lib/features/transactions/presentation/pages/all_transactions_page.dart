@@ -51,8 +51,7 @@ class AllTransactionsScreen extends StatelessWidget {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: TransactionItem(
-                        item: item,
-                        filterType: FilterType.day,
+                        transaction: item,
                       ),
                     );
                   }).toList(),

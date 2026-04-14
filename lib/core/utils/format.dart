@@ -2,7 +2,10 @@ import 'package:intl/intl.dart';
 
 class AppFormat {
   static String currency(double amount) {
-    final formatter = NumberFormat('#,###', 'vi_VN');
+    final formatter = amount % 1 == 0
+        ? NumberFormat('#,###', 'vi_VN')
+        : NumberFormat('#,###.##', 'vi_VN');
+
     return '${formatter.format(amount)} VND';
   }
 

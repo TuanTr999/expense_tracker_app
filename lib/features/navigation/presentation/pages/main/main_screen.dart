@@ -48,9 +48,6 @@ class _MainScreenState extends State<MainScreen> {
             children: [
               _item('assets/icons/navigation/home.png', 0),
               _item('assets/icons/navigation/wallet.png', 1),
-
-              const SizedBox(width: 40),
-
               _item('assets/icons/navigation/budget.png', 2),
               _item('assets/icons/navigation/settings.png', 3),
             ],
@@ -58,26 +55,7 @@ class _MainScreenState extends State<MainScreen> {
         ),
       ),
 
-      floatingActionButton: FloatingActionButton(
-        shape: CircleBorder(),
-        elevation: 3,
-        backgroundColor: Colors.blue,
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => MultiBlocProvider(
-                providers: [
-                  BlocProvider.value(value: context.read<TransactionBloc>()),
-                  BlocProvider.value(value: context.read<FilterBloc>()),
-                ],
-                child: AddTransactionPage(),
-              ),
-            ),
-          );
-        },
-        child: Icon(Icons.add, color: Colors.white),
-      ),
+
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
