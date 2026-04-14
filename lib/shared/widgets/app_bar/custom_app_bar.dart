@@ -26,11 +26,11 @@ class _CustomAppBarState extends State<CustomAppBar> {
       backgroundColor: Color(0xFFF5F5F5),
       title: Row(
         mainAxisAlignment:
-            (state.type != FilterType.all && state.type != FilterType.custom)
+            (state.filterType != FilterType.all && state.filterType != FilterType.custom)
             ? MainAxisAlignment.spaceBetween
             : MainAxisAlignment.center,
         children: [
-          if (state.type != FilterType.all && state.type != FilterType.custom)
+          if (state.filterType != FilterType.all && state.filterType != FilterType.custom)
             Material(
               color: Colors.white,
               shape: CircleBorder(),
@@ -62,8 +62,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
               child: Center(
                 child: Text(
-                  state.type != FilterType.custom ?
-                  formatDate(state.type, currentDate)
+                  state.filterType != FilterType.custom ?
+                  formatDate(state.filterType, currentDate)
                   : "Tùy chỉnh",
                   style: TextStyle(
                     color: Colors.black,
@@ -93,8 +93,8 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   ),
                 ),
               SizedBox(width: 10),
-              if (state.type != FilterType.all &&
-                  state.type != FilterType.custom)
+              if (state.filterType != FilterType.all &&
+                  state.filterType != FilterType.custom)
                 Material(
                   color: Colors.white,
                   shape: CircleBorder(),

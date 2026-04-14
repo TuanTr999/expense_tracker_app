@@ -1,5 +1,5 @@
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
-import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker_app/core/utils/current_date.dart';
@@ -51,10 +51,11 @@ class TransactionItem extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   SizedBox(height: 5),
+                  (item.date.hour !=  0) ?
                   Text(
                     '${item.date.hour}:${item.date.minute}',
                     style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
+                  ) : SizedBox(),
                 ],
               ),
               Spacer(),

@@ -6,7 +6,7 @@ class AppColors {
   AppColors._(); // Prevent instantiation
 
   // Primary Colors
-  static const Color primary = Color(0xFF6200EE);
+  static const Color primary = Color(0xFFF5F5F5);
   static const Color primaryLight = Color(0xFF7C3AED);
   static const Color primaryDark = Color(0xFF4C00B8);
 

@@ -1,6 +1,11 @@
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../transactions/data/datasources/transaction_local_datasource.dart';
+import '../../../../transactions/presentation/blocs/filter/filter_bloc.dart';
+import '../../../../transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import '../../../../transactions/presentation/pages/add_transaction_page.dart';
 import '../../blocs/navigation/navigation_event.dart';
 import '../../blocs/navigation/navigation_state.dart';
 import 'package:expense_tracker_app/features/home/presentation/pages/home/home_tab.dart';
@@ -16,13 +21,6 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  // final List<Widget> pages = [
-  //   HomeTab(),
-  //   WalletScreen(),
-  //   BudgetScreen(),
-  //   SettingsScreen(),
-  // ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,9 +64,23 @@ class _MainScreenState extends State<MainScreen> {
         shape: CircleBorder(),
         elevation: 3,
         backgroundColor: Colors.blue,
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => MultiBlocProvider(
+                providers: [
+                  BlocProvider.value(value: context.read<TransactionBloc>()),
+                  BlocProvider.value(value: context.read<FilterBloc>()),
+                ],
+                child: AddTransactionPage(),
+              ),
+            ),
+          );
+        },
         child: Icon(Icons.add, color: Colors.white),
       ),
+
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
@@ -80,17 +92,19 @@ class _MainScreenState extends State<MainScreen> {
       },
       icon: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-
           return Container(
             width: 60,
             height: 60,
             decoration: BoxDecoration(
               color: state.currentIndex == index
-                  ? Colors.blue.withOpacity(0.1)
+                  ? Color(0xFFF5F5F5)
                   : Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: state.currentIndex == index ? Colors.blue : Colors.grey),
+            child: Icon(
+              icon,
+              color: state.currentIndex == index ? Colors.blue : Colors.grey,
+            ),
           );
         },
       ),

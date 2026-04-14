@@ -1,4 +1,4 @@
-import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 
 double calculateTotalExpense(List<TransactionModel> transactions) {
   double total = 0;

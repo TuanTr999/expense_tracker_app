@@ -87,9 +87,9 @@ class BudgetCard extends StatelessWidget {
           Positioned(
             top: 22.5,
             right: 10,
-            child: state.type != FilterType.custom
+            child: state.filterType != FilterType.custom
                 ? Text(
-                    formatDate(state.type, state.selectedDate),
+                    formatDate(state.filterType, state.selectedDate),
                     style: TextStyle(color: Colors.blue, fontSize: 12),
                   )
                 : (state.fromDate == null || state.toDate == null)
@@ -98,12 +98,12 @@ class BudgetCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        formatDate(state.type, state.fromDate!),
+                        formatDate(state.filterType, state.fromDate!),
                         style: TextStyle(color: Colors.blue, fontSize: 12),
                       ),
                       SizedBox(height: 15),
                       Text(
-                        formatDate(state.type, state.toDate!),
+                        formatDate(state.filterType, state.toDate!),
                         style: TextStyle(color: Colors.blue, fontSize: 12),
                       ),
                     ],

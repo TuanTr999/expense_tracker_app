@@ -1,27 +1,30 @@
-import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'filter_state.dart';
 
 abstract class FilterEvent {}
 
 class PreviousPressed extends FilterEvent {}
+
 class NextPressed extends FilterEvent {}
+
 class ResetPressed extends FilterEvent {}
 
 class ChangeFilterType extends FilterEvent {
-  final FilterType type;
+  final FilterType filterType;
   final DateTime? fromDate;
   final DateTime? toDate;
 
-  ChangeFilterType(
-      this.type, {
-        this.fromDate,
-        this.toDate,
-      });
+  ChangeFilterType(this.filterType, {this.fromDate, this.toDate});
 }
 
-class LoadTransactions extends FilterEvent {
+class ChangeTransactionType extends FilterEvent {
+  final TransactionType? transactionType;
+
+  ChangeTransactionType({this.transactionType});
+}
+
+class SetTransactions extends FilterEvent {
   final List<TransactionModel> transactions;
 
-  LoadTransactions(this.transactions);
+  SetTransactions(this.transactions);
 }
-

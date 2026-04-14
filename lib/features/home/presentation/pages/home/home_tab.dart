@@ -1,4 +1,6 @@
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_screen.dart';
 import 'package:expense_tracker_app/shared/widgets/app_bar/custom_app_bar.dart';
 import 'package:expense_tracker_app/shared/widgets/budget_card.dart';
@@ -13,7 +15,8 @@ import 'package:expense_tracker_app/features/transactions/presentation/blocs/fil
 import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:expense_tracker_app/core/utils/transaction_util.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
-import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
+
+import '../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 
 class HomeTab extends StatefulWidget {
   HomeTab({super.key});
@@ -23,29 +26,12 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  final List<TransactionModel> transactions = [
-    TransactionModel(
-      id: '1',
-      title: 'Ăn sáng',
-      image: '',
-      amount: 30000,
-      date: DateTime(2026, 4, 8, 15, 30, 20),
-      type: TransactionType.expense,
-    ),
-    TransactionModel(
-      id: '2',
-      title: 'Lương',
-      image: '',
-      amount: 5000000,
-      date: DateTime(2026, 4, 9, 12, 15, 0),
-      type: TransactionType.income,
-    ),
-  ];
+
 
   @override
   void initState() {
     super.initState();
-    context.read<FilterBloc>().add(LoadTransactions(transactions));
+    context.read<TransactionBloc>().add(LoadTransactionEvent());
   }
 
   @override
@@ -53,7 +39,14 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
       appBar: CustomAppBar(),
-      body: Padding(
+      body: BlocListener<TransactionBloc, TransactionState>(
+        listener: (context, state) {
+          context.read<FilterBloc>().add(
+            SetTransactions(state.transactions),
+          );
+        },
+        child:
+      Padding(
         padding: EdgeInsets.all(20),
         child: Column(
           children: [
@@ -84,7 +77,7 @@ class _HomeTabState extends State<HomeTab> {
             SizedBox(height: 20),
             BlocBuilder<FilterBloc, FilterState>(
               builder: (context, state) {
-                if (state.type != FilterType.custom) {
+                if (state.filterType != FilterType.custom) {
                   return Container();
                 }
                 return Column(
@@ -105,7 +98,6 @@ class _HomeTabState extends State<HomeTab> {
                               context.read<FilterBloc>().add(
                                 ChangeFilterType(
                                   FilterType.custom,
-                                  fromDate: fromDate,
                                 ),
                               );
                             }
@@ -119,7 +111,7 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                             child: Center(
                               child: Text(
-                                formatDate(state.type, state.fromDate),
+                                formatDate(state.filterType, state.fromDate),
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -165,7 +157,7 @@ class _HomeTabState extends State<HomeTab> {
                             ),
                             child: Center(
                               child: Text(
-                                formatDate(state.type, state.toDate),
+                                formatDate(state.filterType, state.toDate),
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
@@ -231,7 +223,7 @@ class _HomeTabState extends State<HomeTab> {
                           context,
                           MaterialPageRoute(
                             builder: (context) => AllTransactionsScreen(
-                              transactions: state.filteredTransactions, filterType: state.type,
+                              transactions: state.filteredTransactions, filterType: state.filterType,
                             ),
                           ),
                         );
@@ -253,7 +245,7 @@ class _HomeTabState extends State<HomeTab> {
                     itemCount: state.filteredTransactions.length,
                     itemBuilder: (context, index) {
                       return TransactionItem(
-                        item: state.filteredTransactions[index],filterType: state.type,
+                        item: state.filteredTransactions[index],filterType: state.filterType,
                       );
                     },
                     separatorBuilder: (context, index) => SizedBox(height: 10),
@@ -263,8 +255,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ],
         ),
-      ),
-    );
+      ),),);
   }
 
   Widget filterItem(String title, FilterType type, FilterState state) {
@@ -275,7 +266,7 @@ class _HomeTabState extends State<HomeTab> {
       child: Text(
         title,
         style: TextStyle(
-          color: state.type == type ? Colors.black : Colors.grey,
+          color: state.filterType == type ? Colors.black : Colors.grey,
           fontWeight: FontWeight.bold,
         ),
       ),
