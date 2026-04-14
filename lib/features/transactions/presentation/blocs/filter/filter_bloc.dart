@@ -7,40 +7,41 @@ import 'filter_state.dart';
 
 class FilterBloc extends Bloc<FilterEvent, FilterState> {
   FilterBloc()
-      : super(
-    FilterState(
-      filterType: FilterType.day,
-      reset: false,
-      selectedDate: DateTime.now(),
-      allTransactions: [],
-      filteredTransactions: [],
-      groupedTransactions: [],
-      fromDate: null,
-      toDate: null,
-    ),
-  ) {
-
+    : super(
+        FilterState(
+          filterType: FilterType.day,
+          reset: false,
+          selectedDate: DateTime.now(),
+          allTransactions: [],
+          filteredTransactions: [],
+          groupedTransactions: [],
+          fromDate: null,
+          toDate: null,
+        ),
+      ) {
     List<TransactionModel> _filter(
-        List<TransactionModel> list,
-        FilterType filterType,
-        DateTime date,
-        DateTime? from,
-        DateTime? to,
-        ) {
+      List<TransactionModel> list,
+      FilterType filterType,
+      DateTime date,
+      DateTime? from,
+      DateTime? to,
+    ) {
       switch (filterType) {
         case FilterType.day:
           return list
-              .where((t) =>
-          t.date.year == date.year &&
-              t.date.month == date.month &&
-              t.date.day == date.day)
+              .where(
+                (t) =>
+                    t.date.year == date.year &&
+                    t.date.month == date.month &&
+                    t.date.day == date.day,
+              )
               .toList();
 
         case FilterType.month:
           return list
-              .where((t) =>
-          t.date.year == date.year &&
-              t.date.month == date.month)
+              .where(
+                (t) => t.date.year == date.year && t.date.month == date.month,
+              )
               .toList();
 
         case FilterType.year:
@@ -50,19 +51,20 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
           return list;
 
         case FilterType.custom:
-          if (from == null || to == null) return list;
+          if (from == null && to == null) return list;
+
+          final start = from ?? DateTime(1970);
+          final end = to ?? DateTime(2100);
 
           return list.where((t) {
-            return !t.date.isBefore(from) && !t.date.isAfter(to);
+            return !t.date.isBefore(start) && !t.date.isAfter(end);
           }).toList();
       }
     }
 
-
     List<TransactionGroup> _group(List<TransactionModel> list) {
       return groupByDate(list);
     }
-
 
     on<SetTransactions>((event, emit) {
       final filtered = _filter(
@@ -82,7 +84,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       );
     });
 
-
     on<ChangeTransactionType>((event, emit) {
       emit(state.copyWith(transactionType: event.transactionType));
     });
@@ -90,48 +91,51 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     on<ChangeFilterType>((event, emit) {
       final fromDate = event.fromDate ?? state.fromDate;
       final toDate = event.toDate ?? state.toDate;
+      final baseDate = state.selectedDate;
 
       final filtered = _filter(
         state.allTransactions,
         event.filterType,
-        state.selectedDate,
-        state.fromDate,
-        state.toDate
+        baseDate,
+        fromDate,
+        toDate,
       );
       event.filterType == FilterType.all ||
-          event.filterType == FilterType.custom
+              event.filterType == FilterType.custom
           ? emit(
-        state.copyWith(
-          filterType: event.filterType,
-          reset: false,
-          fromDate: fromDate,
-          toDate: toDate,
-          filteredTransactions: filtered,
-        ),
-      )
+              state.copyWith(
+                filterType: event.filterType,
+                reset: false,
+                fromDate: fromDate,
+                toDate: toDate,
+                filteredTransactions: filtered,
+                groupedTransactions: _group(filtered),
+              ),
+            )
           : state.selectedDate.year == DateTime.now().year &&
-          state.selectedDate.month == DateTime.now().month &&
-          state.selectedDate.day == DateTime.now().day
+                state.selectedDate.month == DateTime.now().month &&
+                state.selectedDate.day == DateTime.now().day
           ? emit(
-        state.copyWith(
-          filterType: event.filterType,
-          reset: false,
-          fromDate: fromDate,
-          toDate: toDate,
-          filteredTransactions: filtered,
-        ),
-      )
+              state.copyWith(
+                filterType: event.filterType,
+                reset: false,
+                fromDate: fromDate,
+                toDate: toDate,
+                filteredTransactions: filtered,
+                groupedTransactions: _group(filtered),
+              ),
+            )
           : emit(
-        state.copyWith(
-          filterType: event.filterType,
-          fromDate: fromDate,
-          reset: true,
-          toDate: toDate,
-          filteredTransactions: filtered,
-        ),
-      );
+              state.copyWith(
+                filterType: event.filterType,
+                fromDate: fromDate,
+                reset: true,
+                toDate: toDate,
+                filteredTransactions: filtered,
+                groupedTransactions: _group(filtered),
+              ),
+            );
     });
-
 
     on<PreviousPressed>((event, emit) {
       final current = state.selectedDate;
@@ -169,7 +173,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       );
     });
 
-
     on<NextPressed>((event, emit) {
       final current = state.selectedDate;
       DateTime newDate = current;
@@ -205,7 +208,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         ),
       );
     });
-
 
     on<ResetPressed>((event, emit) {
       final now = DateTime.now();

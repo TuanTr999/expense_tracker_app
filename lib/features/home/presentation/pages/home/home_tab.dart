@@ -88,7 +88,6 @@ class _HomeTabState extends State<HomeTab> {
                                 firstDate: DateTime(2020),
                                 lastDate: DateTime(2100),
                               );
-
                               if (fromDate != null) {
                                 context.read<FilterBloc>().add(
                                   ChangeFilterType(
@@ -142,7 +141,7 @@ class _HomeTabState extends State<HomeTab> {
                                     toDate: toDate,
                                   ),
                                 );
-                              }
+                                }
                             },
                             child: Container(
                               width: 110,
