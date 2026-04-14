@@ -216,12 +216,21 @@ class _HomeTabState extends State<HomeTab> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(
-                              builder: (context) => BlocProvider(
-                                create: (_) => FilterBloc(),
-                                child: AllTransactionsScreen(transactions: state.groupedTransactions,),
-                              ),
-                            ),
+                              MaterialPageRoute(
+                                builder: (_) => MultiBlocProvider(
+                                  providers: [
+                                    BlocProvider.value(
+                                      value: context.read<FilterBloc>(),
+                                    ),
+                                    BlocProvider.value(
+                                      value: context.read<TransactionBloc>(),
+                                    ),
+                                  ],
+                                  child: AllTransactionsScreen(
+                                    transactions: state.groupedTransactions,
+                                  ),
+                                ),
+                              )
                           );
                         },
                         child: Text(

@@ -101,7 +101,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             child: Center(
               child: state.currentIndex == index
-                  ? Image.asset(iconPath, width: 24, height: 24) // giữ màu gốc
+                  ? Image.asset(iconPath, width: 24, height: 24)
                   : ColorFiltered(
                       colorFilter: ColorFilter.mode(
                         Colors.grey,

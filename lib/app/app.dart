@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/features/navigation/presentation/pages/main/main_screen.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/pages/transaction_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';

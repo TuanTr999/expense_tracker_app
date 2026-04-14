@@ -1,12 +1,9 @@
 import 'package:expense_tracker_app/core/utils/transaction_group.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
-import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/utils/current_date.dart';
-import '../blocs/filter/filter_bloc.dart';
 
 class AllTransactionsScreen extends StatelessWidget {
   const AllTransactionsScreen({super.key, required this.transactions});
@@ -27,7 +24,7 @@ class AllTransactionsScreen extends StatelessWidget {
         ),
         title: Text(
           'Tất cả giao dịch',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
       body: Expanded(
