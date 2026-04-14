@@ -1,3 +1,5 @@
+import 'package:expense_tracker_app/core/enums/app_type.dart';
+
 import '../../../data/models/category_model.dart';
 
 abstract class CategoryEvent {}
@@ -5,7 +7,7 @@ abstract class CategoryEvent {}
 class LoadCategoryEvent extends CategoryEvent {}
 
 class LoadCategoryByTypeEvent extends CategoryEvent {
-  final String type;
+  final AppType type;
 
   LoadCategoryByTypeEvent(this.type);
 }
@@ -23,7 +25,7 @@ class UpdateCategoryEvent extends CategoryEvent {
 }
 
 class DeleteCategoryEvent extends CategoryEvent {
-  final String id;
+  final int id;
 
   DeleteCategoryEvent(this.id);
 }

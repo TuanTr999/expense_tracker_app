@@ -17,10 +17,12 @@ class AppDatabase {
       path,
       version: 1,
       onCreate: (db, version) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+
         // Category
         await db.execute('''
           CREATE TABLE categories(
-            id TEXT PRIMARY KEY,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT,
             icon TEXT,
             type TEXT
@@ -35,12 +37,10 @@ class AppDatabase {
             amount REAL,
             date TEXT,
             type TEXT,
-            categoryId TEXT,
+            categoryId INTEGER,
             FOREIGN KEY (categoryId) REFERENCES categories(id)
           )
         ''');
-
-
 
         for (var item in defaultCategories) {
           await db.insert('categories', item);
@@ -49,73 +49,18 @@ class AppDatabase {
     );
   }
 
-  static List<Map<String, dynamic>>  defaultCategories = [
-    {
-      'id': '1',
-      'name': 'Ăn uống',
-      'icon': 'food.png',
-      'type': 'expense',
-    },
-    {
-      'id': '2',
-      'name': 'Giải trí',
-      'icon': 'entertainment.png',
-      'type': 'expense',
-    },
-    {
-      'id': '3',
-      'name': 'Sức khỏe',
-      'icon': 'healthcare.png',
-      'type': 'expense',
-    },
-    {
-      'id': '4',
-      'name': 'Nhà ở',
-      'icon': 'house.png',
-      'type': 'expense',
-    },
-    {
-      'id': '5',
-      'name': 'Mua sắm',
-      'icon': 'shopping-cart.png',
-      'type': 'expense',
-    },
-    {
-      'id': '6',
-      'name': 'Di chuyển',
-      'icon': 'transportation.png',
-      'type': 'expense',
-    },
-    {
-      'id': '7',
-      'name': 'Giáo dục',
-      'icon': 'education.png',
-      'type': 'expense',
-    },
+  static List<Map<String, dynamic>> defaultCategories = [
+    {'name': 'Ăn uống', 'icon': 'food.png', 'type': 'expense'},
+    {'name': 'Giải trí', 'icon': 'entertainment.png', 'type': 'expense'},
+    {'name': 'Sức khỏe', 'icon': 'healthcare.png', 'type': 'expense'},
+    {'name': 'Nhà ở', 'icon': 'house.png', 'type': 'expense'},
+    {'name': 'Mua sắm', 'icon': 'shopping-cart.png', 'type': 'expense'},
+    {'name': 'Di chuyển', 'icon': 'transportation.png', 'type': 'expense'},
+    {'name': 'Giáo dục', 'icon': 'education.png', 'type': 'expense'},
 
-    {
-      'id': '8',
-      'name': 'Lương',
-      'icon': 'salary.png',
-      'type': 'income',
-    },
-    {
-      'id': '9',
-      'name': 'Thưởng',
-      'icon': 'bonus.png',
-      'type': 'income',
-    },
-    {
-      'id': '10',
-      'name': 'Đầu tư',
-      'icon': 'investment.png',
-      'type': 'income',
-    },
-    {
-      'id': '11',
-      'name': 'Quà tặng',
-      'icon': 'giftbox.png',
-      'type': 'income',
-    },
+    {'name': 'Lương', 'icon': 'salary.png', 'type': 'income'},
+    {'name': 'Thưởng', 'icon': 'bonus.png', 'type': 'income'},
+    {'name': 'Đầu tư', 'icon': 'investment.png', 'type': 'income'},
+    {'name': 'Quà tặng', 'icon': 'giftbox.png', 'type': 'income'},
   ];
 }

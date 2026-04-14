@@ -11,7 +11,7 @@ class CategoryLocalDataSource {
     await db.insert(
       'categories',
       category.toMap(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.abort,
     );
   }
 
@@ -35,7 +35,7 @@ class CategoryLocalDataSource {
   }
 
 
-  Future<void> deleteCategory(String id) async {
+  Future<void> deleteCategory(int id) async {
     final db = await database;
     await db.delete(
       'categories',

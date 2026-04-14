@@ -1,7 +1,8 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/core/enums/app_type.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_state.dart';
-import 'package:expense_tracker_app/features/categories/presentation/pages/category_item.dart';
+import 'package:expense_tracker_app/features/categories/presentation/pages/add_category.dart';
+import 'package:expense_tracker_app/features/categories/presentation/pages/update_category.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,7 +23,7 @@ class _AllCategoryState extends State<AllCategory> {
   void initState() {
     super.initState();
     type = AppType.expense;
-    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent('expense'));
+    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent(AppType.expense));
   }
 
   @override
@@ -73,7 +74,7 @@ class _AllCategoryState extends State<AllCategory> {
                       });
 
                       context.read<CategoryBloc>().add(
-                        LoadCategoryByTypeEvent('expense'),
+                        LoadCategoryByTypeEvent(AppType.expense),
                       );
                     },
                     child: Container(
@@ -104,7 +105,7 @@ class _AllCategoryState extends State<AllCategory> {
                         type = AppType.income;
                       });
                       context.read<CategoryBloc>().add(
-                        LoadCategoryByTypeEvent('income'),
+                        LoadCategoryByTypeEvent(AppType.income),
                       );
                     },
                     child: Container(
@@ -173,7 +174,7 @@ class _AllCategoryState extends State<AllCategory> {
                                       MaterialPageRoute(
                                         builder: (_) => BlocProvider.value(
                                           value: context.read<CategoryBloc>(),
-                                          child: CategoryItem(),
+                                          child: UpdateCategory(currentCategory: item, type: item.type,),
                                         ),
                                       ),
                                     );
@@ -282,7 +283,7 @@ class _AllCategoryState extends State<AllCategory> {
 
                                       if (confirm == true) {
                                         context.read<CategoryBloc>().add(
-                                          DeleteCategoryEvent(item.id),
+                                          DeleteCategoryEvent(item.id!),
                                         );
                                         Navigator.pop(context);
                                       }
@@ -336,7 +337,7 @@ class _AllCategoryState extends State<AllCategory> {
                         value: context.read<CategoryBloc>(),
                         child: FractionallySizedBox(
                           heightFactor: 0.93,
-                          child: CategoryItem(),
+                          child: AddCategory(type: type!,),
                         ),
                       ),
                     );

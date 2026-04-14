@@ -2,13 +2,13 @@
 import '../../../../core/enums/app_type.dart';
 
 class CategoryModel {
-  final String id;
+  final int? id;
   final String name;
   final String icon;
   final AppType type;
 
   CategoryModel({
-    required this.id,
+    this.id,
     required this.name,
     required this.icon,
     required this.type
@@ -36,10 +36,10 @@ class CategoryModel {
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
+      if (id != null) 'id': id,
       'name': name,
       'icon': icon,
-      'type': type.name
+      'type': type.name,
     };
   }
 }

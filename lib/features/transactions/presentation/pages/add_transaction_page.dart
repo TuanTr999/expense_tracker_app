@@ -35,7 +35,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
 
     type = AppType.expense;
 
-    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent('expense'));
+    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent(AppType.expense));
   }
 
   @override
@@ -75,7 +75,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         });
 
                         context.read<CategoryBloc>().add(
-                          LoadCategoryByTypeEvent('expense'),
+                          LoadCategoryByTypeEvent(AppType.expense),
                         );
                       },
                       child: Container(
@@ -108,7 +108,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         });
 
                         context.read<CategoryBloc>().add(
-                          LoadCategoryByTypeEvent('income'),
+                          LoadCategoryByTypeEvent(AppType.income),
                         );
                       },
                       child: Container(
@@ -343,15 +343,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: selectedCategory?.id == item.id
-                                ? Colors.blue.withOpacity(0.2)
-                                : Colors.transparent,
-                            border: Border.all(
-                              color: selectedCategory?.id == item.id
-                                  ? Colors.blue
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: EdgeInsets.all(8),
@@ -359,6 +350,12 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: selectedCategory?.id == item.id
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -433,7 +430,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 amount: amount!,
                 date: selectedDate,
                 type: type!,
-                categoryId: selectedCategory!.id,
+                categoryId: selectedCategory!.id!,
               );
 
               context.read<TransactionBloc>().add(

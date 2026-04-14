@@ -4,7 +4,7 @@ import '../../../../core/enums/app_type.dart';
 
 class TransactionModel {
   final String id;
-  final String categoryId;
+  final int categoryId;
   final String title;
   final double amount;
   final DateTime date;

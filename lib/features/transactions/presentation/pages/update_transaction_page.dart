@@ -38,7 +38,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
         : currentTransaction.amount.toString();
     tittleController.text = currentTransaction.title;
     context.read<CategoryBloc>().add(
-      LoadCategoryByTypeEvent(currentTransaction.type.name),
+      LoadCategoryByTypeEvent(currentTransaction.type),
     );
     newCategory = CategoryModel(
       id: currentTransaction.categoryId,
@@ -264,7 +264,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                         child: Container(
                           decoration: BoxDecoration(
                             color: newCategory?.id == item.id
-                                ? Colors.blue.withOpacity(0.2)
+                                ? Colors.blue
                                 : Colors.transparent,
                             border: Border.all(
                               color: newCategory?.id == item.id
@@ -351,7 +351,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                 amount: amount!,
                 date: currentTransaction.date,
                 type: currentTransaction.type,
-                categoryId: newCategory!.id,
+                categoryId: newCategory!.id!,
               );
 
               context.read<TransactionBloc>().add(

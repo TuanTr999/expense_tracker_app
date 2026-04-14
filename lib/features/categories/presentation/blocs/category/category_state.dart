@@ -1,8 +1,10 @@
+import 'package:expense_tracker_app/core/enums/app_type.dart';
+
 import '../../../data/models/category_model.dart';
 
 class CategoryState {
   final List<CategoryModel> categories;
-  final String? selectedType;
+  final AppType? selectedType;
   final bool isLoading;
 
   CategoryState({
@@ -13,7 +15,7 @@ class CategoryState {
 
   CategoryState copyWith({
     List<CategoryModel>? categories,
-    String? selectedType,
+    AppType? selectedType,
     bool? isLoading,
   }) {
     return CategoryState(

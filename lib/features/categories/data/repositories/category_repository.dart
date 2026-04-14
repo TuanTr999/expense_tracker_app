@@ -1,3 +1,5 @@
+import 'package:expense_tracker_app/core/enums/app_type.dart';
+
 import '../models/category_model.dart';
 
 abstract class CategoryRepository {
@@ -5,11 +7,11 @@ abstract class CategoryRepository {
 
   Future<List<CategoryModel>> getCategories();
 
-  Future<List<CategoryModel>> getCategoriesByType(String type);
+  Future<List<CategoryModel>> getCategoriesByType(AppType type);
 
   Future<void> updateCategory(CategoryModel category);
 
-  Future<void> deleteCategory(String id);
+  Future<void> deleteCategory(int id);
 
   Future<void> resetCategory();
 }

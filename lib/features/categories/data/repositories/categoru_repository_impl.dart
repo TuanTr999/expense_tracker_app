@@ -1,3 +1,5 @@
+import 'package:expense_tracker_app/core/enums/app_type.dart';
+
 import '../repositories/category_repository.dart';
 import '../datasources/category_local_data_source.dart';
 import '../models/category_model.dart';
@@ -18,8 +20,8 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<List<CategoryModel>> getCategoriesByType(String type) {
-    return localDataSource.getCategoriesByType(type);
+  Future<List<CategoryModel>> getCategoriesByType(AppType type) {
+    return localDataSource.getCategoriesByType(type.name);
   }
 
 
@@ -29,7 +31,7 @@ class CategoryRepositoryImpl implements CategoryRepository {
   }
 
   @override
-  Future<void> deleteCategory(String id) {
+  Future<void> deleteCategory(int id) {
     return localDataSource.deleteCategory(id);
   }
 
