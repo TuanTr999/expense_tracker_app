@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/core/utils/current_date.dart';
@@ -26,28 +27,19 @@ class _CustomAppBarState extends State<CustomAppBar> {
       backgroundColor: Color(0xFFF5F5F5),
       title: Row(
         mainAxisAlignment:
-            (state.filterType != FilterType.all && state.filterType != FilterType.custom)
+            (state.filterType != FilterType.all &&
+                state.filterType != FilterType.custom)
             ? MainAxisAlignment.spaceBetween
             : MainAxisAlignment.center,
         children: [
-          if (state.filterType != FilterType.all && state.filterType != FilterType.custom)
-            Material(
-              color: Colors.white,
-              shape: CircleBorder(),
-              child: InkWell(
-                onTap: () {
-                  context.read<FilterBloc>().add(PreviousPressed());
-                },
-                customBorder: CircleBorder(),
-                child: SizedBox(
-                  width: 50,
-                  height: 50,
-                  child: Padding(
-                    padding: EdgeInsets.only(left: 8),
-                    child: Icon(Icons.arrow_back_ios),
-                  ),
-                ),
-              ),
+          if (state.filterType != FilterType.all &&
+              state.filterType != FilterType.custom)
+            AppCircleButton(
+              onTap: () {
+                context.read<FilterBloc>().add(PreviousPressed());
+              },
+              padding: EdgeInsets.only(left: 8),
+              child: Icon(Icons.arrow_back_ios),
             ),
           Padding(
             padding: (!state.reset)
@@ -62,9 +54,9 @@ class _CustomAppBarState extends State<CustomAppBar> {
               ),
               child: Center(
                 child: Text(
-                  state.filterType != FilterType.custom ?
-                  formatDate(state.filterType, currentDate)
-                  : "Tùy chỉnh",
+                  state.filterType != FilterType.custom
+                      ? formatDate(state.filterType, currentDate)
+                      : "Tùy chỉnh",
                   style: TextStyle(
                     color: Colors.black,
                     fontSize: 18,
@@ -77,38 +69,20 @@ class _CustomAppBarState extends State<CustomAppBar> {
           Row(
             children: [
               if (state.reset)
-                Material(
-                  color: Colors.white,
-                  shape: CircleBorder(),
-                  child: InkWell(
-                    onTap: () {
-                      context.read<FilterBloc>().add(ResetPressed());
-                    },
-                    customBorder: CircleBorder(),
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: Icon(Icons.refresh),
-                    ),
-                  ),
+                AppCircleButton(
+                  onTap: () {
+                    context.read<FilterBloc>().add(ResetPressed());
+                  },
+                  child: Icon(Icons.refresh),
                 ),
               SizedBox(width: 10),
               if (state.filterType != FilterType.all &&
                   state.filterType != FilterType.custom)
-                Material(
-                  color: Colors.white,
-                  shape: CircleBorder(),
-                  child: InkWell(
-                    onTap: () {
-                      context.read<FilterBloc>().add(NextPressed());
-                    },
-                    customBorder: CircleBorder(),
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: Center(child: Icon(Icons.arrow_forward_ios)),
-                    ),
-                  ),
+                AppCircleButton(
+                  onTap: () {
+                    context.read<FilterBloc>().add(NextPressed());
+                  },
+                  child: Icon(Icons.arrow_forward_ios),
                 ),
             ],
           ),

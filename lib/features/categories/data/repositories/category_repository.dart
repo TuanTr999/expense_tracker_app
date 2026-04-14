@@ -10,4 +10,6 @@ abstract class CategoryRepository {
   Future<void> updateCategory(CategoryModel category);
 
   Future<void> deleteCategory(String id);
+
+  Future<void> resetCategory();
 }

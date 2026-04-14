@@ -52,5 +52,20 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
 
       emit(state.copyWith(categories: data));
     });
+
+    on<ResetCategoryEvent>((event, emit) async {
+      emit(state.copyWith(isLoading: true));
+
+      await repository.resetCategory();
+
+      final data = state.selectedType != null
+          ? await repository.getCategoriesByType(state.selectedType!)
+          : await repository.getCategories();
+
+      emit(state.copyWith(
+        categories: data,
+        isLoading: false,
+      ));
+    });
   }
 }

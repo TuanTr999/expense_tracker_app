@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
@@ -23,7 +24,7 @@ class TransactionDetail extends StatelessWidget {
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
         final transaction = state.transactions.firstWhere(
-              (e) => e.id == this.transactionId,
+          (e) => e.id == this.transactionId,
         );
 
         return Scaffold(
@@ -34,23 +35,12 @@ class TransactionDetail extends StatelessWidget {
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Material(
-                  color: Colors.white,
-                  shape: CircleBorder(),
-                  child: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    customBorder: CircleBorder(),
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: Icon(Icons.arrow_back_ios),
-                      ),
-                    ),
-                  ),
+                AppCircleButton(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  padding: EdgeInsets.only(left: 8),
+                  child: Icon(Icons.arrow_back_ios),
                 ),
                 Text(
                   'Giao dịch',
@@ -95,7 +85,9 @@ class TransactionDetail extends StatelessWidget {
                                         backgroundColor: Colors.green,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
@@ -110,12 +102,15 @@ class TransactionDetail extends StatelessWidget {
                                   SizedBox(width: 10),
                                   Expanded(
                                     child: ElevatedButton(
-                                      onPressed: () => Navigator.pop(context, true),
+                                      onPressed: () =>
+                                          Navigator.pop(context, true),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.red,
                                         foregroundColor: Colors.white,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
                                         ),
                                       ),
                                       child: Text(
@@ -166,8 +161,12 @@ class TransactionDetail extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Image.asset('assets/icons/${transaction.type.name}/${transaction.categoryIcon}', width: 40, height: 40,),
-                      SizedBox(width: 10),
+                        Image.asset(
+                          'assets/icons/${transaction.type.name}/${transaction.categoryIcon}',
+                          width: 40,
+                          height: 40,
+                        ),
+                        SizedBox(width: 10),
                         Text(
                           transaction.title,
                           style: TextStyle(
@@ -197,7 +196,10 @@ class TransactionDetail extends StatelessWidget {
                     SizedBox(height: 5),
                     Text(
                       formatDate(FilterType.day, transaction.date),
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
@@ -211,7 +213,10 @@ class TransactionDetail extends StatelessWidget {
                     SizedBox(height: 5),
                     Text(
                       '${transaction.date.hour}:${transaction.date.minute}',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                     SizedBox(height: 20),
                     Text(
@@ -227,7 +232,10 @@ class TransactionDetail extends StatelessWidget {
                       transaction.type == AppType.expense
                           ? 'Chi tiêu'
                           : 'Thu nhập',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ],
                 ),
@@ -250,10 +258,16 @@ class TransactionDetail extends StatelessWidget {
                     MaterialPageRoute(
                       builder: (_) => MultiBlocProvider(
                         providers: [
-                          BlocProvider.value(value: context.read<TransactionBloc>()),
-                          BlocProvider.value(value: context.read<CategoryBloc>()),
+                          BlocProvider.value(
+                            value: context.read<TransactionBloc>(),
+                          ),
+                          BlocProvider.value(
+                            value: context.read<CategoryBloc>(),
+                          ),
                         ],
-                        child: UpdateTransactionPage(currentTransaction: transaction),
+                        child: UpdateTransactionPage(
+                          currentTransaction: transaction,
+                        ),
                       ),
                     ),
                   );
@@ -268,6 +282,5 @@ class TransactionDetail extends StatelessWidget {
         );
       },
     );
-
   }
 }

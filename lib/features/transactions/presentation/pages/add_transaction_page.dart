@@ -1,58 +1,41 @@
 import 'package:expense_tracker_app/core/constants/app_colors.dart';
-import 'package:expense_tracker_app/core/constants/app_icon.dart';
-import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/categories/data/models/category_model.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_event.dart';
+import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_state.dart';
+import 'package:expense_tracker_app/features/categories/presentation/pages/all_category.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/app_icon.dart';
 import '../../../../core/enums/app_type.dart';
+import '../../../../core/utils/current_date.dart';
 import '../../../categories/presentation/blocs/category/category_bloc.dart';
-import '../../../categories/presentation/blocs/category/category_state.dart';
+import '../blocs/filter/filter_state.dart';
 import '../blocs/transaction/transaction_event.dart';
 
-class UpdateTransactionPage extends StatefulWidget {
-  const UpdateTransactionPage({super.key, required this.currentTransaction});
-
-  final TransactionModel currentTransaction;
+class AddTransactionPage extends StatefulWidget {
+  const AddTransactionPage({super.key});
 
   @override
-  State<UpdateTransactionPage> createState() => _UpdateTransactionPageState();
+  State<AddTransactionPage> createState() => _AddTransactionPageState();
 }
 
-class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
+class _AddTransactionPageState extends State<AddTransactionPage> {
   TextEditingController amountController = TextEditingController();
   TextEditingController tittleController = TextEditingController();
-
-  late final TransactionModel currentTransaction;
-  CategoryModel? newCategory;
+  DateTime selectedDate = DateTime.now();
+  AppType? type;
+  CategoryModel? selectedCategory;
 
   @override
   void initState() {
     super.initState();
-    currentTransaction = widget.currentTransaction;
-    amountController.text = currentTransaction.amount % 1 == 0
-        ? currentTransaction.amount.toInt().toString()
-        : currentTransaction.amount.toString();
-    tittleController.text = currentTransaction.title;
-    context.read<CategoryBloc>().add(
-      LoadCategoryByTypeEvent(currentTransaction.type.name),
-    );
-    newCategory = CategoryModel(
-      id: currentTransaction.categoryId,
-      name: '',
-      icon: '',
-      type: currentTransaction.type,
-    );
-  }
 
-  @override
-  void dispose() {
-    amountController.dispose();
-    tittleController.dispose();
-    super.dispose();
+    type = AppType.expense;
+
+    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent('expense'));
   }
 
   @override
@@ -72,7 +55,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               padding: EdgeInsets.only(left: 8),
               child: Icon(Icons.arrow_back_ios),
             ),
-            SizedBox(width: 20,),
+            SizedBox(width: 20),
             Container(
               width: 240,
               height: 40,
@@ -84,42 +67,67 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(
-                      width: 120,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: currentTransaction.type == AppType.expense
-                            ? Colors.red
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Tiền chi',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          type = AppType.expense;
+                          selectedCategory = null;
+                        });
+
+                        context.read<CategoryBloc>().add(
+                          LoadCategoryByTypeEvent('expense'),
+                        );
+                      },
+                      child: Container(
+                        width: 120,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: type == AppType.expense
+                              ? Colors.red
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Tiền chi',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    Container(
-                      width: 120,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: currentTransaction.type == AppType.income
-                            ? Colors.green
-                            : Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'Tiền thu',
-                          style: TextStyle(
-                            color: Colors.black,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
+
+                    InkWell(
+                      onTap: () {
+                        setState(() {
+                          type = AppType.income;
+                          selectedCategory = null;
+                        });
+
+                        context.read<CategoryBloc>().add(
+                          LoadCategoryByTypeEvent('income'),
+                        );
+                      },
+                      child: Container(
+                        width: 120,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: type == AppType.income
+                              ? Colors.green
+                              : Colors.grey.shade300,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Tiền thu',
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),
@@ -136,6 +144,60 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Row(
+              children: [
+                SizedBox(
+                  width: 80,
+                  child: Center(
+                    child: Text(
+                      'Ngày',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 20),
+                Expanded(
+                  child: InkWell(
+                    onTap: () async {
+                      final pickedDate = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime(2020),
+                        lastDate: DateTime(2100),
+                      );
+                      if (pickedDate != null) {
+                        setState(() {
+                          selectedDate = pickedDate;
+                        });
+                      }
+                    },
+                    child: Container(
+                      width: 110,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Center(
+                        child: Text(
+                          formatDate(FilterType.day, selectedDate),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Divider(color: Colors.grey, thickness: 1, height: 20),
             Row(
               children: [
                 SizedBox(
@@ -165,7 +227,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                       textAlign: TextAlign.center,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        hintText: AppFormat.currency(currentTransaction.amount),
+                        hintText: '0',
                         border: InputBorder.none,
                         isCollapsed: true,
                       ),
@@ -209,7 +271,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                       keyboardType: TextInputType.text,
                       textAlign: TextAlign.center,
                       decoration: InputDecoration(
-                        hintText: currentTransaction.title,
+                        hintText: 'Ghi chú',
                         border: InputBorder.none,
                         isCollapsed: true,
                       ),
@@ -224,13 +286,32 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               ],
             ),
             Divider(color: Colors.grey, thickness: 1, height: 20),
-            Text(
-              'Danh mục',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Danh mục',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<CategoryBloc>(),
+                          child: AllCategory(),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.settings),
+                ),
+              ],
             ),
             Expanded(
               child: BlocBuilder<CategoryBloc, CategoryState>(
@@ -242,7 +323,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                   final categories = state.categories;
 
                   if (categories.isEmpty) {
-                    return const SizedBox();
+                    return SizedBox();
                   }
 
                   return GridView.builder(
@@ -254,20 +335,19 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                     itemCount: categories.length,
                     itemBuilder: (context, index) {
                       final item = categories[index];
-
                       return GestureDetector(
                         onTap: () {
                           setState(() {
-                            newCategory = item;
+                            selectedCategory = item;
                           });
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: newCategory?.id == item.id
+                            color: selectedCategory?.id == item.id
                                 ? Colors.blue.withOpacity(0.2)
                                 : Colors.transparent,
                             border: Border.all(
-                              color: newCategory?.id == item.id
+                              color: selectedCategory?.id == item.id
                                   ? Colors.blue
                                   : Colors.transparent,
                               width: 2,
@@ -294,7 +374,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: item.id == newCategory?.id
+                                    color: item.id == selectedCategory?.id
                                         ? Colors.black
                                         : Colors.grey,
                                   ),
@@ -334,7 +414,9 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                 error = 'Số tiền không hợp lệ';
               } else if (tittleController.text.isEmpty) {
                 error = 'Nhập ghi chú';
-              } else if (newCategory == null) {
+              } else if (type == null) {
+                error = 'Chọn loại giao dịch';
+              } else if (selectedCategory == null) {
                 error = 'Chọn danh mục';
               }
 
@@ -346,22 +428,22 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               }
 
               final transaction = TransactionModel(
-                id: currentTransaction.id,
+                id: DateTime.now().toString(),
                 title: tittleController.text,
                 amount: amount!,
-                date: currentTransaction.date,
-                type: currentTransaction.type,
-                categoryId: newCategory!.id,
+                date: selectedDate,
+                type: type!,
+                categoryId: selectedCategory!.id,
               );
 
               context.read<TransactionBloc>().add(
-                UpdateTransactionEvent(transaction),
+                AddTransactionEvent(transaction),
               );
 
               Navigator.pop(context);
             },
             child: Text(
-              'Cập nhật',
+              'Xác nhận',
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
           ),

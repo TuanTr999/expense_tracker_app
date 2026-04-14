@@ -309,13 +309,13 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
           Positioned(
-            bottom: 20,
+            bottom: 10,
             left: 0,
             right: 0,
             child: Center(
               child: SizedBox(
-                width: 180,
-                height: 60,
+                width: 150,
+                height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
@@ -323,7 +323,7 @@ class _HomeTabState extends State<HomeTab> {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    elevation: 3,
+                    elevation: 1,
                   ),
                   onPressed: () {
                     Navigator.push(

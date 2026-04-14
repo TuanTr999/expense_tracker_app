@@ -54,4 +54,14 @@ class CategoryLocalDataSource {
 
     return maps.map((e) => CategoryModel.fromMap(e)).toList();
   }
+
+  Future<void> resetCategories() async {
+    final db = await database;
+
+    await db.delete('categories');
+
+    for (var item in AppDatabase.defaultCategories) {
+      await db.insert('categories', item);
+    }
+  }
 }

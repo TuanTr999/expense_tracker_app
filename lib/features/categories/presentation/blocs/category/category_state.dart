@@ -2,7 +2,7 @@ import '../../../data/models/category_model.dart';
 
 class CategoryState {
   final List<CategoryModel> categories;
-  final String? selectedType; // để filter
+  final String? selectedType;
   final bool isLoading;
 
   CategoryState({

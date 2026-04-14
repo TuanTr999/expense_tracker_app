@@ -32,4 +32,9 @@ class CategoryRepositoryImpl implements CategoryRepository {
   Future<void> deleteCategory(String id) {
     return localDataSource.deleteCategory(id);
   }
+
+  @override
+  Future<void> resetCategory(){
+    return localDataSource.resetCategories();
+  }
 }

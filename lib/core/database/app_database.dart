@@ -40,75 +40,7 @@ class AppDatabase {
           )
         ''');
 
-        final defaultCategories = [
-          {
-            'id': '1',
-            'name': 'Ăn uống',
-            'icon': 'food.png',
-            'type': 'expense',
-          },
-          {
-            'id': '2',
-            'name': 'Giải trí',
-            'icon': 'entertainment.png',
-            'type': 'expense',
-          },
-          {
-            'id': '3',
-            'name': 'Sức khỏe',
-            'icon': 'healthcare.png',
-            'type': 'expense',
-          },
-          {
-            'id': '4',
-            'name': 'Nhà ở',
-            'icon': 'house.png',
-            'type': 'expense',
-          },
-          {
-            'id': '5',
-            'name': 'Mua sắm',
-            'icon': 'shopping-cart.png',
-            'type': 'expense',
-          },
-          {
-            'id': '6',
-            'name': 'Di chuyển',
-            'icon': 'transportation.png',
-            'type': 'expense',
-          },
-          {
-            'id': '7',
-            'name': 'Giáo dục',
-            'icon': 'education.png',
-            'type': 'expense',
-          },
 
-          {
-            'id': '8',
-            'name': 'Lương',
-            'icon': 'salary.png',
-            'type': 'income',
-          },
-          {
-            'id': '9',
-            'name': 'Thưởng',
-            'icon': 'bonus.png',
-            'type': 'income',
-          },
-          {
-            'id': '10',
-            'name': 'Đầu tư',
-            'icon': 'investment.png',
-            'type': 'income',
-          },
-          {
-            'id': '11',
-            'name': 'Quà tặng',
-            'icon': 'giftbox.png',
-            'type': 'income',
-          },
-        ];
 
         for (var item in defaultCategories) {
           await db.insert('categories', item);
@@ -117,5 +49,73 @@ class AppDatabase {
     );
   }
 
+  static List<Map<String, dynamic>>  defaultCategories = [
+    {
+      'id': '1',
+      'name': 'Ăn uống',
+      'icon': 'food.png',
+      'type': 'expense',
+    },
+    {
+      'id': '2',
+      'name': 'Giải trí',
+      'icon': 'entertainment.png',
+      'type': 'expense',
+    },
+    {
+      'id': '3',
+      'name': 'Sức khỏe',
+      'icon': 'healthcare.png',
+      'type': 'expense',
+    },
+    {
+      'id': '4',
+      'name': 'Nhà ở',
+      'icon': 'house.png',
+      'type': 'expense',
+    },
+    {
+      'id': '5',
+      'name': 'Mua sắm',
+      'icon': 'shopping-cart.png',
+      'type': 'expense',
+    },
+    {
+      'id': '6',
+      'name': 'Di chuyển',
+      'icon': 'transportation.png',
+      'type': 'expense',
+    },
+    {
+      'id': '7',
+      'name': 'Giáo dục',
+      'icon': 'education.png',
+      'type': 'expense',
+    },
 
+    {
+      'id': '8',
+      'name': 'Lương',
+      'icon': 'salary.png',
+      'type': 'income',
+    },
+    {
+      'id': '9',
+      'name': 'Thưởng',
+      'icon': 'bonus.png',
+      'type': 'income',
+    },
+    {
+      'id': '10',
+      'name': 'Đầu tư',
+      'icon': 'investment.png',
+      'type': 'income',
+    },
+    {
+      'id': '11',
+      'name': 'Quà tặng',
+      'icon': 'giftbox.png',
+      'type': 'income',
+    },
+  ];
 }
