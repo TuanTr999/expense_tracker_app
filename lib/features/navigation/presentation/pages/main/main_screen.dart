@@ -46,13 +46,13 @@ class _MainScreenState extends State<MainScreen> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _item(Icons.home, 0),
-              _item(Icons.account_balance_wallet, 1),
+              _item('assets/icons/navigation/home.png', 0),
+              _item('assets/icons/navigation/wallet.png', 1),
 
               const SizedBox(width: 40),
 
-              _item(Icons.pie_chart, 2),
-              _item(Icons.person, 3),
+              _item('assets/icons/navigation/budget.png', 2),
+              _item('assets/icons/navigation/settings.png', 3),
             ],
           ),
         ),
@@ -83,7 +83,7 @@ class _MainScreenState extends State<MainScreen> {
     );
   }
 
-  Widget _item(IconData icon, int index) {
+  Widget _item(String iconPath, int index) {
     return IconButton(
       onPressed: () {
         context.read<NavigationBloc>().add(ChangePageEvent(index));
@@ -99,9 +99,16 @@ class _MainScreenState extends State<MainScreen> {
                   : Colors.transparent,
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              icon,
-              color: state.currentIndex == index ? Colors.blue : Colors.grey,
+            child: Center(
+              child: state.currentIndex == index
+                  ? Image.asset(iconPath, width: 24, height: 24) // giữ màu gốc
+                  : ColorFiltered(
+                      colorFilter: ColorFilter.mode(
+                        Colors.grey,
+                        BlendMode.modulate,
+                      ),
+                      child: Image.asset(iconPath, width: 24, height: 24),
+                    ),
             ),
           );
         },
