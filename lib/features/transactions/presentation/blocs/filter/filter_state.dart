@@ -1,4 +1,4 @@
-import '../../models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 
 enum FilterType { day, month, year, all, custom }
 
@@ -41,3 +41,4 @@ class FilterState {
     );
   }
 }
+

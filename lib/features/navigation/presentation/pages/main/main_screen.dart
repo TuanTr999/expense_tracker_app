@@ -1,12 +1,12 @@
-import 'package:expense_tracker_app/blocs/navigation/navigation_bloc.dart';
+import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../blocs/navigation/navigation_event.dart';
 import '../../blocs/navigation/navigation_state.dart';
-import '../home/home_tab.dart';
-import '../wallet/wallet_screen.dart';
-import '../budget/budget_screen.dart';
-import '../settings/settings_screen.dart';
+import 'package:expense_tracker_app/features/home/presentation/pages/home/home_tab.dart';
+import 'package:expense_tracker_app/features/wallet/presentation/pages/wallet/wallet_screen.dart';
+import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_screen.dart';
+import 'package:expense_tracker_app/features/settings/presentation/pages/settings/settings_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

@@ -1,9 +1,9 @@
-import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
-import 'package:expense_tracker_app/models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 import 'package:flutter/material.dart';
 
-import '../core/utils/current_date.dart';
-import '../core/utils/format.dart';
+import 'package:expense_tracker_app/core/utils/current_date.dart';
+import 'package:expense_tracker_app/core/utils/format.dart';
 
 class TransactionItem extends StatelessWidget {
   TransactionItem({super.key, required this.item, required this.filterType});

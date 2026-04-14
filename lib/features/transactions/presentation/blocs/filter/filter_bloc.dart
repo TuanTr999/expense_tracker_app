@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 import 'filter_event.dart';
 import 'filter_state.dart';
 
@@ -79,13 +79,37 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
         event.type,
         state.selectedDate,
       );
-
-      emit(state.copyWith(
-        type: event.type,
-        fromDate: fromDate,
-        toDate: toDate,
-        filteredTransactions: filtered,
-      ));
+      event.type == FilterType.all || event.type == FilterType.custom
+          ? emit(
+              state.copyWith(
+                type: event.type,
+                reset: false,
+                fromDate: fromDate,
+                toDate: toDate,
+                filteredTransactions: filtered,
+              ),
+            )
+          : state.selectedDate.year == DateTime.now().year &&
+                state.selectedDate.month == DateTime.now().month &&
+                state.selectedDate.day == DateTime.now().day
+          ? emit(
+              state.copyWith(
+                type: event.type,
+                reset: false,
+                fromDate: fromDate,
+                toDate: toDate,
+                filteredTransactions: filtered,
+              ),
+            )
+          : emit(
+              state.copyWith(
+                type: event.type,
+                fromDate: fromDate,
+                reset: true,
+                toDate: toDate,
+                filteredTransactions: filtered,
+              ),
+            );
     });
 
     on<PreviousPressed>((event, emit) {
@@ -121,7 +145,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       );
     });
 
-    /// 🔹 Bấm tới
     on<NextPressed>((event, emit) {
       final current = state.selectedDate;
       DateTime newDate = current;
@@ -155,7 +178,6 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
       );
     });
 
-    /// 🔹 Reset về hôm nay
     on<ResetPressed>((event, emit) {
       final now = DateTime.now();
 
@@ -171,3 +193,4 @@ class FilterBloc extends Bloc<FilterEvent, FilterState> {
     });
   }
 }
+

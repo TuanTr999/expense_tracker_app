@@ -1,7 +1,7 @@
-import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
-import 'package:expense_tracker_app/models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 import 'package:flutter/material.dart';
-import 'package:expense_tracker_app/widgets/transaction_item.dart';
+import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 
 class AllTransactionsScreen extends StatelessWidget {
   const AllTransactionsScreen({super.key, required this.transactions, required this.filterType});

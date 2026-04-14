@@ -1,19 +1,19 @@
-import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
-import 'package:expense_tracker_app/screens/all_transactions_screen.dart';
-import 'package:expense_tracker_app/widgets/app_bar/custom_app_bar.dart';
-import 'package:expense_tracker_app/widgets/budget_card.dart';
-import 'package:expense_tracker_app/widgets/summary_card.dart';
-import 'package:expense_tracker_app/widgets/transaction_item.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_screen.dart';
+import 'package:expense_tracker_app/shared/widgets/app_bar/custom_app_bar.dart';
+import 'package:expense_tracker_app/shared/widgets/budget_card.dart';
+import 'package:expense_tracker_app/shared/widgets/summary_card.dart';
+import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../blocs/filter/filter_bloc.dart';
-import '../../blocs/filter/filter_event.dart';
-import '../../core/utils/current_date.dart';
-import '../../core/utils/transaction_util.dart';
-import '../../core/utils/format.dart';
-import '../../models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
+import 'package:expense_tracker_app/core/utils/current_date.dart';
+import 'package:expense_tracker_app/core/utils/transaction_util.dart';
+import 'package:expense_tracker_app/core/utils/format.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 
 class HomeTab extends StatefulWidget {
   HomeTab({super.key});

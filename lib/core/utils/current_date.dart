@@ -1,5 +1,4 @@
-
-import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 
 String formatDate(FilterType type, DateTime? date) {
   if (date == null) return "";
@@ -16,8 +15,6 @@ String formatDate(FilterType type, DateTime? date) {
 
     case FilterType.all:
       return "Tất cả";
-
-
 
     default:
       return "${_twoDigits(date.day)}/${_twoDigits(date.month)}/${date.year}";

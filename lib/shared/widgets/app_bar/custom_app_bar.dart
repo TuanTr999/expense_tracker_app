@@ -1,11 +1,10 @@
-import 'package:expense_tracker_app/blocs/filter/filter_event.dart';
-import 'package:expense_tracker_app/blocs/filter/filter_state.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../blocs/filter/filter_bloc.dart';
-import '../../blocs/filter/filter_event.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   CustomAppBar({super.key});

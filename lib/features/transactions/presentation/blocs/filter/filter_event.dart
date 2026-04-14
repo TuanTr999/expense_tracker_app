@@ -1,4 +1,4 @@
-import '../../models/transaction_model.dart';
+import 'package:expense_tracker_app/features/transactions/domain/entities/transaction_model.dart';
 import 'filter_state.dart';
 
 abstract class FilterEvent {}
@@ -24,3 +24,4 @@ class LoadTransactions extends FilterEvent {
 
   LoadTransactions(this.transactions);
 }
+
