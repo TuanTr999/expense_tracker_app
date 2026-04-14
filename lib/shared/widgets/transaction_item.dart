@@ -2,11 +2,10 @@ import 'package:expense_tracker_app/features/transactions/presentation/blocs/fil
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:flutter/material.dart';
 
-import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 
 class TransactionItem extends StatelessWidget {
-  TransactionItem({super.key, required this.item, required this.filterType});
+  const TransactionItem({super.key, required this.item, required this.filterType});
 
   final TransactionModel item;
   final FilterType filterType;
@@ -16,13 +15,6 @@ class TransactionItem extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        filterType != FilterType.day
-            ? Text(
-                formatDate(FilterType.day, item.date),
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-              )
-            : Container(),
-        SizedBox(height: 5),
         Container(
           height: 80,
           padding: EdgeInsets.all(10),

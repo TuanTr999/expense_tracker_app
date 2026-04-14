@@ -26,8 +26,6 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-
-
   @override
   void initState() {
     super.initState();
@@ -41,221 +39,243 @@ class _HomeTabState extends State<HomeTab> {
       appBar: CustomAppBar(),
       body: BlocListener<TransactionBloc, TransactionState>(
         listener: (context, state) {
-          context.read<FilterBloc>().add(
-            SetTransactions(state.transactions),
-          );
+          context.read<FilterBloc>().add(SetTransactions(state.transactions));
         },
-        child:
-      Padding(
-        padding: EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: EdgeInsets.only(left: 20, right: 20),
-                child: BlocBuilder<FilterBloc, FilterState>(
-                  builder: (context, state) {
-                    return Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        filterItem('Ngày', FilterType.day, state),
-                        filterItem('Tháng', FilterType.month, state),
-                        filterItem('Năm', FilterType.year, state),
-                        filterItem('Tất cả', FilterType.all, state),
-                        filterItem('Tùy chỉnh', FilterType.custom, state),
-                      ],
-                    );
-                  },
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Column(
+            children: [
+              Container(
+                height: 50,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ),
-            ),
-            SizedBox(height: 20),
-            BlocBuilder<FilterBloc, FilterState>(
-              builder: (context, state) {
-                if (state.filterType != FilterType.custom) {
-                  return Container();
-                }
-                return Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        InkWell(
-                          onTap: () async {
-                            final fromDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
-                            );
-
-                            if (fromDate != null) {
-                              context.read<FilterBloc>().add(
-                                ChangeFilterType(
-                                  FilterType.custom,
-                                ),
-                              );
-                            }
-                          },
-                          child: Container(
-                            width: 110,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                formatDate(state.filterType, state.fromDate),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        Text(
-                          '-',
-                          style: TextStyle(
-                            fontSize: 30,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(width: 15),
-                        InkWell(
-                          onTap: () async {
-                            final toDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
-                            );
-
-                            if (toDate != null) {
-                              context.read<FilterBloc>().add(
-                                ChangeFilterType(
-                                  FilterType.custom,
-                                  toDate: toDate,
-                                ),
-                              );
-                            }
-                          },
-                          child: Container(
-                            width: 110,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Center(
-                              child: Text(
-                                formatDate(state.filterType, state.toDate),
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.blue,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 20),
-                  ],
-                );
-              },
-            ),
-            BudgetCard(),
-            SizedBox(height: 20),
-            Row(
-              children: [
-                BlocBuilder<FilterBloc, FilterState>(
-                  builder: (context, state) {
-                    return Expanded(
-                      child: SummaryCard(
-                        title: 'Chi tiêu',
-                        amount: AppFormat.currency(
-                          calculateTotalExpense(state.filteredTransactions),
-                        ),
-                        color: Colors.red,
-                      ),
-                    );
-                  },
-                ),
-                SizedBox(width: 20),
-                BlocBuilder<FilterBloc, FilterState>(
-                  builder: (context, state) {
-                    return Expanded(
-                      child: SummaryCard(
-                        title: 'Thu nhập',
-                        amount: AppFormat.currency(
-                          calculateTotalIncome(state.filteredTransactions),
-                        ),
-                        color: Colors.green,
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Danh sách giao dịch',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-                BlocBuilder<FilterBloc, FilterState>(
-                  builder: (context, state) {
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AllTransactionsScreen(
-                              transactions: state.filteredTransactions, filterType: state.filterType,
-                            ),
-                          ),
-                        );
-                      },
-                      child: Text(
-                        'Xem tất cả',
-                        style: TextStyle(fontSize: 16, color: Colors.blue),
-                      ),
-                    );
-                  },
-                ),
-              ],
-            ),
-            SizedBox(height: 15),
-            BlocBuilder<FilterBloc, FilterState>(
-              builder: (context, state) {
-                return Expanded(
-                  child: ListView.separated(
-                    itemCount: state.filteredTransactions.length,
-                    itemBuilder: (context, index) {
-                      return TransactionItem(
-                        item: state.filteredTransactions[index],filterType: state.filterType,
+                child: Padding(
+                  padding: EdgeInsets.only(left: 20, right: 20),
+                  child: BlocBuilder<FilterBloc, FilterState>(
+                    builder: (context, state) {
+                      return Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          filterItem('Ngày', FilterType.day, state),
+                          filterItem('Tháng', FilterType.month, state),
+                          filterItem('Năm', FilterType.year, state),
+                          filterItem('Tất cả', FilterType.all, state),
+                          filterItem('Tùy chỉnh', FilterType.custom, state),
+                        ],
                       );
                     },
-                    separatorBuilder: (context, index) => SizedBox(height: 10),
                   ),
-                );
-              },
-            ),
-          ],
+                ),
+              ),
+              SizedBox(height: 20),
+              BlocBuilder<FilterBloc, FilterState>(
+                builder: (context, state) {
+                  if (state.filterType != FilterType.custom) {
+                    return Container();
+                  }
+                  return Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InkWell(
+                            onTap: () async {
+                              final fromDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2100),
+                              );
+
+                              if (fromDate != null) {
+                                context.read<FilterBloc>().add(
+                                  ChangeFilterType(
+                                    FilterType.custom,
+                                    fromDate: fromDate,
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 110,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  formatDate(state.filterType, state.fromDate),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          SizedBox(width: 15),
+                          Text(
+                            '-',
+                            style: TextStyle(
+                              fontSize: 30,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(width: 15),
+                          InkWell(
+                            onTap: () async {
+                              final toDate = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime(2020),
+                                lastDate: DateTime(2100),
+                              );
+
+                              if (toDate != null) {
+                                context.read<FilterBloc>().add(
+                                  ChangeFilterType(
+                                    FilterType.custom,
+                                    toDate: toDate,
+                                  ),
+                                );
+                              }
+                            },
+                            child: Container(
+                              width: 110,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  formatDate(state.filterType, state.toDate),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 20),
+                    ],
+                  );
+                },
+              ),
+              BudgetCard(),
+              SizedBox(height: 20),
+              Row(
+                children: [
+                  BlocBuilder<FilterBloc, FilterState>(
+                    builder: (context, state) {
+                      return Expanded(
+                        child: SummaryCard(
+                          title: 'Chi tiêu',
+                          amount: AppFormat.currency(
+                            calculateTotalExpense(state.filteredTransactions),
+                          ),
+                          color: Colors.red,
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(width: 20),
+                  BlocBuilder<FilterBloc, FilterState>(
+                    builder: (context, state) {
+                      return Expanded(
+                        child: SummaryCard(
+                          title: 'Thu nhập',
+                          amount: AppFormat.currency(
+                            calculateTotalIncome(state.filteredTransactions),
+                          ),
+                          color: Colors.green,
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Danh sách giao dịch',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  BlocBuilder<FilterBloc, FilterState>(
+                    builder: (context, state) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (_) => FilterBloc(),
+                                child: AllTransactionsScreen(transactions: state.groupedTransactions,),
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Xem tất cả',
+                          style: TextStyle(fontSize: 16, color: Colors.blue),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+              SizedBox(height: 10),
+              BlocBuilder<FilterBloc, FilterState>(
+                builder: (context, state) {
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: state.groupedTransactions.length,
+                      itemBuilder: (context, index) {
+                        final group = state.groupedTransactions[index];
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 8),
+                              child: Text(
+                                formatDate(FilterType.day, group.date),
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                            ...group.items.map((item) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: TransactionItem(
+                                  item: item,
+                                  filterType: state.filterType,
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
         ),
-      ),),);
+      ),
+    );
   }
 
   Widget filterItem(String title, FilterType type, FilterState state) {

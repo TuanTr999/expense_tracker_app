@@ -1,8 +1,6 @@
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/data/repositories/transaction_repository_impl.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../transactions/data/datasources/transaction_local_datasource.dart';
 import '../../../../transactions/presentation/blocs/filter/filter_bloc.dart';
 import '../../../../transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import '../../../../transactions/presentation/pages/add_transaction_page.dart';
