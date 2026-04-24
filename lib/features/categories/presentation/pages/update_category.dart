@@ -8,10 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class UpdateCategory extends StatefulWidget {
-  const UpdateCategory({super.key, this.currentCategory, required this.type});
+  const UpdateCategory({super.key, required this.currentCategory});
 
-  final CategoryModel? currentCategory;
-  final AppType type;
+  final CategoryModel currentCategory;
 
   @override
   State<UpdateCategory> createState() => _UpdateCategoryState();
@@ -20,23 +19,31 @@ class UpdateCategory extends StatefulWidget {
 class _UpdateCategoryState extends State<UpdateCategory> {
   int selectedIndex = -1;
   late String selectedIcon;
+  late List<String> icons;
   late AppType type;
+  late TextEditingController nameCategoryController;
+  String? errorText;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.currentCategory != null) {
-      selectedIcon = widget.currentCategory!.icon;
-      type = widget.currentCategory!.type;
-    } else {
-      selectedIcon = 'other.png';
-    }
+    type = widget.currentCategory.type;
+    selectedIcon = widget.currentCategory.icon;
+
+    icons = type == AppType.income
+        ? AppIconList.incomeIcon
+        : AppIconList.expenseIcon;
+
+    selectedIndex = icons.indexOf(selectedIcon);
+
+    nameCategoryController = TextEditingController(
+      text: widget.currentCategory.name,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController nameCategoryController = TextEditingController();
     return Stack(
       children: [
         Container(
@@ -89,7 +96,7 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                             children: [
                               Row(
                                 mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   AppCircleButton(
                                     onTap: () {
@@ -108,25 +115,25 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                                 ],
                               ),
                               SizedBox(height: 20),
+
                               Expanded(
                                 child: GridView.builder(
                                   gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 4,
-                                    crossAxisSpacing: 12,
-                                    mainAxisSpacing: 12,
-                                  ),
-                                  itemCount: AppIconList.expenseIcon.length,
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 4,
+                                        crossAxisSpacing: 12,
+                                        mainAxisSpacing: 12,
+                                      ),
+                                  itemCount: icons.length,
                                   itemBuilder: (context, index) {
                                     final isSelected = selectedIndex == index;
                                     return InkWell(
                                       onTap: () {
                                         setState(() {
                                           selectedIndex = index;
-                                          selectedIcon =
-                                          AppIconList.expenseIcon[index];
-                                          Navigator.pop(context);
+                                          selectedIcon = icons[index];
                                         });
+                                        Navigator.pop(context);
                                       },
                                       child: Container(
                                         width: 30,
@@ -138,14 +145,14 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                                           ),
                                           border: isSelected
                                               ? Border.all(
-                                            color: Colors.blue,
-                                            width: 3,
-                                          )
+                                                  color: Colors.blue,
+                                                  width: 3,
+                                                )
                                               : null,
                                         ),
                                         child: Center(
                                           child: Image.asset(
-                                            AppIconList.expenseIcon[index],
+                                            'assets/icons/${type.name}/${icons[index]}',
                                             width: 30,
                                             height: 30,
                                           ),
@@ -170,7 +177,7 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                     ),
                     child: Center(
                       child: Image.asset(
-                        'assets/icons/${widget.type.name}/$selectedIcon',
+                        'assets/icons/${type.name}/$selectedIcon',
                         width: 40,
                         height: 40,
                       ),
@@ -199,12 +206,18 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                         controller: nameCategoryController,
                         keyboardType: TextInputType.text,
                         textAlign: TextAlign.start,
+                        onChanged: (value) {
+                          if (errorText != null) {
+                            setState(() {
+                              errorText = null;
+                            });
+                          }
+                        },
                         decoration: InputDecoration(
-                          hintText: widget.currentCategory == null
-                              ? 'Nhập tên danh mục'
-                              : widget.currentCategory?.name,
+                          hintText: 'Nhập tên danh mục',
                           border: InputBorder.none,
                           isCollapsed: true,
+                          errorText: errorText,
                         ),
                         style: TextStyle(
                           fontSize: 16,
@@ -234,26 +247,24 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
-                  String error = '';
 
                   if (nameCategoryController.text.isEmpty) {
-                    error = 'Nhập tên danh mục';
-                  }
-
-                  if (error.isNotEmpty) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(error)));
+                    setState(() {
+                      errorText = 'Vui lòng nhập tên danh mục';
+                    });
                     return;
                   }
 
                   final category = CategoryModel(
+                    id: widget.currentCategory.id,
                     name: nameCategoryController.text,
                     icon: selectedIcon,
-                    type: widget.type,
+                    type: type,
                   );
 
-                  context.read<CategoryBloc>().add(AddCategoryEvent(category));
+                  context.read<CategoryBloc>().add(
+                    UpdateCategoryEvent(category),
+                  );
 
                   Navigator.pop(context);
                 },

@@ -64,4 +64,16 @@ class CategoryLocalDataSource {
       await db.insert('categories', item);
     }
   }
+
+  Future<bool> hasTransaction(int categoryId) async {
+    final db = await database;
+    final result = await db.query(
+      'transactions',
+      where: 'categoryId = ?',
+      whereArgs: [categoryId],
+      limit: 1,
+    );
+
+    return result.isNotEmpty;
+  }
 }

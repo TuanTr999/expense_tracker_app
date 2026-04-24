@@ -169,13 +169,18 @@ class _AllCategoryState extends State<AllCategory> {
                                 Spacer(),
                                 IconButton(
                                   onPressed: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => BlocProvider.value(
-                                          value: context.read<CategoryBloc>(),
-                                          child: UpdateCategory(currentCategory: item, type: item.type,),
-                                        ),
+                                    showModalBottomSheet(
+                                      context: context,
+                                      isScrollControlled: true,
+                                      builder: (_) => BlocProvider.value(
+                                        value: context.read<CategoryBloc>(),
+                                        child: FractionallySizedBox(
+                                          heightFactor: 0.93,
+                                          child: UpdateCategory(
+                                            currentCategory: item,
+                                          ),
+                                        )
+
                                       ),
                                     );
                                   },
@@ -337,7 +342,7 @@ class _AllCategoryState extends State<AllCategory> {
                         value: context.read<CategoryBloc>(),
                         child: FractionallySizedBox(
                           heightFactor: 0.93,
-                          child: AddCategory(type: type!,),
+                          child: AddCategory(type: type!),
                         ),
                       ),
                     );

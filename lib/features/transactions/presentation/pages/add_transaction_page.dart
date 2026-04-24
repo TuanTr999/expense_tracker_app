@@ -342,9 +342,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           });
                         },
                         child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
                           padding: EdgeInsets.all(8),
                           child: Container(
                             decoration: BoxDecoration(

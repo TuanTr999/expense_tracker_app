@@ -20,11 +20,14 @@ class _AddCategoryState extends State<AddCategory> {
   int selectedIndex = -1;
   String selectedIcon = 'other.png';
   late List<String> icons;
+  String? errorText;
 
   @override
   void initState() {
     super.initState();
-    icons = widget.type == AppType.income ? AppIconList.incomeIcon : AppIconList.expenseIcon;
+    icons = widget.type == AppType.income
+        ? AppIconList.incomeIcon
+        : AppIconList.expenseIcon;
   }
 
   @override
@@ -66,96 +69,92 @@ class _AddCategoryState extends State<AddCategory> {
                     showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      builder: (_) =>
-                          FractionallySizedBox(
-                            heightFactor: 0.9,
-                            child: Container(
-                              padding: EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: Color(0xFFF5F5F5),
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(30),
-                                ),
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
+                      builder: (_) => FractionallySizedBox(
+                        heightFactor: 0.9,
+                        child: Container(
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Color(0xFFF5F5F5),
+                            borderRadius: BorderRadius.vertical(
+                              top: Radius.circular(30),
+                            ),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      AppCircleButton(
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                        },
-                                        child: Icon(Icons.close, size: 35),
-                                      ),
-                                      const Text(
-                                        'Chọn biểu tượng',
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      SizedBox(width: 50),
-                                    ],
+                                children: [
+                                  AppCircleButton(
+                                    onTap: () {
+                                      Navigator.pop(context);
+                                    },
+                                    child: Icon(Icons.close, size: 35),
                                   ),
-                                  SizedBox(height: 20),
+                                  const Text(
+                                    'Chọn biểu tượng',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(width: 50),
+                                ],
+                              ),
+                              SizedBox(height: 20),
 
-                                  Expanded(
-                                    child: GridView.builder(
-                                      gridDelegate:
+                              Expanded(
+                                child: GridView.builder(
+                                  gridDelegate:
                                       SliverGridDelegateWithFixedCrossAxisCount(
                                         crossAxisCount: 4,
                                         crossAxisSpacing: 12,
                                         mainAxisSpacing: 12,
                                       ),
-                                      itemCount: AppIconList.expenseIcon.length,
-                                      itemBuilder: (context, index) {
-                                        final isSelected = selectedIndex ==
-                                            index;
-                                        return InkWell(
-                                          onTap: () {
-                                            setState(() {
-                                              selectedIndex = index;
-                                              selectedIcon =
-                                              icons[index];
-                                              Navigator.pop(context);
-                                            });
-                                          },
-                                          child: Container(
+                                  itemCount: AppIconList.expenseIcon.length,
+                                  itemBuilder: (context, index) {
+                                    final isSelected = selectedIndex == index;
+                                    return InkWell(
+                                      onTap: () {
+                                        setState(() {
+                                          selectedIndex = index;
+                                          selectedIcon = icons[index];
+                                          Navigator.pop(context);
+                                        });
+                                      },
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
+                                          border: isSelected
+                                              ? Border.all(
+                                                  color: Colors.blue,
+                                                  width: 3,
+                                                )
+                                              : null,
+                                        ),
+                                        child: Center(
+                                          child: Image.asset(
+                                            'assets/icons/${widget.type.name}/${icons[index]}',
                                             width: 30,
                                             height: 30,
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius
-                                                  .circular(
-                                                20,
-                                              ),
-                                              border: isSelected
-                                                  ? Border.all(
-                                                color: Colors.blue,
-                                                width: 3,
-                                              )
-                                                  : null,
-                                            ),
-                                            child: Center(
-                                              child: Image.asset(
-                                               'assets/icons/${widget.type.name}/${icons[index]}',
-                                                width: 30,
-                                                height: 30,
-                                              ),
-                                            ),
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
+                            ],
                           ),
+                        ),
+                      ),
                     );
                   },
                   child: Container(
@@ -196,7 +195,15 @@ class _AddCategoryState extends State<AddCategory> {
                         controller: nameCategoryController,
                         keyboardType: TextInputType.text,
                         textAlign: TextAlign.start,
+                        onChanged: (value) {
+                          if (errorText != null) {
+                            setState(() {
+                              errorText = null;
+                            });
+                          }
+                        },
                         decoration: InputDecoration(
+                          errorText: errorText,
                           hintText: 'Nhập tên danh mục',
                           border: InputBorder.none,
                           isCollapsed: true,
@@ -229,16 +236,10 @@ class _AddCategoryState extends State<AddCategory> {
                   foregroundColor: Colors.white,
                 ),
                 onPressed: () {
-                  String error = '';
-
                   if (nameCategoryController.text.isEmpty) {
-                    error = 'Nhập tên danh mục';
-                  }
-
-                  if (error.isNotEmpty) {
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text(error)));
+                    setState(() {
+                      errorText = 'Vui lòng nhập tên danh mục';
+                    });
                     return;
                   }
 
