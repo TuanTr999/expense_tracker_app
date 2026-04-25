@@ -57,27 +57,30 @@ class TransactionItem extends StatelessWidget {
                   ),
                 ),
                 SizedBox(width: 10),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      transaction.title,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        transaction.title,
+                        style: TextStyle(
+                          overflow: TextOverflow.ellipsis,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 5),
-                    (transaction.date.hour != 0)
-                        ? Text(
-                            '${transaction.date.hour}:${transaction.date.minute}',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
-                          )
-                        : SizedBox(),
-                  ],
+                      SizedBox(height: 5),
+                      (transaction.date.hour != 0)
+                          ? Text(
+                              '${transaction.date.hour}:${transaction.date.minute}',
+                              style: TextStyle(fontSize: 14, color: Colors.grey),
+                            )
+                          : SizedBox(),
+                    ],
+                  ),
                 ),
-                Spacer(),
+                SizedBox(width: 10,),
                 Text(
                   AppFormat.currencyWithSign(
                     transaction.amount,

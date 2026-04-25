@@ -149,7 +149,7 @@ class TransactionDetail extends StatelessWidget {
             padding: EdgeInsets.all(20),
             child: Container(
               width: double.infinity,
-              height: 300,
+              height: 320,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -167,14 +167,17 @@ class TransactionDetail extends StatelessWidget {
                           height: 40,
                         ),
                         SizedBox(width: 10),
-                        Text(
-                          transaction.title,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
+                        Expanded(
+                          child: Text(
+                            transaction.title,
+                            style: TextStyle(
+                              overflow: TextOverflow.visible,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
                           ),
                         ),
-                        Spacer(),
+                        SizedBox(width: 10),
                         Text(
                           AppFormat.currency(transaction.amount),
                           style: TextStyle(

@@ -292,6 +292,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                                 Text(
                                   item.name,
                                   style: TextStyle(
+                                    overflow: TextOverflow.ellipsis,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: item.id == newCategory?.id

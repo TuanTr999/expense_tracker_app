@@ -366,6 +366,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                 Text(
                                   item.name,
                                   style: TextStyle(
+                                    overflow: TextOverflow.ellipsis,
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,
                                     color: item.id == selectedCategory?.id

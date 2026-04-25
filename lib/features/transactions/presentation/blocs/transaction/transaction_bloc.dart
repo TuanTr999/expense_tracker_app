@@ -15,12 +15,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<AddTransactionEvent>((event, emit) async {
       await repository.addTransaction(event.transaction);
 
-      // print("✅ INSERT OK: ${event.transaction.title}");
-
       final data = await repository.getTransactions();
-
-      // print("📦 TOTAL AFTER INSERT: ${data.length}");
-      // print("📦 LAST ITEM: ${data.last.title}");
 
       emit(state.copyWith(transactions: data));
     });

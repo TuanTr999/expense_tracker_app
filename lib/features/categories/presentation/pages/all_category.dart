@@ -159,14 +159,16 @@ class _AllCategoryState extends State<AllCategory> {
                                   height: 40,
                                 ),
                                 SizedBox(width: 10),
-                                Text(
-                                  item.name,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
+                                Expanded(
+                                  child: Text(
+                                    item.name,
+                                    style: TextStyle(
+                                      overflow: TextOverflow.ellipsis,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                                Spacer(),
                                 IconButton(
                                   onPressed: () {
                                     showModalBottomSheet(
