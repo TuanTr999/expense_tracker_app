@@ -43,6 +43,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     return Scaffold(
       backgroundColor: AppColors.primary,
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.primary,
         title: Row(
@@ -400,6 +401,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             onPressed: () {
               final raw = amountController.text.replaceAll(',', '');
               final amount = double.tryParse(raw);
+
 
               String error = '';
 

@@ -1,4 +1,7 @@
+import 'package:expense_tracker_app/core/network/dio_client.dart';
+import 'package:expense_tracker_app/features/categories/data/datasources/category_remote_datasource.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/pages/main/main_screen.dart';
+import 'package:expense_tracker_app/features/transactions/data/datasources/transaction_remote_datasource.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -6,7 +9,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
 
-import '../features/categories/data/datasources/category_local_data_source.dart';
+import '../features/categories/data/datasources/category_local_datasource.dart';
 import '../features/categories/data/repositories/categoru_repository_impl.dart';
 import '../features/categories/presentation/blocs/category/category_bloc.dart';
 import '../features/transactions/data/datasources/transaction_local_datasource.dart';
@@ -20,11 +23,12 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataSourceTransaction = TransactionLocalDataSource();
-    final repositoryTransaction = TransactionRepositoryImpl(dataSourceTransaction);
+    final dio = DioClient().dio;
+    final remoteSourceTransaction = TransactionRemoteDataSource(dio);
+    final repositoryTransaction = TransactionRepositoryImpl(remoteSourceTransaction);
 
-    final dataSourceCategory = CategoryLocalDataSource();
-    final repositoryCategory = CategoryRepositoryImpl(dataSourceCategory);
+    final remoteSourceCategory = CategoryRemoteDataSource(dio);
+    final repositoryCategory = CategoryRepositoryImpl(remoteSourceCategory);
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,

@@ -24,7 +24,7 @@ class TransactionModel {
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'categoryId': categoryId,
+      'category_id': categoryId,
       'title': title,
       'amount': amount,
       'date': date.toIso8601String(),
@@ -34,15 +34,15 @@ class TransactionModel {
 
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
-      id: map['id'],
-      categoryId: map['categoryId'],
+      id: map['id'].toString(),
+      categoryId: map['category_id'],
       title: map['title'],
-      amount: map['amount'],
-      date: DateTime.parse(map['date']),
+      amount: (map['amount'] as num).toDouble(),
+      date: DateTime.parse(map['date']).toLocal(),
       type: AppType.values.firstWhere(
             (e) => e.name == map['type'],
       ),
-      categoryIcon: map['categoryIcon'],
+      categoryIcon: map['category_icon'],
     );
   }
 }

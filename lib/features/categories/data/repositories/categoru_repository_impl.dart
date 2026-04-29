@@ -1,42 +1,43 @@
 import 'package:expense_tracker_app/core/enums/app_type.dart';
+import 'package:expense_tracker_app/features/categories/data/datasources/category_remote_datasource.dart';
 
 import '../repositories/category_repository.dart';
-import '../datasources/category_local_data_source.dart';
+import '../datasources/category_local_datasource.dart';
 import '../models/category_model.dart';
 
 class CategoryRepositoryImpl implements CategoryRepository {
-  final CategoryLocalDataSource localDataSource;
+  final CategoryRemoteDataSource remoteDataSource;
 
-  CategoryRepositoryImpl(this.localDataSource);
+  CategoryRepositoryImpl(this.remoteDataSource);
 
   @override
   Future<void> insertCategory(CategoryModel category) {
-    return localDataSource.insertCategory(category);
+    return remoteDataSource.addCategory(category);
   }
 
   @override
   Future<List<CategoryModel>> getCategories() {
-    return localDataSource.getCategories();
+    return remoteDataSource.getCategories();
   }
 
   @override
   Future<List<CategoryModel>> getCategoriesByType(AppType type) {
-    return localDataSource.getCategoriesByType(type.name);
+    return remoteDataSource.getCategoriesByType(type.name);
   }
 
 
   @override
   Future<void> updateCategory(CategoryModel category) {
-    return localDataSource.updateCategory(category);
+    return remoteDataSource.updateCategory(category);
   }
 
   @override
   Future<void> deleteCategory(int id) {
-    return localDataSource.deleteCategory(id);
+    return remoteDataSource.deleteCategory(id);
   }
 
   @override
   Future<void> resetCategory(){
-    return localDataSource.resetCategories();
+    return remoteDataSource.resetCategories();
   }
 }

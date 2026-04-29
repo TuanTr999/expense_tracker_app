@@ -31,6 +31,7 @@ class _AllCategoryState extends State<AllCategory> {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Color(0xFFF5F5F5),
         automaticallyImplyLeading: false,
         title: Row(

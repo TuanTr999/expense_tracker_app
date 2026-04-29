@@ -25,6 +25,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
     final currentDate = state.selectedDate;
     return AppBar(
       backgroundColor: Color(0xFFF5F5F5),
+      scrolledUnderElevation: 0,
       title: Row(
         mainAxisAlignment:
             (state.filterType != FilterType.all &&

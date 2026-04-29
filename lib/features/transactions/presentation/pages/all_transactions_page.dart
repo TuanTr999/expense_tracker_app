@@ -15,6 +15,7 @@ class AllTransactionsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
       appBar: AppBar(
+        scrolledUnderElevation: 0,
         backgroundColor: Color(0xFFF5F5F5),
         leading: IconButton(
           onPressed: () {
@@ -27,38 +28,36 @@ class AllTransactionsScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
       ),
-      body: Expanded(
-        child: Padding(
-          padding: EdgeInsets.only(left: 20, right: 20),
-          child: ListView.builder(
-            itemCount: transactions.length,
-            itemBuilder: (context, index) {
-              final group = transactions[index];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(
-                      formatDate(FilterType.day, group.date),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+      body: Padding(
+        padding: EdgeInsets.only(left: 20, right: 20),
+        child: ListView.builder(
+          itemCount: transactions.length,
+          itemBuilder: (context, index) {
+            final group = transactions[index];
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    formatDate(FilterType.day, group.date),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  ...group.items.map((item) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: TransactionItem(
-                        transaction: item,
-                      ),
-                    );
-                  }).toList(),
-                ],
-              );
-            },
-          ),
+                ),
+                ...group.items.map((item) {
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: TransactionItem(
+                      transaction: item,
+                    ),
+                  );
+                }).toList(),
+              ],
+            );
+          },
         ),
       ),
     );
