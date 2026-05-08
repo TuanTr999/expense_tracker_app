@@ -1,10 +1,230 @@
+import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
+import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
+import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
+import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
+import 'package:expense_tracker_app/shared/widgets/app_bar/custom_app_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-class BudgetScreen extends StatelessWidget {
+import '../../../../transactions/presentation/blocs/filter/filter_state.dart';
+
+class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
 
   @override
+  State<BudgetScreen> createState() => _BudgetScreenState();
+}
+
+class _BudgetScreenState extends State<BudgetScreen> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      appBar: BudgetAppBar(),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [_FilterBar()],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Row(
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Ngân sách',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                SizedBox(width: 20),
+                                Text(
+                                  'Chi tiêu',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Row(
+                              children: [
+                                Text(
+                                  'Vượt chi',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Expanded(
+                  child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      return Container(
+                        height: 100,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Row(
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Ngân sách',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      SizedBox(width: 20),
+                                      Text(
+                                        'Chi tiêu',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Vượt chi',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return SizedBox(height: 20);
+                    },
+                    itemCount: 1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterBar extends StatelessWidget {
+  const _FilterBar();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 50,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        child: BlocBuilder<BudgetBloc, BudgetState>(
+          buildWhen: (pre, cur) => pre.type != cur.type!,
+          builder: (context, state) {
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                _FilterItem(
+                  title: 'Tháng',
+                  type: FilterType.month,
+                  state: state,
+                ),
+                SizedBox(width: 40),
+                _FilterItem(title: 'Năm', type: FilterType.year, state: state),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterItem extends StatelessWidget {
+  const _FilterItem({
+    required this.title,
+    required this.type,
+    required this.state,
+  });
+
+  final String title;
+  final FilterType type;
+  final BudgetState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () {
+        context.read<BudgetBloc>().add(ChangeFilterType(type));
+      },
+      child: Text(
+        title,
+        style: TextStyle(
+          color: state.type == type ? Colors.black : Colors.grey,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }

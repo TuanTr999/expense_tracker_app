@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../home/presentation/pages/home/home_tab.dart';
 import '../../blocs/navigation/navigation_event.dart';
 import '../../blocs/navigation/navigation_state.dart';
-import 'package:expense_tracker_app/features/home/presentation/pages/home/home_tab2.dart';
 import 'package:expense_tracker_app/features/wallet/presentation/pages/wallet/wallet_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_screen.dart';
 import 'package:expense_tracker_app/features/settings/presentation/pages/settings/settings_screen.dart';

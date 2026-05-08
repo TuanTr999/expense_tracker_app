@@ -208,12 +208,24 @@ class _AllCategoryState extends State<AllCategory> {
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
-                                            content: Text(
-                                              'Bạn có chắc chắn muốn xoá danh mục này không?',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.normal,
-                                              ),
+                                            content: Column(
+                                              mainAxisSize: MainAxisSize.min,
+                                              crossAxisAlignment: CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  'Bạn có chắc chắn muốn xoá danh mục này?',
+                                                  style: TextStyle(fontSize: 16),
+                                                ),
+                                                SizedBox(height: 10),
+                                                Text(
+                                                  '⚠️ Tất cả giao dịch thuộc danh mục này sẽ bị xoá.',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.red,
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                             actionsPadding:
                                                 EdgeInsets.symmetric(

@@ -1,4 +1,7 @@
 import 'package:expense_tracker_app/core/network/dio_client.dart';
+import 'package:expense_tracker_app/features/budget/data/datasources/budget_remote_datasource.dart';
+import 'package:expense_tracker_app/features/budget/data/repositories/budget_repository_impl.dart';
+import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/categories/data/datasources/category_remote_datasource.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/pages/main/main_screen.dart';
 import 'package:expense_tracker_app/features/transactions/data/datasources/transaction_remote_datasource.dart';
@@ -30,6 +33,9 @@ class App extends StatelessWidget {
     final remoteSourceCategory = CategoryRemoteDataSource(dio);
     final repositoryCategory = CategoryRepositoryImpl(remoteSourceCategory);
 
+    final remoteSourceBudget = BudgetRemoteDatasource(dio);
+    final repositoryBudget = BudgetRepositoryImpl(remoteSourceBudget);
+
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       locale: Locale('vi'),
@@ -47,7 +53,8 @@ class App extends StatelessWidget {
           BlocProvider(create: (_) => NavigationBloc()),
           BlocProvider(create: (_) => FilterBloc()),
           BlocProvider(create: (_) => TransactionBloc(repositoryTransaction)),
-          BlocProvider(create: (_) => CategoryBloc(repositoryCategory))
+          BlocProvider(create: (_) => CategoryBloc(repositoryCategory)),
+          BlocProvider(create: (_) => BudgetBloc(repositoryBudget))
         ],
         child: MainScreen(),
       ),

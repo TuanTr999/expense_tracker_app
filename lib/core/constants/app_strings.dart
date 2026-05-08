@@ -1,5 +1,4 @@
-/// App String Constants
-/// Chứa tất cả các chuỗi văn bản được sử dụng trong ứng dụng
+
 class AppStrings {
   AppStrings._(); // Prevent instantiation
 
