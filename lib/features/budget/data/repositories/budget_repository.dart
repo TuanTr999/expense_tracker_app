@@ -16,8 +16,11 @@ abstract class BudgetRepository {
 
   Future<void> deleteBudget(String id);
 
+  Future<void> deleteAllBudget();
+
   Future<List<BudgetSummaryModel>> getBudgetSummary(
     int? month,
     int? year,
   );
+
 }

@@ -190,6 +190,30 @@ router.put('/budgets/:id', async (req, res) => {
 });
 
 // =========================
+// DELETE ALL BUDGETS
+// =========================
+router.delete('/budgets', async (req, res) => {
+  try {
+
+    const [result] = await db.query(
+      'DELETE FROM budgets'
+    );
+
+    res.json({
+      message: 'All budgets deleted',
+      affectedRows: result.affectedRows,
+    });
+
+  } catch (err) {
+    console.error(err);
+
+    res.status(500).json({
+      message: 'Server error',
+    });
+  }
+});
+
+// =========================
 // DELETE BUDGET
 // =========================
 router.delete('/budgets/:id', async (req, res) => {

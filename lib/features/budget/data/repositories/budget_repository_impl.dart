@@ -40,4 +40,9 @@ class BudgetRepositoryImpl implements BudgetRepository {
       int? year,) {
     return remote.getBudgetSummary(month, year);
   }
+
+  @override
+  Future<void> deleteAllBudget() {
+    return remote.deleteAllBudgets();
+  }
 }

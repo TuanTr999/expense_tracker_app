@@ -4,7 +4,9 @@ import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
+import 'package:expense_tracker_app/features/budget/presentation/pages/budget/setting_budget_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
+import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -53,125 +55,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       children: [_FilterBar()],
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      height: 106,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30),
-                      ),
-                      child: BlocBuilder<BudgetBloc, BudgetState>(
-                        buildWhen: (pre, cur){
-                          return pre.budgetsSummary != cur.budgetsSummary;
-                        },
-                        builder: (context, state) {
-                          return Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: 16,
-                                  left: 20,
-                                  right: 20,
-                                  bottom: 8,
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Ngân sách',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          AppFormat.currency(
-                                            calculateTotalBudget(
-                                              state.budgetsSummary,
-                                            ),
-                                          ),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Chi tiêu',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          AppFormat.currency(
-                                            calculateTotalSpentAmountBudget(
-                                              state.budgetsSummary,
-                                            ),
-                                          ),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          calculateTotalRemainingBudget(state.budgetsSummary) < 0 ?
-                                          'Vượt chi' : 'Còn lại',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          AppFormat.currency(
-                                            calculateTotalRemainingBudget(
-                                              state.budgetsSummary,
-                                            ),
-                                          ),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                height: 12,
-                                decoration: BoxDecoration(
-                                  color: calculateTotalRemainingBudget(state.budgetsSummary) < 0 ? Colors.red : Colors.green,
-                                  borderRadius: BorderRadius.only(
-                                    bottomLeft: Radius.circular(20),
-                                    bottomRight: Radius.circular(20),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
+                    _BudgetSummaryCard(state: state),
                     const SizedBox(height: 20),
                     Expanded(
                       child: ListView.separated(
@@ -242,6 +126,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                   ],
                 ),
               ),
+              _AddTransactionButton(),
             ],
           );
         },
@@ -307,6 +192,185 @@ class _FilterItem extends StatelessWidget {
         style: TextStyle(
           color: state.type == type ? Colors.black : Colors.grey,
           fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+}
+
+class _BudgetSummaryCard extends StatelessWidget {
+  const _BudgetSummaryCard({super.key, required this.state});
+
+  final BudgetState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return  Container(
+      height: 106,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      child: BlocBuilder<BudgetBloc, BudgetState>(
+        buildWhen: (pre, cur){
+          return pre.budgetsSummary != cur.budgetsSummary;
+        },
+        builder: (context, state) {
+          return Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(
+                  top: 16,
+                  left: 20,
+                  right: 20,
+                  bottom: 8,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Ngân sách',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          AppFormat.currency(
+                            calculateTotalBudget(
+                              state.budgetsSummary,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Chi tiêu',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          AppFormat.currency(
+                            calculateTotalSpentAmountBudget(
+                              state.budgetsSummary,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          calculateTotalRemainingBudget(state.budgetsSummary) < 0 ?
+                          'Vượt chi' : 'Còn lại',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Text(
+                          AppFormat.currency(
+                            calculateTotalRemainingBudget(
+                              state.budgetsSummary,
+                            ),
+                          ),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                height: 12,
+                decoration: BoxDecoration(
+                  color: calculateTotalRemainingBudget(state.budgetsSummary) < 0 ? Colors.red : Colors.green,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+
+class _AddTransactionButton extends StatelessWidget {
+  const _AddTransactionButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 10,
+      left: 0,
+      right: 0,
+      child: Center(
+        child: SizedBox(
+          width: 150,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.white,
+              foregroundColor: Colors.black,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 1,
+            ),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                builder: (_) => MultiBlocProvider(
+                  providers: [
+                    BlocProvider.value(value: context.read<CategoryBloc>(),),
+                    BlocProvider.value(value: context.read<BudgetBloc>())
+                  ],
+                  child: FractionallySizedBox(
+                    heightFactor: 0.93,
+                    child: AddBudgetScreen(),
+                  ),
+                ),
+              );
+            },
+            child: const Text(
+              'Ngân sách',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+          ),
         ),
       ),
     );

@@ -55,4 +55,8 @@ class BudgetRemoteDatasource {
         .map((e) => BudgetSummaryModel.fromJson(e))
         .toList();
   }
+
+  Future<void> deleteAllBudgets() async {
+    await dio.delete('/budgets');
+  }
 }

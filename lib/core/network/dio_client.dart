@@ -1,19 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart';
 
-class ApiConfig {
-  static const _envUrl = String.fromEnvironment('BASE_URL');
+import '../config/api_config.dart';
 
-  static String get baseUrl {
-    if (_envUrl.isNotEmpty) return _envUrl;
-
-    if (Platform.isAndroid) {
-      return "http://10.0.2.2:3000";
-    } else {
-      return "http://192.168.41.38:3000";
-    }
-  }
-}
 
 class DioClient {
   late final Dio dio;

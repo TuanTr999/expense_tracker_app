@@ -36,6 +36,8 @@ class DeleteBudget extends BudgetEvent {
   DeleteBudget(this.id);
 }
 
+class DeleteAllBudget extends BudgetEvent{}
+
 class ChangeFilterType extends BudgetEvent {
   FilterType type;
 
