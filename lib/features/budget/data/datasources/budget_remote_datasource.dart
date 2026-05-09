@@ -13,7 +13,7 @@ class BudgetRemoteDatasource {
     int? categoryId,
   ) async {
     final res = await dio.get(
-      'budgets',
+      '/budgets',
       queryParameters: {
         if (month != null) 'month': month,
         if (year != null) 'year': year,
@@ -31,14 +31,14 @@ class BudgetRemoteDatasource {
   // }
 
   Future<void> createBudget(BudgetModel budget) async {
-    await dio.post('budget', data: budget.toJson());
+    await dio.post('/budget', data: budget.toJson());
   }
 
   Future<void> updateBudget(BudgetModel budget) async {
-    await dio.put('budget/:${budget.id}', data: budget.toJson());
+    await dio.put('/budget/${budget.id}', data: budget.toJson());
   }
 
   Future<void> deleteBudget(String id) async {
-    await dio.delete('budget/:$id');
+    await dio.delete('/budget/$id');
   }
 }

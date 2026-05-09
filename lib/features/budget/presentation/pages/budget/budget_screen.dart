@@ -1,3 +1,5 @@
+import 'package:expense_tracker_app/core/utils/budget_util.dart';
+import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
@@ -19,6 +21,15 @@ class _BudgetScreenState extends State<BudgetScreen> {
   @override
   void initState() {
     super.initState();
+    final now = DateTime.now();
+
+    context.read<BudgetBloc>().add(
+      LoadBudget(
+        now.month,
+        now.year,
+        null,
+      ),
+    );
   }
 
   @override
@@ -38,20 +49,25 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 ),
                 const SizedBox(height: 20),
                 Container(
-                  height: 100,
+                  height: 105,
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Column(
+                    child: BlocBuilder<BudgetBloc, BudgetState>(
+                      buildWhen: (pre, cur) {
+                        return pre.budgets != cur.budgets;
+                      },
+                      builder: (context, state) {
+                        return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment:
+                                  MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   'Ngân sách',
@@ -61,18 +77,26 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                     color: Colors.grey,
                                   ),
                                 ),
-                                SizedBox(width: 20),
+                                SizedBox(width: 10),
                                 Text(
-                                  'Chi tiêu',
+                                  AppFormat.currency(
+                                    calculateTotalBudget(state.budgets),
+                                  ),
                                   style: TextStyle(
-                                    fontSize: 16,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
+                                    fontSize: 16,
                                   ),
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 20),
+                            Text(
+                              'Chi tiêu',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
+                            ),
                             Row(
                               children: [
                                 Text(
@@ -86,8 +110,8 @@ class _BudgetScreenState extends State<BudgetScreen> {
                               ],
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
                 ),

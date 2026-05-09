@@ -15,6 +15,6 @@ const budgetRoutes = require('./budget.routes');
 // USE ROUTES
 app.use(transactionRoutes);
 app.use(categoryRoutes);
-app.use('/api', budgetRoutes);
+app.use(budgetRoutes);
 
 app.listen(3000, '0.0.0.0', () => console.log('Server running at http://0.0.0.0:3000'));

@@ -1,12 +1,9 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
-
 import '../../../../../core/utils/current_date.dart';
+import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 
 class BudgetAppBar extends StatefulWidget implements PreferredSizeWidget {
   BudgetAppBar({super.key});
@@ -31,7 +28,7 @@ class _BudgetAppBarState extends State<BudgetAppBar> {
         children: [
           AppCircleButton(
             onTap: () {
-              context.read<FilterBloc>().add(PreviousPressed());
+              context.read<BudgetBloc>().add(PreviousPressed());
             },
             padding: EdgeInsets.only(left: 8),
             child: Icon(Icons.arrow_back_ios),
@@ -64,14 +61,14 @@ class _BudgetAppBarState extends State<BudgetAppBar> {
               if (state.reset)
                 AppCircleButton(
                   onTap: () {
-                    context.read<FilterBloc>().add(ResetPressed());
+                    context.read<BudgetBloc>().add(ResetPressed());
                   },
                   child: Icon(Icons.refresh),
                 ),
               SizedBox(width: 10),
                 AppCircleButton(
                   onTap: () {
-                    context.read<FilterBloc>().add(NextPressed());
+                    context.read<BudgetBloc>().add(NextPressed());
                   },
                   child: Icon(Icons.arrow_forward_ios),
                 ),

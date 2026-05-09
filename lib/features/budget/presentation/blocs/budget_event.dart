@@ -1,4 +1,4 @@
-import 'package:expense_tracker_app/core/enums/app_type.dart';
+
 import 'package:expense_tracker_app/features/budget/data/models/budget_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 
@@ -35,3 +35,6 @@ class ChangeFilterType extends BudgetEvent {
 
   ChangeFilterType(this.type);
 }
+class PreviousPressed extends BudgetEvent{}
+class NextPressed extends BudgetEvent{}
+class ResetPressed extends BudgetEvent{}
