@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/features/budget/data/models/budget_model.dart';
+import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
 
 abstract class BudgetRepository {
   Future<List<BudgetModel>> getBudgetAll(
@@ -14,4 +15,9 @@ abstract class BudgetRepository {
   Future<void> updateBudget(BudgetModel budget);
 
   Future<void> deleteBudget(String id);
+
+  Future<List<BudgetSummaryModel>> getBudgetSummary(
+    int? month,
+    int? year,
+  );
 }

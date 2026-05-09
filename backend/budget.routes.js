@@ -51,6 +51,59 @@ router.get('/budgets', async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 });
+router.get('/budgets/summary', async (req, res) => {
+  try {
+    const { month, year } = req.query;
+
+    let query = `
+      SELECT
+        b.id AS budgetId,
+        b.amount AS budgetAmount,
+        b.month,
+        b.year,
+
+        c.name AS categoryName,
+        c.icon AS categoryIcon,
+
+        COALESCE(SUM(t.amount), 0) AS spentAmount,
+        (b.amount - COALESCE(SUM(t.amount), 0)) AS remaining
+
+      FROM budgets b
+      LEFT JOIN categories c ON b.category_id = c.id
+      LEFT JOIN transactions t
+        ON t.category_id = b.category_id
+        AND t.type = 'expense'
+        AND MONTH(t.date) = b.month
+        AND YEAR(t.date) = b.year
+    `;
+
+    let params = [];
+
+    query += ` WHERE 1=1 `;
+
+    if (month) {
+      query += ` AND b.month = ?`;
+      params.push(month);
+    }
+
+    if (year) {
+      query += ` AND b.year = ?`;
+      params.push(year);
+    }
+
+    query += `
+      GROUP BY b.id, c.name, c.icon
+    `;
+
+    const [rows] = await db.query(query, params);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 
 // =========================
 // GET BY ID
@@ -161,49 +214,7 @@ router.delete('/budgets/:id', async (req, res) => {
 // =========================
 // SUMMARY (OPTIMIZED)
 // =========================
-router.get('/budgets/summary', async (req, res) => {
-  try {
-    const { month, year, userId } = req.query;
 
-    if (!month || !year || !userId) {
-      return res.status(400).json({ message: 'Missing params' });
-    }
-
-    const [rows] = await db.query(`
-      SELECT
-        b.id AS budgetId,
-        b.amount AS budgetAmount,
-        b.month,
-        b.year,
-
-        c.name AS categoryName,
-        c.icon AS categoryIcon,
-
-        COALESCE(SUM(t.amount), 0) AS spentAmount,
-        (b.amount - COALESCE(SUM(t.amount), 0)) AS remaining
-
-      FROM budgets b
-      LEFT JOIN categories c ON b.category_id = c.id
-      LEFT JOIN transactions t
-        ON t.category_id = b.category_id
-        AND t.type = 'expense'
-        AND t.user_id = ?
-        AND t.date BETWEEN
-          STR_TO_DATE(CONCAT(b.year, '-', b.month, '-01'), '%Y-%m-%d')
-          AND LAST_DAY(STR_TO_DATE(CONCAT(b.year, '-', b.month, '-01'), '%Y-%m-%d'))
-
-      WHERE b.month = ? AND b.year = ?
-
-      GROUP BY b.id, c.name, c.icon
-    `, [userId, month, year]);
-
-    res.json(rows);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
 // =========================
 // EXPORT

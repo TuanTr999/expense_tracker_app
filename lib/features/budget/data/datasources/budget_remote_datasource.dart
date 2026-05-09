@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
 
 import '../models/budget_model.dart';
 
@@ -40,5 +41,18 @@ class BudgetRemoteDatasource {
 
   Future<void> deleteBudget(String id) async {
     await dio.delete('/budget/$id');
+  }
+
+  Future<List<BudgetSummaryModel>> getBudgetSummary(
+    int? month,
+    int? year,
+  ) async {
+    final res = await dio.get(
+      '/budgets/summary',
+      queryParameters: {'month': month, 'year': year},
+    );
+    return (res.data as List)
+        .map((e) => BudgetSummaryModel.fromJson(e))
+        .toList();
   }
 }

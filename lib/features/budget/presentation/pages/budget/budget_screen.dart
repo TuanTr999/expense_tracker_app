@@ -1,10 +1,10 @@
+import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/core/utils/budget_util.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
-import 'package:expense_tracker_app/shared/widgets/app_bar/custom_app_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -23,13 +23,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
     super.initState();
     final now = DateTime.now();
 
-    context.read<BudgetBloc>().add(
-      LoadBudget(
-        now.month,
-        now.year,
-        null,
-      ),
-    );
+    context.read<BudgetBloc>().add(LoadBudgetSummary(now.month, now.year));
   }
 
   @override
@@ -37,154 +31,220 @@ class _BudgetScreenState extends State<BudgetScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: BudgetAppBar(),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [_FilterBar()],
-                ),
-                const SizedBox(height: 20),
-                Container(
-                  height: 105,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: BlocBuilder<BudgetBloc, BudgetState>(
-                      buildWhen: (pre, cur) {
-                        return pre.budgets != cur.budgets;
-                      },
-                      builder: (context, state) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Ngân sách',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                SizedBox(width: 10),
-                                Text(
-                                  AppFormat.currency(
-                                    calculateTotalBudget(state.budgets),
-                                  ),
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Text(
-                              'Chi tiêu',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  'Vượt chi',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        );
-                      },
+      body: BlocBuilder<BudgetBloc, BudgetState>(
+        buildWhen: (pre, cur) =>
+            pre.status != cur.status || pre.budgets != cur.budgets,
+        builder: (context, state) {
+          // if (state.status == AppStatus.loading && state.budgets.isEmpty) {
+          //   return const Center(child: CircularProgressIndicator());
+          // }
+
+          if (state.status == AppStatus.error) {
+            return const Center(child: Text('Có lỗi xảy ra'));
+          }
+          return Stack(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [_FilterBar()],
                     ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: ListView.separated(
-                    itemBuilder: (context, index) {
-                      return Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(16.0),
-                          child: Row(
+                    const SizedBox(height: 20),
+                    Container(
+                      height: 106,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(30),
+                      ),
+                      child: BlocBuilder<BudgetBloc, BudgetState>(
+                        buildWhen: (pre, cur){
+                          return pre.budgetsSummary != cur.budgetsSummary;
+                        },
+                        builder: (context, state) {
+                          return Column(
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Text(
-                                        'Ngân sách',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey,
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: 16,
+                                  left: 20,
+                                  right: 20,
+                                  bottom: 8,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Ngân sách',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey,
+                                          ),
                                         ),
-                                      ),
-                                      SizedBox(width: 20),
-                                      Text(
-                                        'Chi tiêu',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey,
+                                        Text(
+                                          AppFormat.currency(
+                                            calculateTotalBudget(
+                                              state.budgetsSummary,
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
                                         ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Chi tiêu',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                          AppFormat.currency(
+                                            calculateTotalSpentAmountBudget(
+                                              state.budgetsSummary,
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          calculateTotalRemainingBudget(state.budgetsSummary) < 0 ?
+                                          'Vượt chi' : 'Còn lại',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                          AppFormat.currency(
+                                            calculateTotalRemainingBudget(
+                                              state.budgetsSummary,
+                                            ),
+                                          ),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                height: 12,
+                                decoration: BoxDecoration(
+                                  color: calculateTotalRemainingBudget(state.budgetsSummary) < 0 ? Colors.red : Colors.green,
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(20),
+                                    bottomRight: Radius.circular(20),
                                   ),
-                                  const SizedBox(height: 20),
-                                  Row(
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Expanded(
+                      child: ListView.separated(
+                        itemBuilder: (context, index) {
+                          return Container(
+                            height: 100,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
-                                      Text(
-                                        'Vượt chi',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey,
-                                        ),
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Ngân sách',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                          SizedBox(width: 20),
+                                          Text(
+                                            'Chi tiêu',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 20),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Vượt chi',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.grey,
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
                                 ],
                               ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                    separatorBuilder: (context, index) {
-                      return SizedBox(height: 20);
-                    },
-                    itemCount: 1,
-                  ),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return SizedBox(height: 20);
+                        },
+                        itemCount: 1,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -204,7 +264,7 @@ class _FilterBar extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: BlocBuilder<BudgetBloc, BudgetState>(
-          buildWhen: (pre, cur) => pre.type != cur.type!,
+          buildWhen: (pre, cur) => pre.type != cur.type,
           builder: (context, state) {
             return Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

@@ -12,6 +12,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     : super(
         BudgetState(
           budgets: [],
+          budgetsSummary: [],
           type: FilterType.month,
           status: AppStatus.initial,
           selectedDate: DateTime.now(),
@@ -26,6 +27,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     on<PreviousPressed>(_onPreviousPressed);
     on<NextPressed>(_onNextPressed);
     on<ResetPressed>(_onResetPressed);
+    on<LoadBudgetSummary>(_onLoadBudgetSummary);
   }
 
   Future<void> _onLoadBudget(
@@ -42,8 +44,24 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
       );
 
       emit(state.copyWith(budgets: data, status: AppStatus.success));
+    } catch (e) {
+      emit(state.copyWith(status: AppStatus.error));
+    }
+  }
 
+  Future<void> _onLoadBudgetSummary(
+    LoadBudgetSummary event,
+    Emitter<BudgetState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: AppStatus.loading));
 
+      final data = await repository.getBudgetSummary(
+        event.month,
+        event.year
+      );
+
+      emit(state.copyWith(budgetsSummary: data, status: AppStatus.success));
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
     }
@@ -99,8 +117,6 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     Emitter<BudgetState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: AppStatus.loading));
-
       state.selectedDate.year == DateTime.now().year &&
               state.selectedDate.month == DateTime.now().month &&
               state.selectedDate.day == DateTime.now().day
@@ -121,12 +137,11 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       add(
         event.type == FilterType.month
-            ? LoadBudget(
+            ? LoadBudgetSummary(
                 state.selectedDate.month,
                 state.selectedDate.year,
-                null,
               )
-            : LoadBudget(null, state.selectedDate.year, null),
+            : LoadBudgetSummary(null, state.selectedDate.year),
       );
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
@@ -158,8 +173,8 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       add(
         state.type == FilterType.month
-            ? LoadBudget(newDate.month, newDate.year, null)
-            : LoadBudget(null, newDate.year, null),
+            ? LoadBudgetSummary(newDate.month, newDate.year)
+            : LoadBudgetSummary(null, newDate.year),
       );
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
@@ -191,8 +206,8 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       add(
         state.type == FilterType.month
-            ? LoadBudget(newDate.month, newDate.year, null)
-            : LoadBudget(null, newDate.year, null),
+            ? LoadBudgetSummary(newDate.month, newDate.year)
+            : LoadBudgetSummary(null, newDate.year),
       );
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
@@ -210,8 +225,8 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       add(
         state.type == FilterType.month
-            ? LoadBudget(now.month, now.year, null)
-            : LoadBudget(null, now.year, null),
+            ? LoadBudgetSummary(now.month, now.year)
+            : LoadBudgetSummary(null, now.year),
       );
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));

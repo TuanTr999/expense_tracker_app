@@ -1,4 +1,3 @@
-
 import 'package:expense_tracker_app/features/budget/data/models/budget_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 
@@ -10,6 +9,13 @@ class LoadBudget extends BudgetEvent {
   final int? categoryId;
 
   LoadBudget(this.month, this.year, this.categoryId);
+}
+
+class LoadBudgetSummary extends BudgetEvent {
+  final int? month;
+  final int? year;
+
+  LoadBudgetSummary(this.month, this.year);
 }
 
 class CreateBudget extends BudgetEvent {
@@ -35,6 +41,9 @@ class ChangeFilterType extends BudgetEvent {
 
   ChangeFilterType(this.type);
 }
-class PreviousPressed extends BudgetEvent{}
-class NextPressed extends BudgetEvent{}
-class ResetPressed extends BudgetEvent{}
+
+class PreviousPressed extends BudgetEvent {}
+
+class NextPressed extends BudgetEvent {}
+
+class ResetPressed extends BudgetEvent {}

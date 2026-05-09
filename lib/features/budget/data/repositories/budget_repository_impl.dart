@@ -1,5 +1,6 @@
 import 'package:expense_tracker_app/features/budget/data/datasources/budget_remote_datasource.dart';
 import 'package:expense_tracker_app/features/budget/data/models/budget_model.dart';
+import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
 import 'package:expense_tracker_app/features/budget/data/repositories/budget_repository.dart';
 
 class BudgetRepositoryImpl implements BudgetRepository {
@@ -28,11 +29,15 @@ class BudgetRepositoryImpl implements BudgetRepository {
   }
 
   @override
-  Future<List<BudgetModel>> getBudgetAll(
-    int? month,
-    int? year,
-    int? categoryId,
-  ) {
+  Future<List<BudgetModel>> getBudgetAll(int? month,
+      int? year,
+      int? categoryId,) {
     return remote.getBudgetAll(month, year, categoryId);
+  }
+
+  @override
+  Future<List<BudgetSummaryModel>> getBudgetSummary(int? month,
+      int? year,) {
+    return remote.getBudgetSummary(month, year);
   }
 }
