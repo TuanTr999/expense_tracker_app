@@ -1,8 +1,8 @@
 import 'package:expense_tracker_app/core/utils/transaction_group.dart';
 import 'package:flutter/material.dart';
-import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 
 import '../../../../core/utils/current_date.dart';
+import '../../../home/presentation/pages/widgets/transaction_item.dart';
 import '../blocs/transaction/transaction_state.dart';
 
 class AllTransactionsScreen extends StatelessWidget {

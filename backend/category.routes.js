@@ -48,14 +48,27 @@ router.put('/categories/:id', async (req, res) => {
 router.delete('/categories/:id', async (req, res) => {
   const id = req.params.id;
 
-  await db.query(
-    'DELETE FROM categories WHERE id=?',
-    [id]
-  );
+  try {
+    // 1. Xóa transaction trước
+    await db.query(
+      'DELETE FROM transactions WHERE category_id = ?',
+      [id]
+    );
 
-  res.json({
-    message: 'Đã xóa category và toàn bộ transaction liên quan'
-  });
+    // 2. Xóa category
+    await db.query(
+      'DELETE FROM categories WHERE id = ?',
+      [id]
+    );
+
+    res.json({
+      message: 'Đã xóa category và toàn bộ transaction liên quan'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Delete failed' });
+  }
 });
 
 // HAS TRANSACTION

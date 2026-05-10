@@ -12,6 +12,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/enums/app_type.dart';
 import '../../../categories/presentation/blocs/category/category_bloc.dart';
 import '../../../categories/presentation/blocs/category/category_state.dart';
+import '../../../categories/presentation/pages/all_category.dart';
 
 class UpdateTransactionPage extends StatefulWidget {
   const UpdateTransactionPage({super.key, required this.currentTransaction});
@@ -224,13 +225,37 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               ],
             ),
             Divider(color: Colors.grey, thickness: 1, height: 20),
-            Text(
-              'Danh mục',
-              style: TextStyle(
-                color: Colors.black,
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Danh mục',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider.value(
+                              value: context.read<CategoryBloc>(),
+                            ),
+                            BlocProvider.value(value: context.read<TransactionBloc>())
+                          ],
+                          child: AllCategory(),
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(Icons.settings),
+                ),
+              ],
             ),
             Expanded(
               child: BlocBuilder<CategoryBloc, CategoryState>(

@@ -5,7 +5,7 @@ import 'package:expense_tracker_app/features/transactions/presentation/blocs/tra
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../features/transactions/presentation/blocs/transaction/transaction_state.dart';
+import '../../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   CustomAppBar({super.key});

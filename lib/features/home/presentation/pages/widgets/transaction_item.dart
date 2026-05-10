@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../core/enums/app_type.dart';
-import '../../features/categories/presentation/blocs/category/category_bloc.dart';
-import '../../features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import '../../../../../core/enums/app_type.dart';
+import '../../../../categories/presentation/blocs/category/category_bloc.dart';
+import '../../../../transactions/presentation/blocs/transaction/transaction_bloc.dart';
+
 
 class TransactionItem extends StatelessWidget {
   const TransactionItem({super.key, required this.transaction});

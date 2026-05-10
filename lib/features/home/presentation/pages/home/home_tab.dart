@@ -2,10 +2,6 @@ import 'package:expense_tracker_app/features/categories/presentation/blocs/categ
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_page.dart';
-import 'package:expense_tracker_app/shared/widgets/app_bar/custom_app_bar.dart';
-import 'package:expense_tracker_app/shared/widgets/budget_card.dart';
-import 'package:expense_tracker_app/shared/widgets/summary_card.dart';
-import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -13,9 +9,12 @@ import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:expense_tracker_app/core/utils/transaction_util.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 
-import '../../../../categories/presentation/blocs/category/category_state.dart';
 import '../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 import '../../../../transactions/presentation/pages/add_transaction_page.dart';
+import '../widgets/app_bar/custom_app_bar.dart';
+import '../widgets/budget_card.dart';
+import '../widgets/summary_card.dart';
+import '../widgets/transaction_item.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});

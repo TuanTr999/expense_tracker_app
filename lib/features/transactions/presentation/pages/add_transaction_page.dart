@@ -303,8 +303,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<CategoryBloc>(),
+                        builder: (_) => MultiBlocProvider(
+                          providers: [
+                            BlocProvider.value(
+                              value: context.read<CategoryBloc>(),
+                            ),
+                            BlocProvider.value(value: context.read<TransactionBloc>())
+                          ],
                           child: AllCategory(),
                         ),
                       ),
@@ -402,7 +407,6 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               final raw = amountController.text.replaceAll(',', '');
               final amount = double.tryParse(raw);
 
-
               String error = '';
 
               if (amountController.text.isEmpty) {
@@ -433,9 +437,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 categoryId: selectedCategory!.id!,
               );
 
-              context.read<TransactionBloc>().add(
-                AddTransaction(transaction),
-              );
+              context.read<TransactionBloc>().add(AddTransaction(transaction));
 
               Navigator.pop(context);
             },
