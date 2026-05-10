@@ -4,15 +4,18 @@ import 'package:expense_tracker_app/features/budget/data/models/budget_summary_m
 import '../models/budget_model.dart';
 
 class BudgetRemoteDatasource {
-  Dio dio;
+  final Dio dio;
 
   BudgetRemoteDatasource(this.dio);
 
+  // =========================
+  // GET ALL BUDGETS
+  // =========================
   Future<List<BudgetModel>> getBudgetAll(
-    int? month,
-    int? year,
-    int? categoryId,
-  ) async {
+      int? month,
+      int? year,
+      int? categoryId,
+      ) async {
     final res = await dio.get(
       '/budgets',
       queryParameters: {
@@ -22,31 +25,45 @@ class BudgetRemoteDatasource {
       },
     );
 
-    return (res.data as List).map((e) => BudgetModel.fromJson(e)).toList();
+    return (res.data as List)
+        .map((e) => BudgetModel.fromJson(e))
+        .toList();
   }
 
-  // Future<List<BudgetModel>> getBudgetById(int id) async {
-  //   final res = await dio.get('budget/:$id');
-  //
-  //   return (res.data as List).map((e) => BudgetModel.fromJson(e)).toList();
-  // }
-
+  // =========================
+  // CREATE
+  // =========================
   Future<void> createBudget(BudgetModel budget) async {
-    await dio.post('/budget', data: budget.toJson());
+    await dio.post(
+      '/budgets',
+      data: budget.toJson(),
+    );
   }
 
+  // =========================
+  // UPDATE
+  // =========================
   Future<void> updateBudget(BudgetModel budget) async {
-    await dio.put('/budget/${budget.id}', data: budget.toJson());
+    await dio.put(
+      '/budgets/${budget.id}',
+      data: budget.toJson(),
+    );
   }
 
+  // =========================
+  // DELETE
+  // =========================
   Future<void> deleteBudget(String id) async {
-    await dio.delete('/budget/$id');
+    await dio.delete('/budgets/$id');
   }
 
+  // =========================
+  // SUMMARY
+  // =========================
   Future<List<BudgetSummaryModel>> getBudgetSummary(
-    int? month,
-    int? year,
-  ) async {
+      int? month,
+      int? year,
+      ) async {
     final res = await dio.get(
       '/budgets/summary',
       queryParameters: {
@@ -54,11 +71,15 @@ class BudgetRemoteDatasource {
         if (year != null) 'year': year,
       },
     );
+
     return (res.data as List)
         .map((e) => BudgetSummaryModel.fromJson(e))
         .toList();
   }
 
+  // =========================
+  // DELETE ALL
+  // =========================
   Future<void> deleteAllBudgets() async {
     await dio.delete('/budgets');
   }
