@@ -1,7 +1,8 @@
 import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/features/budget/data/models/budget_model.dart';
 import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
+
+import '../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 
 class BudgetState {
   final List<BudgetModel> budgets;

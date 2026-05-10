@@ -2,8 +2,9 @@ import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/features/budget/data/repositories/budget_repository.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 
 class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   final BudgetRepository repository;

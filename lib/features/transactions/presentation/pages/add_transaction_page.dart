@@ -12,8 +12,8 @@ import '../../../../core/constants/app_icon.dart';
 import '../../../../core/enums/app_type.dart';
 import '../../../../core/utils/current_date.dart';
 import '../../../categories/presentation/blocs/category/category_bloc.dart';
-import '../blocs/filter/filter_state.dart';
 import '../blocs/transaction/transaction_event.dart';
+import '../blocs/transaction/transaction_state.dart';
 
 class AddTransactionPage extends StatefulWidget {
   const AddTransactionPage({super.key});
@@ -434,7 +434,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
               );
 
               context.read<TransactionBloc>().add(
-                AddTransactionEvent(transaction),
+                AddTransaction(transaction),
               );
 
               Navigator.pop(context);

@@ -1,22 +1,48 @@
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
+import 'package:expense_tracker_app/core/enums/app_type.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 
 abstract class TransactionEvent {}
 
-class LoadTransactionEvent extends TransactionEvent {}
+// =====================
+// CRUD
+// =====================
+class LoadTransactions extends TransactionEvent {}
 
-class AddTransactionEvent extends TransactionEvent {
+class AddTransaction extends TransactionEvent {
   final TransactionModel transaction;
-  AddTransactionEvent(this.transaction);
+  AddTransaction(this.transaction);
 }
 
-class UpdateTransactionEvent extends TransactionEvent {
+class UpdateTransaction extends TransactionEvent {
   final TransactionModel transaction;
-  UpdateTransactionEvent(this.transaction);
+  UpdateTransaction(this.transaction);
 }
 
-class DeleteTransactionEvent extends TransactionEvent {
+class DeleteTransaction extends TransactionEvent {
   final String id;
-  DeleteTransactionEvent(this.id);
+  DeleteTransaction(this.id);
+}
+
+// =====================
+// FILTER
+// =====================
+class ChangeFilterTypeTransaction extends TransactionEvent {
+  final FilterType filterType;
+  final DateTime? fromDate;
+  final DateTime? toDate;
+
+  ChangeFilterTypeTransaction(this.filterType, {this.fromDate, this.toDate});
 }
 
 
+class SetSelectedDate extends TransactionEvent {
+  final DateTime date;
+  SetSelectedDate(this.date);
+}
+
+class NextDate extends TransactionEvent {}
+
+class PreviousDate extends TransactionEvent {}
+
+class ResetFilter extends TransactionEvent {}

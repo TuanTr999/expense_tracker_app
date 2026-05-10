@@ -1,7 +1,5 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
-import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/update_transaction_page.dart';
@@ -23,7 +21,7 @@ class TransactionDetail extends StatelessWidget {
     final bloc = context.read<TransactionBloc>();
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
-        final transaction = state.transactions.firstWhere(
+        final transaction = state.allTransactions.firstWhere(
           (e) => e.id == this.transactionId,
         );
 
@@ -130,7 +128,7 @@ class TransactionDetail extends StatelessWidget {
                       );
 
                       if (confirm == true) {
-                        bloc.add(DeleteTransactionEvent(transaction.id));
+                        bloc.add(DeleteTransaction(transaction.id));
                         Navigator.pop(context);
                       }
                     },

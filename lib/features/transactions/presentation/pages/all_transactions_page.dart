@@ -1,9 +1,9 @@
 import 'package:expense_tracker_app/core/utils/transaction_group.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:flutter/material.dart';
 import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 
 import '../../../../core/utils/current_date.dart';
+import '../blocs/transaction/transaction_state.dart';
 
 class AllTransactionsScreen extends StatelessWidget {
   const AllTransactionsScreen({super.key, required this.transactions});

@@ -1,11 +1,11 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/core/utils/current_date.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
+import '../../../features/transactions/presentation/blocs/transaction/transaction_state.dart';
 
 class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
   CustomAppBar({super.key});
@@ -21,7 +21,7 @@ class CustomAppBar extends StatefulWidget implements PreferredSizeWidget {
 class _CustomAppBarState extends State<CustomAppBar> {
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<FilterBloc>().state;
+    final state = context.watch<TransactionBloc>().state;
     final currentDate = state.selectedDate;
     return AppBar(
       backgroundColor: Color(0xFFF5F5F5),
@@ -37,7 +37,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               state.filterType != FilterType.custom)
             AppCircleButton(
               onTap: () {
-                context.read<FilterBloc>().add(PreviousPressed());
+                context.read<TransactionBloc>().add(PreviousDate());
               },
               padding: EdgeInsets.only(left: 8),
               child: Icon(Icons.arrow_back_ios),
@@ -72,7 +72,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
               if (state.reset)
                 AppCircleButton(
                   onTap: () {
-                    context.read<FilterBloc>().add(ResetPressed());
+                    context.read<TransactionBloc>().add(ResetFilter());
                   },
                   child: Icon(Icons.refresh),
                 ),
@@ -81,7 +81,7 @@ class _CustomAppBarState extends State<CustomAppBar> {
                   state.filterType != FilterType.custom)
                 AppCircleButton(
                   onTap: () {
-                    context.read<FilterBloc>().add(NextPressed());
+                    context.read<TransactionBloc>().add(NextDate());
                   },
                   child: Icon(Icons.arrow_forward_ios),
                 ),

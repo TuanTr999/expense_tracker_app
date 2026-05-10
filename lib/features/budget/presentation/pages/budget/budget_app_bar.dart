@@ -1,7 +1,5 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/utils/current_date.dart';
@@ -31,7 +29,6 @@ class _BudgetAppBarState extends State<BudgetAppBar> {
           AppCircleButton(
             onTap: () {
               context.read<BudgetBloc>().add(PreviousPressedBudget());
-              context.read<FilterBloc>().add(PreviousPressed());
             },
             padding: EdgeInsets.only(left: 8),
             child: Icon(Icons.arrow_back_ios),
@@ -65,7 +62,6 @@ class _BudgetAppBarState extends State<BudgetAppBar> {
                 AppCircleButton(
                   onTap: () {
                     context.read<BudgetBloc>().add(ResetPressedBudget());
-                    context.read<FilterBloc>().add(ResetPressed());
                   },
                   child: Icon(Icons.refresh),
                 ),
@@ -73,7 +69,6 @@ class _BudgetAppBarState extends State<BudgetAppBar> {
                 AppCircleButton(
                   onTap: () {
                     context.read<BudgetBloc>().add(NextPressedBudget());
-                    context.read<FilterBloc>().add(NextPressed());
                   },
                   child: Icon(Icons.arrow_forward_ios),
                 ),

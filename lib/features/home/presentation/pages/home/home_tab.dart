@@ -1,5 +1,4 @@
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_state.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_page.dart';
@@ -10,8 +9,6 @@ import 'package:expense_tracker_app/shared/widgets/transaction_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_bloc.dart';
-import 'package:expense_tracker_app/features/transactions/presentation/blocs/filter/filter_event.dart';
 import 'package:expense_tracker_app/core/utils/current_date.dart';
 import 'package:expense_tracker_app/core/utils/transaction_util.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
@@ -31,7 +28,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    context.read<TransactionBloc>().add(LoadTransactionEvent());
+    context.read<TransactionBloc>().add(LoadTransactions());
   }
 
   @override
@@ -39,47 +36,27 @@ class _HomeTabState extends State<HomeTab> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: CustomAppBar(),
-      body: MultiBlocListener(
-        listeners: [
-          BlocListener<TransactionBloc, TransactionState>(
-            listenWhen: (prev, curr) =>
-                prev.transactions != curr.transactions,
-            listener: (context, state) {
-              context.read<FilterBloc>().add(
-                SetTransactions(state.transactions),
-              );
-            },
-          ),
-          BlocListener<CategoryBloc, CategoryState>(
-            listenWhen: (prev, curr) =>
-                !prev.isDeleted && curr.isDeleted,
-            listener: (context, state) {
-              context.read<TransactionBloc>().add(LoadTransactionEvent());
-            },
-          ),
-        ],
-        child: Stack(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                children: [
-                  _FilterBar(),
-                  const SizedBox(height: 20),
-                  _CustomDatePicker(),
-                  BudgetCard(),
-                  const SizedBox(height: 20),
-                  _SummaryRow(),
-                  const SizedBox(height: 20),
-                  _TransactionListHeader(),
-                  const SizedBox(height: 10),
-                  _TransactionList(),
-                ],
-              ),
+      body: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                _FilterBar(),
+                const SizedBox(height: 20),
+                _CustomDatePicker(),
+                BudgetCard(),
+                const SizedBox(height: 20),
+                _SummaryRow(),
+                const SizedBox(height: 20),
+                _TransactionListHeader(),
+                const SizedBox(height: 10),
+                _TransactionList(),
+              ],
             ),
-            _AddTransactionButton(),
-          ],
-        ),
+          ),
+          _AddTransactionButton(),
+        ],
       ),
     );
   }
@@ -98,7 +75,7 @@ class _FilterBar extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: BlocBuilder<FilterBloc, FilterState>(
+        child: BlocBuilder<TransactionBloc, TransactionState>(
           buildWhen: (prev, curr) => prev.filterType != curr.filterType,
           builder: (context, state) {
             return Row(
@@ -123,7 +100,7 @@ class _CustomDatePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FilterBloc, FilterState>(
+    return BlocBuilder<TransactionBloc, TransactionState>(
       buildWhen: (prev, curr) =>
           prev.filterType != curr.filterType ||
           prev.fromDate != curr.fromDate ||
@@ -141,8 +118,8 @@ class _CustomDatePicker extends StatelessWidget {
                   date: state.fromDate,
                   filterType: state.filterType,
                   onPicked: (picked) {
-                    context.read<FilterBloc>().add(
-                      ChangeFilterType(FilterType.custom, fromDate: picked),
+                    context.read<TransactionBloc>().add(
+                      ChangeFilterTypeTransaction(FilterType.custom, fromDate: picked),
                     );
                   },
                 ),
@@ -156,8 +133,8 @@ class _CustomDatePicker extends StatelessWidget {
                   date: state.toDate,
                   filterType: state.filterType,
                   onPicked: (picked) {
-                    context.read<FilterBloc>().add(
-                      ChangeFilterType(FilterType.custom, toDate: picked),
+                    context.read<TransactionBloc>().add(
+                      ChangeFilterTypeTransaction(FilterType.custom, toDate: picked),
                     );
                   },
                 ),
@@ -176,7 +153,7 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FilterBloc, FilterState>(
+    return BlocBuilder<TransactionBloc, TransactionState>(
       buildWhen: (prev, curr) =>
           prev.filteredTransactions != curr.filteredTransactions,
       builder: (context, state) {
@@ -220,7 +197,7 @@ class _TransactionListHeader extends StatelessWidget {
           'Danh sách giao dịch',
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
-        BlocBuilder<FilterBloc, FilterState>(
+        BlocBuilder<TransactionBloc, TransactionState>(
           buildWhen: (prev, curr) =>
               prev.groupedTransactions != curr.groupedTransactions,
           builder: (context, state) {
@@ -231,7 +208,6 @@ class _TransactionListHeader extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => MultiBlocProvider(
                       providers: [
-                        BlocProvider.value(value: context.read<FilterBloc>()),
                         BlocProvider.value(value: context.read<TransactionBloc>()),
                         BlocProvider.value(value: context.read<CategoryBloc>()),
                       ],
@@ -259,7 +235,7 @@ class _TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FilterBloc, FilterState>(
+    return BlocBuilder<TransactionBloc, TransactionState>(
       buildWhen: (prev, curr) =>
           prev.groupedTransactions != curr.groupedTransactions,
       builder: (context, state) {
@@ -326,7 +302,6 @@ class _AddTransactionButton extends StatelessWidget {
                   builder: (_) => MultiBlocProvider(
                     providers: [
                       BlocProvider.value(value: context.read<TransactionBloc>()),
-                      BlocProvider.value(value: context.read<FilterBloc>()),
                       BlocProvider.value(value: context.read<CategoryBloc>()),
                     ],
                     child: AddTransactionPage(),
@@ -354,13 +329,13 @@ class _FilterItem extends StatelessWidget {
 
   final String title;
   final FilterType type;
-  final FilterState state;
+  final TransactionState state;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.read<FilterBloc>().add(ChangeFilterType(type));
+        context.read<TransactionBloc>().add(ChangeFilterTypeTransaction(type));
       },
       child: Text(
         title,

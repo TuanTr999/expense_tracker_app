@@ -5,13 +5,13 @@ import 'package:expense_tracker_app/features/categories/data/models/category_mod
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_event.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/enums/app_type.dart';
 import '../../../categories/presentation/blocs/category/category_bloc.dart';
 import '../../../categories/presentation/blocs/category/category_state.dart';
-import '../blocs/transaction/transaction_event.dart';
 
 class UpdateTransactionPage extends StatefulWidget {
   const UpdateTransactionPage({super.key, required this.currentTransaction});
@@ -356,7 +356,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               );
 
               context.read<TransactionBloc>().add(
-                UpdateTransactionEvent(transaction),
+                UpdateTransaction(transaction),
               );
 
               Navigator.pop(context);

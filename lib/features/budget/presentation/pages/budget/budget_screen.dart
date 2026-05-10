@@ -7,10 +7,11 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_st
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/setting_budget_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
+import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../transactions/presentation/blocs/filter/filter_state.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -35,7 +36,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
       appBar: BudgetAppBar(),
       body: BlocBuilder<BudgetBloc, BudgetState>(
         buildWhen: (pre, cur) =>
-            pre.status != cur.status || pre.budgets != cur.budgets,
+        pre.status != cur.status || pre.budgets != cur.budgets,
         builder: (context, state) {
           // if (state.status == AppStatus.loading && state.budgets.isEmpty) {
           //   return const Center(child: CircularProgressIndicator());
@@ -58,7 +59,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     _BudgetSummaryCard(state: state),
                     const SizedBox(height: 20),
                     Expanded(
-                      child: _ListBudgetsSummary()
+                        child: _ListBudgetsSummary()
                     ),
                   ],
                 ),
@@ -142,14 +143,14 @@ class _BudgetSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return  Container(
+    return Container(
       height: 106,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
       ),
       child: BlocBuilder<BudgetBloc, BudgetState>(
-        buildWhen: (pre, cur){
+        buildWhen: (pre, cur) {
           return pre.budgetsSummary != cur.budgetsSummary;
         },
         builder: (context, state) {
@@ -222,7 +223,8 @@ class _BudgetSummaryCard extends StatelessWidget {
                       MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          calculateTotalRemainingBudget(state.budgetsSummary) < 0 ?
+                          calculateTotalRemainingBudget(state.budgetsSummary) <
+                              0 ?
                           'Vượt chi' : 'Còn lại',
                           style: TextStyle(
                             fontSize: 16,
@@ -249,7 +251,9 @@ class _BudgetSummaryCard extends StatelessWidget {
               Container(
                 height: 12,
                 decoration: BoxDecoration(
-                  color: calculateTotalRemainingBudget(state.budgetsSummary) < 0 ? Colors.red : Colors.green,
+                  color: calculateTotalRemainingBudget(state.budgetsSummary) < 0
+                      ? Colors.red
+                      : Colors.green,
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(20),
                     bottomRight: Radius.circular(20),
@@ -269,82 +273,79 @@ class _ListBudgetsSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<BudgetBloc,BudgetState>(builder: (context, state){
-      return ListView.separated(
-        itemBuilder: (context, index) {
-          return Container(
-            height: 100,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                children: [
-                  Column(
-                    crossAxisAlignment:
-                    CrossAxisAlignment.start,
+    return BlocConsumer<BudgetBloc, BudgetState>(
+        listener: (context, state) {
+          context.read<TransactionBloc>().add(LoadTransactions());
+        },
+        builder: (context, state) {
+          return ListView.separated(
+            itemBuilder: (context, index) {
+              return Container(
+                height: 100,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Row(
                     children: [
-                      Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment.spaceBetween,
+                      Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Ngân sách',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
+                          Row(
+                            mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Ngân sách',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                              SizedBox(width: 20),
+                              Text(
+                                'Chi tiêu',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
-                          SizedBox(width: 20),
-                          Text(
-                            'Chi tiêu',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 20),
-                      Row(
-                        children: [
-                          Text(
-                            'Vượt chi',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.grey,
-                            ),
+                          const SizedBox(height: 20),
+                          Row(
+                            children: [
+                              Text(
+                                'Vượt chi',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                ),
+              );
+            },
+            separatorBuilder: (context, index) {
+              return SizedBox(height: 20);
+            },
+            itemCount: 1,
           );
-        },
-        separatorBuilder: (context, index) {
-          return SizedBox(height: 20);
-        },
-        itemCount: 1,
-      );
-    }, listener: (context, index) {
-      MultiBlocListener(listeners: [
-        context.read<CategoryBloc>()
-      ], child: null,
-
-      );
-    });
-
+        }
+    );
   }
 }
-
 
 
 class _AddTransactionButton extends StatelessWidget {
@@ -373,16 +374,18 @@ class _AddTransactionButton extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 isScrollControlled: true,
-                builder: (_) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: context.read<CategoryBloc>(),),
-                    BlocProvider.value(value: context.read<BudgetBloc>())
-                  ],
-                  child: FractionallySizedBox(
-                    heightFactor: 0.93,
-                    child: AddBudgetScreen(),
-                  ),
-                ),
+                builder: (_) =>
+                    MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(
+                          value: context.read<CategoryBloc>(),),
+                        BlocProvider.value(value: context.read<BudgetBloc>())
+                      ],
+                      child: FractionallySizedBox(
+                        heightFactor: 0.93,
+                        child: AddBudgetScreen(),
+                      ),
+                    ),
               );
             },
             child: const Text(
