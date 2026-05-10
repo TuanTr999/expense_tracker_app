@@ -6,26 +6,25 @@ class TransactionRemoteDataSource {
 
   TransactionRemoteDataSource(this.dio);
 
-  Future<List<TransactionModel>> getTransactions() async {
-    final res = await dio.get('/transactions');
+  Future<List<TransactionModel>> getTransactions({
+    int? categoryId,
+    int? month,
+    int? year,
+  }) async {
+    final query = {
+      if (categoryId != null) 'categoryId': categoryId,
+      if (month != null) 'month': month,
+      if (year != null) 'year': year,
+    };
 
-    print('=== DEBUG ===');
-    print('Status: ${res.statusCode}');
-    print('Data type: ${res.data.runtimeType}');
-    print('Data: ${res.data}');
+    final res = await dio.get(
+      '/transactions',
+      queryParameters: query,
+    );
 
-    final data = res.data as List;
-    print('List length: ${data.length}');
-
-    final result = data.map((e) {
-      print('Parsing: $e');
-      return TransactionModel.fromMap(e);
-    }).toList();
-
-    print('Parsed ${result.length} transactions');
-    print('=============');
-
-    return result;
+    return (res.data as List)
+        .map((e) => TransactionModel.fromMap(e))
+        .toList();
   }
 
   Future<void> addTransaction(TransactionModel t) async {

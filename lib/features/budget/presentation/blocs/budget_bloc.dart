@@ -25,9 +25,9 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     on<DeleteBudget>(_onDeleteBudget);
     on<DeleteAllBudget>(_onDeleteAllBudgets);
     on<ChangeFilterType>(_onChangeFilterType);
-    on<PreviousPressed>(_onPreviousPressed);
-    on<NextPressed>(_onNextPressed);
-    on<ResetPressed>(_onResetPressed);
+    on<PreviousPressedBudget>(_onPreviousPressed);
+    on<NextPressedBudget>(_onNextPressed);
+    on<ResetPressedBudget>(_onResetPressed);
     on<LoadBudgetSummary>(_onLoadBudgetSummary);
   }
 
@@ -147,7 +147,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   }
 
   Future<void> _onPreviousPressed(
-    PreviousPressed event,
+    PreviousPressedBudget event,
     Emitter<BudgetState> emit,
   ) async {
     try {
@@ -180,7 +180,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   }
 
   Future<void> _onNextPressed(
-    NextPressed event,
+    NextPressedBudget event,
     Emitter<BudgetState> emit,
   ) async {
     try {
@@ -213,7 +213,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   }
 
   Future<void> _onResetPressed(
-    ResetPressed event,
+    ResetPressedBudget event,
     Emitter<BudgetState> emit,
   ) async {
     try {

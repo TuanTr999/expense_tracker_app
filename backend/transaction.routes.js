@@ -7,14 +7,39 @@ const userId = 1;
 
 // GET
 router.get('/transactions', async (req, res) => {
-  const [rows] = await db.query(
-    `SELECT t.*, c.icon AS category_icon
-     FROM transactions t
-     LEFT JOIN categories c ON t.category_id = c.id
-     WHERE t.user_id = ?
-     ORDER BY t.date DESC`,
-    [userId]
-  );
+  const { categoryId, month, year } = req.query;
+
+  let query = `
+    SELECT t.*, c.icon AS category_icon
+    FROM transactions t
+    LEFT JOIN categories c ON t.category_id = c.id
+    WHERE t.user_id = ?
+  `;
+
+  let params = [userId];
+
+  if (categoryId) {
+    query += ' AND t.category_id = ?';
+    params.push(categoryId);
+  }
+
+  // có month + year → lọc theo tháng
+  if (month && year) {
+    query += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
+    params.push(month, year);
+  }
+
+  // chỉ có year → lọc theo năm
+  else if (year) {
+    query += ' AND YEAR(t.date) = ?';
+    params.push(year);
+  }
+
+  // không có year → không thêm điều kiện gì (lấy tất cả)
+
+  query += ' ORDER BY t.date DESC';
+
+  const [rows] = await db.query(query, params);
   res.json(rows);
 });
 

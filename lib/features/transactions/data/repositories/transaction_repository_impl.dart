@@ -10,8 +10,16 @@ class TransactionRepositoryImpl implements TransactionRepository {
   TransactionRepositoryImpl(this.remote);
 
   @override
-  Future<List<TransactionModel>> getTransactions() {
-    return remote.getTransactions();
+  Future<List<TransactionModel>> getTransactions({
+    int? categoryId,
+    int? month,
+    int? year,
+  }) {
+    return remote.getTransactions(
+      categoryId: categoryId,
+      month: month,
+      year: year,
+    );
   }
 
   @override

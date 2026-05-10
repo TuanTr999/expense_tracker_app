@@ -44,8 +44,8 @@ class ChangeFilterType extends BudgetEvent {
   ChangeFilterType(this.type);
 }
 
-class PreviousPressed extends BudgetEvent {}
+class PreviousPressedBudget extends BudgetEvent {}
 
-class NextPressed extends BudgetEvent {}
+class NextPressedBudget extends BudgetEvent {}
 
-class ResetPressed extends BudgetEvent {}
+class ResetPressedBudget extends BudgetEvent {}

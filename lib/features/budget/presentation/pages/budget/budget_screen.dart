@@ -58,70 +58,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                     _BudgetSummaryCard(state: state),
                     const SizedBox(height: 20),
                     Expanded(
-                      child: ListView.separated(
-                        itemBuilder: (context, index) {
-                          return Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Row(
-                                children: [
-                                  Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Ngân sách',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                          SizedBox(width: 20),
-                                          Text(
-                                            'Chi tiêu',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 20),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            'Vượt chi',
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.grey,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return SizedBox(height: 20);
-                        },
-                        itemCount: 1,
-                      ),
+                      child: _ListBudgetsSummary()
                     ),
                   ],
                 ),
@@ -199,7 +136,7 @@ class _FilterItem extends StatelessWidget {
 }
 
 class _BudgetSummaryCard extends StatelessWidget {
-  const _BudgetSummaryCard({super.key, required this.state});
+  const _BudgetSummaryCard({required this.state});
 
   final BudgetState state;
 
@@ -326,6 +263,88 @@ class _BudgetSummaryCard extends StatelessWidget {
     );
   }
 }
+
+class _ListBudgetsSummary extends StatelessWidget {
+  const _ListBudgetsSummary();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BudgetBloc,BudgetState>(builder: (context, state){
+      return ListView.separated(
+        itemBuilder: (context, index) {
+          return Container(
+            height: 100,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(30),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Row(
+                children: [
+                  Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Ngân sách',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          SizedBox(width: 20),
+                          Text(
+                            'Chi tiêu',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Text(
+                            'Vượt chi',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+        separatorBuilder: (context, index) {
+          return SizedBox(height: 20);
+        },
+        itemCount: 1,
+      );
+    }, listener: (context, index) {
+      MultiBlocListener(listeners: [
+        context.read<CategoryBloc>()
+      ], child: null,
+
+      );
+    });
+
+  }
+}
+
 
 
 class _AddTransactionButton extends StatelessWidget {
