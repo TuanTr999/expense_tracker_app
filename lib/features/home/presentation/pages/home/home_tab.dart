@@ -44,7 +44,16 @@ class _HomeTabState extends State<HomeTab> {
                 _FilterBar(),
                 const SizedBox(height: 20),
                 _CustomDatePicker(),
-                BudgetCard(),
+                BlocBuilder<TransactionBloc, TransactionState>(
+                  buildWhen: (prev, curr) => prev.filterType != curr.filterType,
+                  builder: (context, state) {
+                    if (state.filterType == FilterType.all ||
+                        state.filterType == FilterType.custom) {
+                      return const SizedBox.shrink();
+                    }
+                    return BudgetCard();
+                  },
+                ),
                 const SizedBox(height: 20),
                 _SummaryRow(),
                 const SizedBox(height: 20),
@@ -81,10 +90,22 @@ class _FilterBar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _FilterItem(title: 'Ngày', type: FilterType.day, state: state),
-                _FilterItem(title: 'Tháng', type: FilterType.month, state: state),
+                _FilterItem(
+                  title: 'Tháng',
+                  type: FilterType.month,
+                  state: state,
+                ),
                 _FilterItem(title: 'Năm', type: FilterType.year, state: state),
-                _FilterItem(title: 'Tất cả', type: FilterType.all, state: state),
-                _FilterItem(title: 'Tùy chỉnh', type: FilterType.custom, state: state),
+                _FilterItem(
+                  title: 'Tất cả',
+                  type: FilterType.all,
+                  state: state,
+                ),
+                _FilterItem(
+                  title: 'Tùy chỉnh',
+                  type: FilterType.custom,
+                  state: state,
+                ),
               ],
             );
           },
@@ -118,7 +139,10 @@ class _CustomDatePicker extends StatelessWidget {
                   filterType: state.filterType,
                   onPicked: (picked) {
                     context.read<TransactionBloc>().add(
-                      ChangeFilterTypeTransaction(FilterType.custom, fromDate: picked),
+                      ChangeFilterTypeTransaction(
+                        FilterType.custom,
+                        fromDate: picked,
+                      ),
                     );
                   },
                 ),
@@ -133,7 +157,10 @@ class _CustomDatePicker extends StatelessWidget {
                   filterType: state.filterType,
                   onPicked: (picked) {
                     context.read<TransactionBloc>().add(
-                      ChangeFilterTypeTransaction(FilterType.custom, toDate: picked),
+                      ChangeFilterTypeTransaction(
+                        FilterType.custom,
+                        toDate: picked,
+                      ),
                     );
                   },
                 ),
@@ -207,7 +234,9 @@ class _TransactionListHeader extends StatelessWidget {
                   MaterialPageRoute(
                     builder: (_) => MultiBlocProvider(
                       providers: [
-                        BlocProvider.value(value: context.read<TransactionBloc>()),
+                        BlocProvider.value(
+                          value: context.read<TransactionBloc>(),
+                        ),
                         BlocProvider.value(value: context.read<CategoryBloc>()),
                       ],
                       child: AllTransactionsScreen(
@@ -300,7 +329,9 @@ class _AddTransactionButton extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (_) => MultiBlocProvider(
                     providers: [
-                      BlocProvider.value(value: context.read<TransactionBloc>()),
+                      BlocProvider.value(
+                        value: context.read<TransactionBloc>(),
+                      ),
                       BlocProvider.value(value: context.read<CategoryBloc>()),
                     ],
                     child: AddTransactionPage(),

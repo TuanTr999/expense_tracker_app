@@ -28,12 +28,12 @@ class DioClient {
         onRequest: (options, handler) {
           print("➡️ REQUEST: ${options.method} ${options.uri}");
           print("➡️ HEADERS: ${options.headers}");
-          print("➡️ DATA: ${options.data}");
+          // print("➡️ DATA: ${options.data}");
           return handler.next(options);
         },
         onResponse: (response, handler) {
           print("✅ RESPONSE: ${response.statusCode}");
-          print("✅ DATA: ${response.data}");
+          // print("✅ DATA: ${response.data}");
           return handler.next(response);
         },
         onError: (DioException e, handler) {

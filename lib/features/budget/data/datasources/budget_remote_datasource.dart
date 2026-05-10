@@ -49,7 +49,10 @@ class BudgetRemoteDatasource {
   ) async {
     final res = await dio.get(
       '/budgets/summary',
-      queryParameters: {'month': month, 'year': year},
+      queryParameters: {
+        if (month != null) 'month': month,
+        if (year != null) 'year': year,
+      },
     );
     return (res.data as List)
         .map((e) => BudgetSummaryModel.fromJson(e))

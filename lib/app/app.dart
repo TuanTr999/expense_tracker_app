@@ -16,31 +16,49 @@ import '../features/categories/presentation/blocs/category/category_bloc.dart';
 import '../features/transactions/data/repositories/transaction_repository_impl.dart';
 import '../features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
   const App({super.key});
 
+  @override
+  State<App> createState() => _AppState();
+}
 
+class _AppState extends State<App> {
+  late final TransactionBloc _transactionBloc;
+  late final CategoryBloc _categoryBloc;
+  late final BudgetBloc _budgetBloc;
+
+  @override
+  void initState() {
+    super.initState();
+    final dio = DioClient().dio;
+
+    _transactionBloc = TransactionBloc(
+      TransactionRepositoryImpl(TransactionRemoteDataSource(dio)),
+    );
+    _categoryBloc = CategoryBloc(
+      CategoryRepositoryImpl(CategoryRemoteDataSource(dio)),
+    );
+    _budgetBloc = BudgetBloc(
+      BudgetRepositoryImpl(BudgetRemoteDatasource(dio)),
+    );
+  }
+
+  @override
+  void dispose() {
+    _transactionBloc.close();
+    _categoryBloc.close();
+    _budgetBloc.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final dio = DioClient().dio;
-    final remoteSourceTransaction = TransactionRemoteDataSource(dio);
-    final repositoryTransaction = TransactionRepositoryImpl(remoteSourceTransaction);
-
-    final remoteSourceCategory = CategoryRemoteDataSource(dio);
-    final repositoryCategory = CategoryRepositoryImpl(remoteSourceCategory);
-
-    final remoteSourceBudget = BudgetRemoteDatasource(dio);
-    final repositoryBudget = BudgetRepositoryImpl(remoteSourceBudget);
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      locale: Locale('vi'),
-      supportedLocales: [
-        Locale('en'),
-        Locale('vi'),
-      ],
-      localizationsDelegates: [
+      locale: const Locale('vi'),
+      supportedLocales: const [Locale('en'), Locale('vi')],
+      localizationsDelegates: const [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -48,13 +66,12 @@ class App extends StatelessWidget {
       home: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => NavigationBloc()),
-          BlocProvider(create: (_) => TransactionBloc(repositoryTransaction)),
-          BlocProvider(create: (_) => CategoryBloc(repositoryCategory)),
-          BlocProvider(create: (_) => BudgetBloc(repositoryBudget))
+          BlocProvider.value(value: _transactionBloc),
+          BlocProvider.value(value: _categoryBloc),
+          BlocProvider.value(value: _budgetBloc),
         ],
-        child: MainScreen(),
+        child: const MainScreen(),
       ),
     );
   }
 }
-

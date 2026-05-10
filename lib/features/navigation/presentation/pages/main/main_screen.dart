@@ -16,19 +16,25 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
+  late final List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      HomeTab(),
+      WalletScreen(),
+      BudgetScreen(),
+      SettingsScreen(),
+    ];
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-          final pages = [
-            HomeTab(),
-            WalletScreen(),
-            BudgetScreen(),
-            SettingsScreen(),
-          ];
 
-          return IndexedStack(index: state.currentIndex, children: pages);
+          return IndexedStack(index: state.currentIndex, children: _pages);
         },
       ),
       bottomNavigationBar: BottomAppBar(

@@ -56,10 +56,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
     Emitter<BudgetState> emit,
   ) async {
     try {
-      emit(state.copyWith(status: AppStatus.loading));
-
       final data = await repository.getBudgetSummary(event.month, event.year);
-
       emit(state.copyWith(budgetsSummary: data, status: AppStatus.success));
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
@@ -233,47 +230,28 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   }
 
   Future<void> _onDeleteAllBudgets(
-      DeleteAllBudget event,
-      Emitter<BudgetState> emit,
-      ) async {
+    DeleteAllBudget event,
+    Emitter<BudgetState> emit,
+  ) async {
     try {
-
-      emit(
-        state.copyWith(
-          status: AppStatus.loading,
-        ),
-      );
+      emit(state.copyWith(status: AppStatus.loading));
 
       await repository.deleteAllBudget();
 
-      emit(
-        state.copyWith(
-          budgetsSummary: [],
-          status: AppStatus.success,
-        ),
-      );
+      emit(state.copyWith(budgetsSummary: [], status: AppStatus.success));
 
       add(
         state.type == FilterType.month
             ? LoadBudgetSummary(
-          state.selectedDate.month,
-          state.selectedDate.year,
-        )
-            : LoadBudgetSummary(
-          null,
-          state.selectedDate.year,
-        ),
+                state.selectedDate.month,
+                state.selectedDate.year,
+              )
+            : LoadBudgetSummary(null, state.selectedDate.year),
       );
-
     } catch (e) {
-
       print(e);
 
-      emit(
-        state.copyWith(
-          status: AppStatus.error,
-        ),
-      );
+      emit(state.copyWith(status: AppStatus.error));
     }
   }
 }
