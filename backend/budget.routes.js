@@ -78,20 +78,39 @@ router.get('/budgets', async (req, res) => {
 // =========================
 // GET SUMMARY
 // =========================
+// =========================
+// GET SUMMARY
+// =========================
 router.get('/budgets/summary', async (req, res) => {
   try {
     const { month, year } = req.query;
 
     const hasMonth = month !== undefined && month !== null && month !== '';
-    const hasYear = year !== undefined && year !== null && year !== '';
+    const hasYear  = year  !== undefined && year  !== null && year  !== '';
 
-    let query = `
+    // Build điều kiện ON cho budgets
+    let budgetOnClause  = 'ON b.category_id = c.id';
+    let txnWhereClause  = "AND t.type = 'expense'";
+
+    let params = [];
+
+    if (hasMonth && hasYear) {
+      budgetOnClause += ' AND b.month = ? AND b.year = ?';
+      txnWhereClause += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
+      params = [month, year, month, year];
+    } else if (!hasMonth && hasYear) {
+      budgetOnClause += ' AND b.year = ?';
+      txnWhereClause += ' AND YEAR(t.date) = ?';
+      params = [year, year];
+    }
+
+    const query = `
       SELECT
-        c.id AS categoryId,
+        c.id   AS categoryId,
         c.name AS categoryName,
         c.icon AS categoryIcon,
 
-        COALESCE(b.id, 0) AS budgetId,
+        COALESCE(b.id,     0) AS budgetId,
         COALESCE(b.amount, 0) AS budgetAmount,
 
         COALESCE(SUM(t.amount), 0) AS spentAmount,
@@ -104,35 +123,12 @@ router.get('/budgets/summary', async (req, res) => {
       FROM categories c
 
       LEFT JOIN budgets b
-        ON b.category_id = c.id
-    `;
-
-    // =========================
-    // BUDGET FILTER LOGIC
-    // =========================
-    if (hasMonth && hasYear) {
-      query += ` AND b.month = ? AND b.year = ?`;
-    } else if (!hasMonth && hasYear) {
-      query += ` AND b.year = ?`;
-    }
-
-    query += `
+        ${budgetOnClause}
 
       LEFT JOIN transactions t
         ON t.category_id = c.id
-        AND t.type = 'expense'
-    `;
+        ${txnWhereClause}
 
-    // =========================
-    // TRANSACTION FILTER LOGIC
-    // =========================
-    if (hasMonth && hasYear) {
-      query += ` AND MONTH(t.date) = ? AND YEAR(t.date) = ?`;
-    } else if (!hasMonth && hasYear) {
-      query += ` AND YEAR(t.date) = ?`;
-    }
-
-    query += `
       GROUP BY
         c.id,
         c.name,
@@ -141,27 +137,13 @@ router.get('/budgets/summary', async (req, res) => {
         b.amount
     `;
 
-    // =========================
-    // PARAMS ORDER MUST MATCH
-    // =========================
-    let params = [];
-
-    if (hasMonth && hasYear) {
-      params.push(month, year, month, year);
-    } else if (!hasMonth && hasYear) {
-      params.push(year, year);
-    }
-
     const [rows] = await db.query(query, params);
 
     res.json(rows);
 
   } catch (err) {
     console.error(err);
-
-    res.status(500).json({
-      message: 'Server error',
-    });
+    res.status(500).json({ message: 'Server error' });
   }
 });
 // =========================

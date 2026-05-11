@@ -48,13 +48,16 @@ class _HomeTabState extends State<HomeTab> {
                   buildWhen: (prev, curr) => prev.filterType != curr.filterType,
                   builder: (context, state) {
                     if (state.filterType == FilterType.all ||
-                        state.filterType == FilterType.custom) {
+                        state.filterType == FilterType.custom ||
+                        state.filterType == FilterType.day) {
                       return const SizedBox.shrink();
                     }
-                    return BudgetCard();
+                    return Column(
+                      children: [BudgetCard(), const SizedBox(height: 20)],
+                    );
                   },
                 ),
-                const SizedBox(height: 20),
+
                 _SummaryRow(),
                 const SizedBox(height: 20),
                 _TransactionListHeader(),
