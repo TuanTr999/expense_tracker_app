@@ -72,7 +72,9 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       await repository.createBudget(event.budget);
 
-      emit(state.copyWith(status: AppStatus.success));
+      final data = await repository.getBudgetSummary(state.selectedDate.month, state.selectedDate.year);
+
+      emit(state.copyWith(status: AppStatus.success, budgetsSummary: data));
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
     }
@@ -87,7 +89,9 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
 
       await repository.updateBudget(event.budget);
 
-      emit(state.copyWith(status: AppStatus.success));
+      final data = await repository.getBudgetSummary(state.selectedDate.month, state.selectedDate.year);
+
+      emit(state.copyWith(status: AppStatus.success, budgetsSummary: data));
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
     }

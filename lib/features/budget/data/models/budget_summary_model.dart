@@ -1,4 +1,6 @@
 class BudgetSummaryModel {
+  final int categoryId;
+
   final int budgetId;
   final double budgetAmount;
 
@@ -12,6 +14,7 @@ class BudgetSummaryModel {
   final double remaining;
 
   BudgetSummaryModel({
+    required this.categoryId,
     required this.budgetId,
     required this.budgetAmount,
     this.month,
@@ -26,26 +29,42 @@ class BudgetSummaryModel {
       Map<String, dynamic> json,
       ) {
     return BudgetSummaryModel(
-      budgetId: json['budgetId'] ?? 0,
+      categoryId: int.tryParse(
+        json['categoryId'].toString(),
+      ) ??
+          0,
 
-      budgetAmount:
-      (json['budgetAmount'] ?? 0).toDouble(),
+      budgetId: int.tryParse(
+        json['budgetId'].toString(),
+      ) ??
+          0,
 
-      month: json['month'],
+      budgetAmount: double.tryParse(
+        json['budgetAmount'].toString(),
+      ) ??
+          0,
 
-      year: json['year'],
+      month: json['month'] == null
+          ? null
+          : int.tryParse(json['month'].toString()),
 
-      categoryName:
-      json['categoryName'] ?? '',
+      year: json['year'] == null
+          ? null
+          : int.tryParse(json['year'].toString()),
 
-      categoryIcon:
-      json['categoryIcon'] ?? '',
+      categoryName: json['categoryName'] ?? '',
 
-      spentAmount:
-      (json['spentAmount'] ?? 0).toDouble(),
+      categoryIcon: json['categoryIcon'] ?? '',
 
-      remaining:
-      (json['remaining'] ?? 0).toDouble(),
+      spentAmount: double.tryParse(
+        json['spentAmount'].toString(),
+      ) ??
+          0,
+
+      remaining: double.tryParse(
+        json['remaining'].toString(),
+      ) ??
+          0,
     );
   }
 }

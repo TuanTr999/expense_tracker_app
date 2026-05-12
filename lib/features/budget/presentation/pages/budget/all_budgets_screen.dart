@@ -4,20 +4,31 @@ import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
+import 'package:expense_tracker_app/features/budget/presentation/pages/budget/update_budget_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/utils/current_date.dart';
-import '../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
 import '../../blocs/budget_state.dart';
 
-class AllBudgetsScreen extends StatelessWidget {
+class AllBudgetsScreen extends StatefulWidget {
   const AllBudgetsScreen({super.key});
 
   @override
+  State<AllBudgetsScreen> createState() => _AllBudgetsScreenState();
+}
+
+class _AllBudgetsScreenState extends State<AllBudgetsScreen> {
+  DateTime selectedDate = DateTime.now();
+  @override
+  void initState() {
+    super.initState();
+    context.read<BudgetBloc>().add(LoadBudgetSummary(selectedDate.month, selectedDate.year));
+  }
+  @override
   Widget build(BuildContext context) {
     return BlocBuilder<BudgetBloc, BudgetState>(
-      buildWhen: (pre, cur) => cur.budgetsSummary != pre.budgetsSummary,
+      // buildWhen: (pre, cur) => cur.budgetsSummary != pre.budgetsSummary,
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
@@ -31,10 +42,7 @@ class AllBudgetsScreen extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: Icon(Icons.arrow_back_ios),
-                  ),
+                  child: Icon(Icons.close, size: 30),
                 ),
                 Text(
                   'Ngân sách',
@@ -138,28 +146,117 @@ class AllBudgetsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(child: _FilterBar()),
                   const SizedBox(height: 10),
                   Text(
                     'Thời gian',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
-                  Container(
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    alignment: Alignment.centerLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: Text(
-                        formatDate(state.type, state.selectedDate),
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
+                  InkWell(
+                    borderRadius: BorderRadius.circular(10),
+
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        builder: (_) {
+                          DateTime tempDate = selectedDate;
+
+                          return Container(
+                            height: 300,
+                            color: Colors.white,
+
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+
+                                  child: Row(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+
+                                        child: const Text(
+                                          'Bỏ qua',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            selectedDate = tempDate;
+                                            context.read<BudgetBloc>().add(LoadBudgetSummary(selectedDate.month, selectedDate.year));
+                                          });
+
+                                          Navigator.pop(context);
+                                        },
+
+                                        child: const Text(
+                                          'OK',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Expanded(
+                                  child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.monthYear,
+
+                                    initialDateTime: selectedDate,
+
+                                    onDateTimeChanged: (value) {
+                                      tempDate = value;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+
+                    child: Container(
+                      height: 60,
+
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              '${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}',
+
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+
+                          const Icon(Icons.calendar_month, color: Colors.grey),
+                        ],
                       ),
                     ),
                   ),
@@ -170,7 +267,7 @@ class AllBudgetsScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    height: 40,
+                    height: 60,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(10),
@@ -210,6 +307,7 @@ class AllBudgetsScreen extends StatelessWidget {
                         itemBuilder: (context, index) {
                           return _BudgetItem(
                             budget: state.budgetsSummary[index],
+                            selectedDate: state.selectedDate,
                           );
                         },
                         separatorBuilder: (context, index) {
@@ -228,97 +326,54 @@ class AllBudgetsScreen extends StatelessWidget {
   }
 }
 
-class _FilterBar extends StatelessWidget {
-  const _FilterBar();
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 50,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: BlocBuilder<BudgetBloc, BudgetState>(
-          buildWhen: (pre, cur) => pre.type != cur.type,
-          builder: (context, state) {
-            return Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _FilterItem(
-                  title: 'Tháng',
-                  type: FilterType.month,
-                  state: state,
-                ),
-                SizedBox(width: 40),
-                _FilterItem(title: 'Năm', type: FilterType.year, state: state),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
+class _BudgetItem extends StatelessWidget {
+  const _BudgetItem({required this.budget, required this.selectedDate});
 
-class _FilterItem extends StatelessWidget {
-  const _FilterItem({
-    required this.title,
-    required this.type,
-    required this.state,
-  });
-
-  final String title;
-  final FilterType type;
-  final BudgetState state;
+  final BudgetSummaryModel budget;
+  final DateTime selectedDate;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        context.read<BudgetBloc>().add(ChangeFilterType(type));
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          builder: (_) => BlocProvider.value(
+            value: context.read<BudgetBloc>(),
+            child: FractionallySizedBox(
+              heightFactor: 0.93,
+              child: UpdateBudgetScreen(
+                budget: budget,
+                selectedDate: selectedDate,
+              ),
+            ),
+          ),
+        );
       },
-      child: Text(
-        title,
-        style: TextStyle(
-          color: state.type == type ? Colors.black : Colors.grey,
-          fontWeight: FontWeight.bold,
+      child: SizedBox(
+        height: 60,
+        width: double.infinity,
+        child: Row(
+          children: [
+            Image.asset(
+              'assets/icons/expense/${budget.categoryIcon}',
+              height: 24,
+              width: 24,
+            ),
+            const SizedBox(width: 10),
+            Text(
+              budget.categoryName,
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Spacer(),
+            Text(
+              AppFormat.currency(budget.budgetAmount),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ],
         ),
-      ),
-    );
-  }
-}
-
-class _BudgetItem extends StatelessWidget {
-  const _BudgetItem({super.key, required this.budget});
-
-  final BudgetSummaryModel budget;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      height: 60,
-      width: double.infinity,
-      child: Row(
-        children: [
-          Image.asset(
-            'assets/icons/expense/${budget.categoryIcon}',
-            height: 24,
-            width: 24,
-          ),
-          const SizedBox(width: 10),
-          Text(
-            budget.categoryName,
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Spacer(),
-          Text(
-            AppFormat.currency(budget.budgetAmount),
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-        ],
       ),
     );
   }

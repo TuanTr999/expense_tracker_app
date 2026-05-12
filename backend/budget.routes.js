@@ -86,66 +86,127 @@ router.get('/budgets/summary', async (req, res) => {
     const { month, year } = req.query;
 
     const hasMonth = month !== undefined && month !== null && month !== '';
-    const hasYear  = year  !== undefined && year  !== null && year  !== '';
+    const hasYear = year !== undefined && year !== null && year !== '';
 
-    // Build điều kiện ON cho budgets
-    let budgetOnClause  = 'ON b.category_id = c.id';
-    let txnWhereClause  = "AND t.type = 'expense'";
-
-    let params = [];
-
-    if (hasMonth && hasYear) {
-      budgetOnClause += ' AND b.month = ? AND b.year = ?';
-      txnWhereClause += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
-      params = [month, year, month, year];
-    } else if (!hasMonth && hasYear) {
-      budgetOnClause += ' AND b.year = ?';
-      txnWhereClause += ' AND YEAR(t.date) = ?';
-      params = [year, year];
+    if (!hasYear) {
+      return res.status(400).json({
+        message: 'Year is required',
+      });
     }
 
-    const query = `
-      SELECT
-        c.id   AS categoryId,
-        c.name AS categoryName,
-        c.icon AS categoryIcon,
+    let query = '';
+    let params = [];
 
-        COALESCE(b.id,     0) AS budgetId,
-        COALESCE(b.amount, 0) AS budgetAmount,
+    if (hasMonth) {
+      query = `
+        SELECT
+          c.id AS categoryId,
+          c.name AS categoryName,
+          c.icon AS categoryIcon,
 
-        COALESCE(SUM(t.amount), 0) AS spentAmount,
+          COALESCE(b.id, 0) AS budgetId,
+          COALESCE(b.amount, 0) AS budgetAmount,
+          COALESCE(b.month, ?) AS month,
+          COALESCE(b.year, ?) AS year,
 
-        (
-          COALESCE(b.amount, 0)
-          - COALESCE(SUM(t.amount), 0)
-        ) AS remaining
+          COALESCE(t.spentAmount, 0) AS spentAmount,
 
-      FROM categories c
+          (
+            COALESCE(b.amount, 0)
+            - COALESCE(t.spentAmount, 0)
+          ) AS remaining
 
-      LEFT JOIN budgets b
-        ${budgetOnClause}
+        FROM categories c
 
-      LEFT JOIN transactions t
-        ON t.category_id = c.id
-        ${txnWhereClause}
+        LEFT JOIN budgets b
+          ON b.category_id = c.id
+          AND b.month = ?
+          AND b.year = ?
 
-      WHERE c.type = 'expense'
+        LEFT JOIN (
+          SELECT
+            category_id,
+            SUM(amount) AS spentAmount
+          FROM transactions
+          WHERE type = 'expense'
+            AND MONTH(date) = ?
+            AND YEAR(date) = ?
+          GROUP BY category_id
+        ) t
+          ON t.category_id = c.id
 
-      GROUP BY
-        c.id,
-        c.name,
-        c.icon,
-        b.id,
-        b.amount
-    `;
+        WHERE c.type = 'expense'
+      `;
+
+      params = [
+        Number(month),
+        Number(year),
+        Number(month),
+        Number(year),
+        Number(month),
+        Number(year),
+      ];
+    } else {
+      query = `
+        SELECT
+          c.id AS categoryId,
+          c.name AS categoryName,
+          c.icon AS categoryIcon,
+
+          0 AS budgetId,
+          COALESCE(b.budgetAmount, 0) AS budgetAmount,
+          NULL AS month,
+          ? AS year,
+
+          COALESCE(t.spentAmount, 0) AS spentAmount,
+
+          (
+            COALESCE(b.budgetAmount, 0)
+            - COALESCE(t.spentAmount, 0)
+          ) AS remaining
+
+        FROM categories c
+
+        LEFT JOIN (
+          SELECT
+            category_id,
+            SUM(amount) AS budgetAmount
+          FROM budgets
+          WHERE year = ?
+          GROUP BY category_id
+        ) b
+          ON b.category_id = c.id
+
+        LEFT JOIN (
+          SELECT
+            category_id,
+            SUM(amount) AS spentAmount
+          FROM transactions
+          WHERE type = 'expense'
+            AND YEAR(date) = ?
+          GROUP BY category_id
+        ) t
+          ON t.category_id = c.id
+
+        WHERE c.type = 'expense'
+      `;
+
+      params = [
+        Number(year),
+        Number(year),
+        Number(year),
+      ];
+    }
 
     const [rows] = await db.query(query, params);
 
     res.json(rows);
-
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+
+    res.status(500).json({
+      message: 'Server error',
+    });
   }
 });
 // =========================

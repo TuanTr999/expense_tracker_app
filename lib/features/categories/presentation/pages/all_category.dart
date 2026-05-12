@@ -43,8 +43,7 @@ class _AllCategoryState extends State<AllCategory> {
               onTap: () {
                 Navigator.pop(context);
               },
-              padding: EdgeInsets.only(left: 8),
-              child: Icon(Icons.arrow_back_ios),
+              child: Icon(Icons.close, size: 30,),
             ),
             Text(
               'Danh mục',
@@ -166,164 +165,205 @@ class _AllCategoryState extends State<AllCategory> {
                                     width: 40,
                                     height: 40,
                                   ),
-                                  SizedBox(width: 10),
+
+                                  const SizedBox(width: 10),
+
                                   Expanded(
                                     child: Text(
                                       item.name,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         overflow: TextOverflow.ellipsis,
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
                                   ),
-                                  IconButton(
-                                    onPressed: () {
-                                      showModalBottomSheet(
-                                        context: context,
-                                        isScrollControlled: true,
-                                        builder: (_) => BlocProvider.value(
-                                          value: context.read<CategoryBloc>(),
-                                          child: FractionallySizedBox(
-                                            heightFactor: 0.93,
-                                            child: UpdateCategory(
-                                              currentCategory: item,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                    icon: Icon(Icons.edit, color: Colors.blue),
-                                  ),
-                                  Material(
-                                    color: Colors.white,
-                                    child: InkWell(
-                                      onTap: () async {
-                                        final bloc = context
-                                            .read<CategoryBloc>();
-                                        final confirm = await showDialog<bool>(
-                                          context: context,
-                                          builder: (context) {
-                                            return AlertDialog(
-                                              backgroundColor: Colors.white,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(16),
-                                              ),
-                                              title: Text(
-                                                'Xác nhận',
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
+
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () {
+                                          showModalBottomSheet(
+                                            context: context,
+                                            isScrollControlled: true,
+                                            builder: (_) => BlocProvider.value(
+                                              value: context.read<CategoryBloc>(),
+                                              child: FractionallySizedBox(
+                                                heightFactor: 0.93,
+                                                child: UpdateCategory(
+                                                  currentCategory: item,
                                                 ),
                                               ),
-                                              content: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    'Bạn có chắc chắn muốn xoá danh mục này?',
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                    ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+                                          child: const Icon(
+                                            Icons.edit_rounded,
+                                            color: Colors.blue,
+                                            size: 22,
+                                          ),
+                                        ),
+                                      ),
+
+                                      const SizedBox(width: 8),
+
+                                      InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () async {
+                                          final bloc = context.read<CategoryBloc>();
+
+                                          final confirm = await showDialog<bool>(
+                                            context: context,
+                                            builder: (context) {
+                                              return AlertDialog(
+                                                backgroundColor: Colors.white,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(16),
+                                                ),
+
+                                                title: const Text(
+                                                  'Xác nhận',
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
                                                   ),
-                                                  SizedBox(height: 10),
-                                                  Text(
-                                                    '⚠️ Tất cả giao dịch thuộc danh mục này sẽ bị xoá.',
-                                                    style: TextStyle(
-                                                      fontSize: 14,
-                                                      color: Colors.red,
-                                                      fontWeight:
-                                                          FontWeight.w500,
+                                                ),
+
+                                                content: Column(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                                  children: const [
+                                                    Text(
+                                                      'Bạn có chắc chắn muốn xoá danh mục này?',
+                                                      style: TextStyle(fontSize: 16),
                                                     ),
-                                                  ),
-                                                ],
-                                              ),
-                                              actionsPadding:
-                                                  EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 10,
-                                                  ),
-                                              actions: [
-                                                Row(
-                                                  children: [
-                                                    Expanded(
-                                                      child: ElevatedButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              false,
-                                                            ),
-                                                        style: ElevatedButton.styleFrom(
-                                                          backgroundColor:
-                                                              Colors.green,
-                                                          foregroundColor:
-                                                              Colors.white,
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  10,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          'Huỷ',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 16,
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    SizedBox(width: 10),
-                                                    Expanded(
-                                                      child: ElevatedButton(
-                                                        onPressed: () =>
-                                                            Navigator.pop(
-                                                              context,
-                                                              true,
-                                                            ),
-                                                        style: ElevatedButton.styleFrom(
-                                                          backgroundColor:
-                                                              Colors.red,
-                                                          foregroundColor:
-                                                              Colors.white,
-                                                          shape: RoundedRectangleBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  10,
-                                                                ),
-                                                          ),
-                                                        ),
-                                                        child: Text(
-                                                          'Xoá',
-                                                          style: TextStyle(
-                                                            fontWeight:
-                                                                FontWeight.bold,
-                                                            fontSize: 16,
-                                                          ),
-                                                        ),
+
+                                                    SizedBox(height: 10),
+
+                                                    Text(
+                                                      '⚠️ Tất cả giao dịch thuộc danh mục này sẽ bị xoá.',
+                                                      style: TextStyle(
+                                                        fontSize: 14,
+                                                        color: Colors.red,
+                                                        fontWeight: FontWeight.w500,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
-                                              ],
-                                            );
-                                          },
-                                        );
 
-                                        if (confirm == true) {
-                                          bloc.add(
-                                            DeleteCategoryEvent(item.id!),
+                                                actionsPadding: const EdgeInsets.symmetric(
+                                                  horizontal: 16,
+                                                  vertical: 10,
+                                                ),
+
+                                                actions: [
+                                                  Row(
+                                                    children: [
+                                                      Expanded(
+                                                        child: ElevatedButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                context,
+                                                                false,
+                                                              ),
+
+                                                          style:
+                                                          ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                            Colors.green,
+                                                            foregroundColor:
+                                                            Colors.white,
+                                                            shape:
+                                                            RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
+                                                            ),
+                                                          ),
+
+                                                          child: const Text(
+                                                            'Huỷ',
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                              FontWeight.bold,
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+
+                                                      const SizedBox(width: 10),
+
+                                                      Expanded(
+                                                        child: ElevatedButton(
+                                                          onPressed: () =>
+                                                              Navigator.pop(
+                                                                context,
+                                                                true,
+                                                              ),
+
+                                                          style:
+                                                          ElevatedButton.styleFrom(
+                                                            backgroundColor:
+                                                            Colors.red,
+                                                            foregroundColor:
+                                                            Colors.white,
+                                                            shape:
+                                                            RoundedRectangleBorder(
+                                                              borderRadius:
+                                                              BorderRadius.circular(
+                                                                10,
+                                                              ),
+                                                            ),
+                                                          ),
+
+                                                          child: const Text(
+                                                            'Xoá',
+                                                            style: TextStyle(
+                                                              fontWeight:
+                                                              FontWeight.bold,
+                                                              fontSize: 16,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ],
+                                              );
+                                            },
                                           );
-                                        }
-                                      },
-                                      child: Icon(
-                                        Icons.delete_outline,
-                                        color: Colors.red,
+
+                                          if (confirm == true) {
+                                            bloc.add(
+                                              DeleteCategoryEvent(item.id!),
+                                            );
+                                          }
+                                        },
+
+                                        child: Container(
+                                          padding: const EdgeInsets.all(8),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(12),
+                                          ),
+
+                                          child: const Icon(
+                                            Icons.delete_rounded,
+                                            color: Colors.red,
+                                            size: 22,
+                                          ),
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
                                 ],
                               );

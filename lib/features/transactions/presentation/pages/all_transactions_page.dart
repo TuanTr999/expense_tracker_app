@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/core/utils/transaction_group.dart';
 import 'package:flutter/material.dart';
 
@@ -15,17 +16,24 @@ class AllTransactionsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         scrolledUnderElevation: 0,
         backgroundColor: Color(0xFFF5F5F5),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(Icons.arrow_back),
-        ),
-        title: Text(
-          'Tất cả giao dịch',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            AppCircleButton(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Icon(Icons.close, size: 30),
+            ),
+            Text(
+              'Tất cả giao dịch',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+            ),
+            SizedBox(width: 60,)
+          ],
         ),
       ),
       body: Padding(
@@ -50,9 +58,7 @@ class AllTransactionsScreen extends StatelessWidget {
                 ...group.items.map((item) {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: TransactionItem(
-                      transaction: item,
-                    ),
+                    child: TransactionItem(transaction: item),
                   );
                 }).toList(),
               ],

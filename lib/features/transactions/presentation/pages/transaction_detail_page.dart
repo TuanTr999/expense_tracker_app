@@ -37,8 +37,7 @@ class TransactionDetail extends StatelessWidget {
                   onTap: () {
                     Navigator.pop(context);
                   },
-                  padding: EdgeInsets.only(left: 8),
-                  child: Icon(Icons.arrow_back_ios),
+                  child: Icon(Icons.close, size: 30,),
                 ),
                 Text(
                   'Giao dịch',

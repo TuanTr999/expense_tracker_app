@@ -7,7 +7,6 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_ev
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/all_budgets_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
-import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -33,12 +32,10 @@ class _BudgetScreenState extends State<BudgetScreen> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: BudgetAppBar(),
       body: BlocBuilder<BudgetBloc, BudgetState>(
-        buildWhen: (pre, cur) =>
-            pre.status != cur.status || pre.budgets != cur.budgets,
         builder: (context, state) {
-          // if (state.status == AppStatus.loading && state.budgets.isEmpty) {
-          //   return const Center(child: CircularProgressIndicator());
-          // }
+          if (state.status == AppStatus.loading && state.budgets.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
           if (state.status == AppStatus.error) {
             return const Center(child: Text('Có lỗi xảy ra'));
@@ -261,7 +258,7 @@ class _ListBudgetsSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<BudgetBloc, BudgetState>(
-      buildWhen: (pre, cur) => pre.budgetsSummary != cur.budgetsSummary,
+      // buildWhen: (pre, cur) => pre.budgetsSummary != cur.budgetsSummary,
       builder: (context, state) {
         final budgetsSummary = state.budgetsSummary.where((e) {
           return e.budgetAmount != 0;
@@ -280,23 +277,13 @@ class _ListBudgetsSummary extends StatelessWidget {
   }
 }
 
-class _DetailBudgetSummary extends StatefulWidget {
-  const _DetailBudgetSummary({super.key, required this.budgetsSummary});
+class _DetailBudgetSummary extends StatelessWidget {
+  const _DetailBudgetSummary({required this.budgetsSummary});
 
   final BudgetSummaryModel budgetsSummary;
 
   @override
-  State<_DetailBudgetSummary> createState() => _DetailBudgetSummaryState();
-}
 
-class _DetailBudgetSummaryState extends State<_DetailBudgetSummary> {
-  late BudgetSummaryModel budgetsSummary;
-
-  @override
-  void initState() {
-    super.initState();
-    budgetsSummary = widget.budgetsSummary;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -394,21 +381,6 @@ class _AddTransactionButton extends StatelessWidget {
               elevation: 1,
             ),
             onPressed: () {
-              // showModalBottomSheet(
-              //   context: context,
-              //   isScrollControlled: true,
-              //   builder: (_) => MultiBlocProvider(
-              //     providers: [
-              //       BlocProvider.value(value: context.read<CategoryBloc>()),
-              //       BlocProvider.value(value: context.read<BudgetBloc>()),
-              //     ],
-              //     child: FractionallySizedBox(
-              //       heightFactor: 0.95,
-              //       child: AllBudgetsScreen(),
-              //     ),
-              //   ),
-              // );
-
               Navigator.push(
                 context,
                 MaterialPageRoute(

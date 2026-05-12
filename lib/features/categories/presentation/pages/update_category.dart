@@ -64,7 +64,7 @@ class _UpdateCategoryState extends State<UpdateCategory> {
                       Navigator.pop(context);
                     },
                     size: 50,
-                    child: Icon(Icons.close, size: 35),
+                    child: Icon(Icons.close, size: 30),
                   ),
                   Text(
                     'Danh mục',

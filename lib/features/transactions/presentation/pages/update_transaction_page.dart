@@ -1,3 +1,4 @@
+
 import 'package:expense_tracker_app/core/constants/app_colors.dart';
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
@@ -70,8 +71,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
               onTap: () {
                 Navigator.pop(context);
               },
-              padding: EdgeInsets.only(left: 8),
-              child: Icon(Icons.arrow_back_ios),
+              child: Icon(Icons.close, size: 30,),
             ),
             SizedBox(width: 20,),
             Container(
