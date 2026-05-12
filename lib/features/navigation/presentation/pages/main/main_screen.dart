@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/features/calendar/presentation/pages/calender_screen.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -21,75 +22,72 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _pages = [
-      HomeTab(),
-      WalletScreen(),
-      BudgetScreen(),
-      SettingsScreen(),
-    ];
+    _pages = [HomeTab(), CalenderScreen() ,WalletScreen(), BudgetScreen(), SettingsScreen()];
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      extendBody: true,
       body: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-
           return IndexedStack(index: state.currentIndex, children: _pages);
         },
       ),
-      bottomNavigationBar: BottomAppBar(
-        color: Color(0xFFF5F5F5),
-        padding: EdgeInsets.only(bottom: 0, left: 20, right: 20),
-        child: Container(
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(40),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _item('assets/icons/navigation/home.png', 0),
-              _item('assets/icons/navigation/wallet.png', 1),
-              _item('assets/icons/navigation/budget.png', 2),
-              _item('assets/icons/navigation/settings.png', 3),
-            ],
+      bottomNavigationBar: Container(
+        color: Colors.white,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Container(
+            height: 66,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _item('assets/icons/navigation/home.png', 0, 'Trang chủ'),
+                _item('assets/icons/navigation/calendar.png', 1, 'Lịch'),
+                _item('assets/icons/navigation/wallet.png', 2, 'Tài sản'),
+                _item('assets/icons/navigation/budget.png', 3, 'Ngân sách'),
+                _item('assets/icons/navigation/settings.png', 4, 'Cài đặt'),
+              ],
+            ),
           ),
         ),
       ),
-
-
 
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 
-  Widget _item(String iconPath, int index) {
-    return IconButton(
-      onPressed: () {
+  Widget _item(String iconPath, int index, String name) {
+    return InkWell(
+      onTap: () {
         context.read<NavigationBloc>().add(ChangePageEvent(index));
       },
-      icon: BlocBuilder<NavigationBloc, NavigationState>(
+      child:  BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
-          return Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: state.currentIndex == index
-                  ? Color(0xFFF5F5F5)
-                  : Colors.transparent,
-              shape: BoxShape.circle,
-            ),
+          return SizedBox(
+            height: double.infinity,
             child: Center(
-              child: state.currentIndex == index
-                  ? Image.asset(iconPath, width: 24, height: 24)
-                  : ColorFiltered(
-                      colorFilter: ColorFilter.mode(
-                        Colors.grey,
-                        BlendMode.modulate,
-                      ),
-                      child: Image.asset(iconPath, width: 24, height: 24),
-                    ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  state.currentIndex == index
+                      ? Image.asset(iconPath, width: 24, height: 24)
+                      : ColorFiltered(
+                          colorFilter: ColorFilter.mode(
+                            Colors.grey,
+                            BlendMode.modulate,
+                          ),
+                          child: Image.asset(iconPath, width: 24, height: 24),
+                        ),
+                  Text(name, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: state.currentIndex == index ? Colors.black : Colors.grey),),
+                ],
+              ),
             ),
           );
         },

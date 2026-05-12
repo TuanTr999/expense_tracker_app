@@ -83,7 +83,7 @@ class _BudgetCardState extends State<BudgetCard> {
               padding: const EdgeInsets.only(right: 12),
               child: Row(
                 children: [
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -103,7 +103,7 @@ class _BudgetCardState extends State<BudgetCard> {
                       ),
                     ],
                   ),
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

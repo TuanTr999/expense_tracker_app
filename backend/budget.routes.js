@@ -129,6 +129,8 @@ router.get('/budgets/summary', async (req, res) => {
         ON t.category_id = c.id
         ${txnWhereClause}
 
+      WHERE c.type = 'expense'
+
       GROUP BY
         c.id,
         c.name,

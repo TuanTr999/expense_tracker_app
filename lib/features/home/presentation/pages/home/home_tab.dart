@@ -310,7 +310,7 @@ class _AddTransactionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 10,
+      bottom: 90,
       left: 0,
       right: 0,
       child: Center(

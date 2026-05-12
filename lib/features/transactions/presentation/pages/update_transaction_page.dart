@@ -288,15 +288,6 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                         },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: newCategory?.id == item.id
-                                ? Colors.blue
-                                : Colors.transparent,
-                            border: Border.all(
-                              color: newCategory?.id == item.id
-                                  ? Colors.blue
-                                  : Colors.transparent,
-                              width: 2,
-                            ),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: EdgeInsets.all(8),
@@ -304,6 +295,12 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: newCategory?.id == item.id
+                                    ? Colors.blue
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,

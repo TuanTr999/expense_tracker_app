@@ -5,7 +5,7 @@ import 'package:expense_tracker_app/features/budget/data/models/budget_summary_m
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
-import 'package:expense_tracker_app/features/budget/presentation/pages/budget/setting_budget_screen.dart';
+import 'package:expense_tracker_app/features/budget/presentation/pages/budget/all_budgets_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
@@ -49,10 +49,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [_FilterBar()],
-                    ),
+                    _FilterBar(),
                     const SizedBox(height: 20),
                     _BudgetSummaryCard(state: state),
                     const SizedBox(height: 20),
@@ -76,6 +73,7 @@ class _FilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 50,
+      // width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
@@ -86,7 +84,7 @@ class _FilterBar extends StatelessWidget {
           buildWhen: (pre, cur) => pre.type != cur.type,
           builder: (context, state) {
             return Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 _FilterItem(
                   title: 'Tháng',
@@ -316,14 +314,18 @@ class _DetailBudgetSummaryState extends State<_DetailBudgetSummary> {
           children: [
             Row(
               children: [
-                Image.asset('assets/icons/expense/${budgetsSummary.categoryIcon}', width: 30, height: 30,),
-                const SizedBox(width: 8,),
+                Image.asset(
+                  'assets/icons/expense/${budgetsSummary.categoryIcon}',
+                  width: 30,
+                  height: 30,
+                ),
+                const SizedBox(width: 8),
                 Text(
                   budgetsSummary.categoryName,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
                 Spacer(),
-                Icon(Icons.keyboard_arrow_down)
+                Icon(Icons.keyboard_arrow_down),
               ],
             ),
             Row(
@@ -375,7 +377,7 @@ class _AddTransactionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 10,
+      bottom: 90,
       left: 0,
       right: 0,
       child: Center(
@@ -392,17 +394,27 @@ class _AddTransactionButton extends StatelessWidget {
               elevation: 1,
             ),
             onPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (_) => MultiBlocProvider(
-                  providers: [
-                    BlocProvider.value(value: context.read<CategoryBloc>()),
-                    BlocProvider.value(value: context.read<BudgetBloc>()),
-                  ],
-                  child: FractionallySizedBox(
-                    heightFactor: 0.93,
-                    child: AddBudgetScreen(),
+              // showModalBottomSheet(
+              //   context: context,
+              //   isScrollControlled: true,
+              //   builder: (_) => MultiBlocProvider(
+              //     providers: [
+              //       BlocProvider.value(value: context.read<CategoryBloc>()),
+              //       BlocProvider.value(value: context.read<BudgetBloc>()),
+              //     ],
+              //     child: FractionallySizedBox(
+              //       heightFactor: 0.95,
+              //       child: AllBudgetsScreen(),
+              //     ),
+              //   ),
+              // );
+
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<BudgetBloc>(),
+                    child: AllBudgetsScreen(),
                   ),
                 ),
               );
