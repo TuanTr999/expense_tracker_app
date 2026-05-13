@@ -113,7 +113,7 @@ class _AddCategoryState extends State<AddCategory> {
                                         crossAxisSpacing: 12,
                                         mainAxisSpacing: 12,
                                       ),
-                                  itemCount: AppIconList.expenseIcon.length,
+                                  itemCount: icons.length,
                                   itemBuilder: (context, index) {
                                     final isSelected = selectedIndex == index;
                                     return InkWell(

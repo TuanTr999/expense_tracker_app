@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
-import '../../blocs/budget_state.dart';
+import '../../../transactions/presentation/blocs/transaction/transaction_state.dart';
+import '../blocs/budget_state.dart';
 
 class UpdateBudgetScreen extends StatefulWidget {
   const UpdateBudgetScreen({

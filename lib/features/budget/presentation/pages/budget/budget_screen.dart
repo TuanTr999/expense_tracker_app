@@ -6,7 +6,9 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bl
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/all_budgets_screen.dart';
-import 'package:expense_tracker_app/features/budget/presentation/pages/budget/budget_app_bar.dart';
+import 'package:expense_tracker_app/features/budget/presentation/widgets/budget_app_bar.dart';
+import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
+import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,8 +24,14 @@ class _BudgetScreenState extends State<BudgetScreen> {
   @override
   void initState() {
     super.initState();
-    final now = DateTime.now();
-    context.read<BudgetBloc>().add(LoadBudgetSummary(now.month, now.year));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    context.read<CategoryBloc>().add(LoadCategoryEvent());
+    context.read<BudgetBloc>().add(LoadBudgetSummary(DateTime.now().month, DateTime.now().year));
   }
 
   @override

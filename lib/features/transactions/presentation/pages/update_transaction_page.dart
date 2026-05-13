@@ -1,6 +1,7 @@
 
 import 'package:expense_tracker_app/core/constants/app_colors.dart';
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
+import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/categories/data/models/category_model.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_event.dart';
@@ -260,7 +261,7 @@ class _UpdateTransactionPageState extends State<UpdateTransactionPage> {
             Expanded(
               child: BlocBuilder<CategoryBloc, CategoryState>(
                 builder: (context, state) {
-                  if (state.isLoading) {
+                  if (state.status == AppStatus.loading) {
                     return const Center(child: CircularProgressIndicator());
                   }
 

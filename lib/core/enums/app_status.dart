@@ -1,1 +1,1 @@
-enum AppStatus { initial, loading, success, error }
+enum AppStatus { initial, loading, success, error, deleted }

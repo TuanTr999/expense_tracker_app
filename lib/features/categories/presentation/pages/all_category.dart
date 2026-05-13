@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/core/constants/app_icon.dart';
+import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/core/enums/app_type.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_state.dart';
 import 'package:expense_tracker_app/features/categories/presentation/pages/add_category.dart';
@@ -24,8 +25,8 @@ class _AllCategoryState extends State<AllCategory> {
   @override
   void initState() {
     super.initState();
-    type = AppType.expense;
-    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent(AppType.expense));
+    type = context.read<CategoryBloc>().state.selectedType;
+    context.read<CategoryBloc>().add(LoadCategoryByTypeEvent(type ?? AppType.expense));
   }
 
   @override
@@ -43,7 +44,7 @@ class _AllCategoryState extends State<AllCategory> {
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Icon(Icons.close, size: 30,),
+              child: Icon(Icons.close, size: 30),
             ),
             Text(
               'Danh mục',
@@ -54,8 +55,108 @@ class _AllCategoryState extends State<AllCategory> {
               ),
             ),
             AppCircleButton(
-              onTap: () {
-                // context.read<CategoryBloc>().add(Reset)
+              onTap: () async {
+                final bloc = context.read<CategoryBloc>();
+
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+
+                      title: const Text(
+                        'Xác nhận',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          Text(
+                            'Bạn có chắc chắn muốn trở về mặc định?',
+                            style: TextStyle(fontSize: 16),
+                          ),
+
+                          SizedBox(height: 10),
+
+                          Text(
+                            '⚠️ Tất cả giao dịch thuộc danh mục khác sẽ bị xoá.',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.red,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      actionsPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 10,
+                      ),
+
+                      actions: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.pop(context, false),
+
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+
+                                child: const Text(
+                                  'Huỷ',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () => Navigator.pop(context, true),
+
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+
+                                child: const Text(
+                                  'Xác nhận',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (confirm == true) {
+                  bloc.add(ResetCategoryEvent());
+                }
               },
               child: Icon(Icons.refresh),
             ),
@@ -63,7 +164,7 @@ class _AllCategoryState extends State<AllCategory> {
         ),
       ),
       body: BlocListener<CategoryBloc, CategoryState>(
-        listenWhen: (pre, cur) => cur.isDeleted,
+        listenWhen: (pre, cur) => cur.status == AppStatus.deleted,
         listener: (context, state) {
           context.read<TransactionBloc>().add(LoadTransactions());
         },
@@ -145,8 +246,9 @@ class _AllCategoryState extends State<AllCategory> {
                     child: Padding(
                       padding: const EdgeInsets.all(12),
                       child: BlocBuilder<CategoryBloc, CategoryState>(
+                        buildWhen: (pre, cur) => pre.categories.length != cur.categories.length,
                         builder: (context, state) {
-                          if (state.isLoading) {
+                          if (state.status == AppStatus.loading) {
                             return const Center(
                               child: CircularProgressIndicator(),
                             );
@@ -188,7 +290,8 @@ class _AllCategoryState extends State<AllCategory> {
                                             context: context,
                                             isScrollControlled: true,
                                             builder: (_) => BlocProvider.value(
-                                              value: context.read<CategoryBloc>(),
+                                              value: context
+                                                  .read<CategoryBloc>(),
                                               child: FractionallySizedBox(
                                                 heightFactor: 0.93,
                                                 child: UpdateCategory(
@@ -202,7 +305,9 @@ class _AllCategoryState extends State<AllCategory> {
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
                                             color: Colors.blue.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.edit_rounded,
@@ -217,7 +322,8 @@ class _AllCategoryState extends State<AllCategory> {
                                       InkWell(
                                         borderRadius: BorderRadius.circular(12),
                                         onTap: () async {
-                                          final bloc = context.read<CategoryBloc>();
+                                          final bloc = context
+                                              .read<CategoryBloc>();
 
                                           final confirm = await showDialog<bool>(
                                             context: context,
@@ -225,7 +331,8 @@ class _AllCategoryState extends State<AllCategory> {
                                               return AlertDialog(
                                                 backgroundColor: Colors.white,
                                                 shape: RoundedRectangleBorder(
-                                                  borderRadius: BorderRadius.circular(16),
+                                                  borderRadius:
+                                                      BorderRadius.circular(16),
                                                 ),
 
                                                 title: const Text(
@@ -236,13 +343,16 @@ class _AllCategoryState extends State<AllCategory> {
                                                 ),
 
                                                 content: Column(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
                                                   crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
+                                                      CrossAxisAlignment.start,
                                                   children: const [
                                                     Text(
                                                       'Bạn có chắc chắn muốn xoá danh mục này?',
-                                                      style: TextStyle(fontSize: 16),
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                      ),
                                                     ),
 
                                                     SizedBox(height: 10),
@@ -252,16 +362,18 @@ class _AllCategoryState extends State<AllCategory> {
                                                       style: TextStyle(
                                                         fontSize: 14,
                                                         color: Colors.red,
-                                                        fontWeight: FontWeight.w500,
+                                                        fontWeight:
+                                                            FontWeight.w500,
                                                       ),
                                                     ),
                                                   ],
                                                 ),
 
-                                                actionsPadding: const EdgeInsets.symmetric(
-                                                  horizontal: 16,
-                                                  vertical: 10,
-                                                ),
+                                                actionsPadding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 16,
+                                                      vertical: 10,
+                                                    ),
 
                                                 actions: [
                                                   Row(
@@ -274,18 +386,16 @@ class _AllCategoryState extends State<AllCategory> {
                                                                 false,
                                                               ),
 
-                                                          style:
-                                                          ElevatedButton.styleFrom(
+                                                          style: ElevatedButton.styleFrom(
                                                             backgroundColor:
-                                                            Colors.green,
+                                                                Colors.green,
                                                             foregroundColor:
-                                                            Colors.white,
-                                                            shape:
-                                                            RoundedRectangleBorder(
+                                                                Colors.white,
+                                                            shape: RoundedRectangleBorder(
                                                               borderRadius:
-                                                              BorderRadius.circular(
-                                                                10,
-                                                              ),
+                                                                  BorderRadius.circular(
+                                                                    10,
+                                                                  ),
                                                             ),
                                                           ),
 
@@ -293,7 +403,8 @@ class _AllCategoryState extends State<AllCategory> {
                                                             'Huỷ',
                                                             style: TextStyle(
                                                               fontWeight:
-                                                              FontWeight.bold,
+                                                                  FontWeight
+                                                                      .bold,
                                                               fontSize: 16,
                                                             ),
                                                           ),
@@ -310,18 +421,16 @@ class _AllCategoryState extends State<AllCategory> {
                                                                 true,
                                                               ),
 
-                                                          style:
-                                                          ElevatedButton.styleFrom(
+                                                          style: ElevatedButton.styleFrom(
                                                             backgroundColor:
-                                                            Colors.red,
+                                                                Colors.red,
                                                             foregroundColor:
-                                                            Colors.white,
-                                                            shape:
-                                                            RoundedRectangleBorder(
+                                                                Colors.white,
+                                                            shape: RoundedRectangleBorder(
                                                               borderRadius:
-                                                              BorderRadius.circular(
-                                                                10,
-                                                              ),
+                                                                  BorderRadius.circular(
+                                                                    10,
+                                                                  ),
                                                             ),
                                                           ),
 
@@ -329,7 +438,8 @@ class _AllCategoryState extends State<AllCategory> {
                                                             'Xoá',
                                                             style: TextStyle(
                                                               fontWeight:
-                                                              FontWeight.bold,
+                                                                  FontWeight
+                                                                      .bold,
                                                               fontSize: 16,
                                                             ),
                                                           ),
@@ -353,7 +463,9 @@ class _AllCategoryState extends State<AllCategory> {
                                           padding: const EdgeInsets.all(8),
                                           decoration: BoxDecoration(
                                             color: Colors.red.withOpacity(0.1),
-                                            borderRadius: BorderRadius.circular(12),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
 
                                           child: const Icon(

@@ -83,32 +83,67 @@ router.delete('/categories/:id', async (req, res) => {
 
 
 // RESET DEFAULT
+// RESET DEFAULT
 router.post('/categories/reset', async (req, res) => {
+  try {
 
-  await db.query('DELETE FROM categories');
+   // 1. Xóa transaction có category
+       await db.query(`
+         DELETE FROM transactions
+         WHERE category_id IN (
+           SELECT id FROM categories
+         )
+       `);
 
-  const defaults = [
-    ['Ăn uống', 'food.png', 'expense'],
-    ['Giải trí', 'entertainment.png', 'expense'],
-    ['Sức khỏe', 'healthcare.png', 'expense'],
-    ['Nhà ở', 'house.png', 'expense'],
-    ['Mua sắm', 'shopping-cart.png', 'expense'],
-    ['Di chuyển', 'transportation.png', 'expense'],
-    ['Giáo dục', 'education.png', 'expense'],
-    ['Lương', 'salary.png', 'income'],
-    ['Thưởng', 'bonus.png', 'income'],
-    ['Đầu tư', 'investment.png', 'income'],
-    ['Quà tặng', 'giftbox.png', 'income'],
-  ];
+       // 2. Xóa categories
+       await db.query('DELETE FROM categories');
 
-  for (let item of defaults) {
-    await db.query(
-      'INSERT INTO categories (name, icon, type) VALUES (?, ?, ?)',
-      item
-    );
+       res.json({
+         message: 'All categories deleted'
+       });
+
+     } catch (error) {
+       console.error(error);
+
+       res.status(500).json({
+         message: 'Reset failed'
+       });
+
+    // 3. Xóa category
+    await db.query('DELETE FROM categories');
+
+    // 4. Insert default categories
+    const defaults = [
+      ['Ăn uống', 'food.png', 'expense'],
+      ['Giải trí', 'entertainment.png', 'expense'],
+      ['Sức khỏe', 'healthcare.png', 'expense'],
+      ['Nhà ở', 'house.png', 'expense'],
+      ['Mua sắm', 'shopping-cart.png', 'expense'],
+      ['Di chuyển', 'transportation.png', 'expense'],
+      ['Giáo dục', 'education.png', 'expense'],
+      ['Lương', 'salary.png', 'income'],
+      ['Thưởng', 'bonus.png', 'income'],
+      ['Đầu tư', 'investment.png', 'income'],
+      ['Quà tặng', 'giftbox.png', 'income'],
+    ];
+
+    for (let item of defaults) {
+      await db.query(
+        'INSERT INTO categories (name, icon, type) VALUES (?, ?, ?)',
+        item
+      );
+    }
+
+    res.json({
+      message: 'Reset categories thành công'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: 'Reset failed'
+    });
   }
-
-  res.json({ message: 'Reset done' });
 });
 
 module.exports = router;

@@ -4,7 +4,7 @@ import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/budget/data/models/budget_summary_model.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_event.dart';
-import 'package:expense_tracker_app/features/budget/presentation/pages/budget/update_budget_screen.dart';
+import 'package:expense_tracker_app/features/budget/presentation/widgets/update_budget_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
