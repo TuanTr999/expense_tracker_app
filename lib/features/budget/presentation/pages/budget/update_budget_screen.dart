@@ -271,8 +271,6 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
                     return;
                   }
 
-                  final amount = double.tryParse(textBudgetAmount.text) ?? 0;
-
                   final newBudget = BudgetModel(
                     id: budget.budgetId,
                     categoryId: budget.categoryId,
@@ -290,7 +288,6 @@ class _UpdateBudgetScreenState extends State<UpdateBudgetScreen> {
                   } else {
                     context.read<BudgetBloc>().add(UpdateBudget(newBudget));
                   }
-
                   Navigator.pop(context);
                 },
                 child: Text(

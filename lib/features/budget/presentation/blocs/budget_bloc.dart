@@ -57,7 +57,11 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
   ) async {
     try {
       final data = await repository.getBudgetSummary(event.month, event.year);
-      emit(state.copyWith(budgetsSummary: data, status: AppStatus.success));
+      final newSelectedDate = DateTime(
+        event.year ?? state.selectedDate.year,
+        event.month ?? state.selectedDate.month,
+      );
+      emit(state.copyWith(budgetsSummary: data, status: AppStatus.success, selectedDate: newSelectedDate));
     } catch (e) {
       emit(state.copyWith(status: AppStatus.error));
     }
