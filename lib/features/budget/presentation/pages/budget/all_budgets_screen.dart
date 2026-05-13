@@ -7,9 +7,11 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_ev
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/update_budget_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../transactions/presentation/blocs/transaction/transaction_state.dart';
+import '../../../data/models/budget_model.dart';
 import '../../blocs/budget_state.dart';
 
 class AllBudgetsScreen extends StatelessWidget {
@@ -331,58 +333,145 @@ class AllBudgetsScreen extends StatelessWidget {
   }
 }
 
-class _BudgetItem extends StatelessWidget {
+class _BudgetItem extends StatefulWidget {
   const _BudgetItem({required this.budget, required this.selectedDate});
 
   final BudgetSummaryModel budget;
   final DateTime selectedDate;
 
   @override
+  State<_BudgetItem> createState() => _BudgetItemState();
+}
+
+class _BudgetItemState extends State<_BudgetItem> {
+  late final TextEditingController textAmountBudget;
+  late final FocusNode focusNode;
+  late BudgetBloc budgetBloc;
+
+  String _onlyNumber(String value) {
+    return value.replaceAll(RegExp(r'[^0-9]'), '');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    budgetBloc = context.read<BudgetBloc>();
+  }
+
+  void _saveBudget() {
+    final rawValue = _onlyNumber(textAmountBudget.text);
+
+    final newBudget = BudgetModel(
+      id: widget.budget.budgetId,
+      categoryId: widget.budget.categoryId,
+      amount: double.tryParse(rawValue) ?? 0,
+      month: widget.selectedDate.month,
+      year: widget.selectedDate.year,
+    );
+
+    final isSameMonth =
+        widget.budget.month == widget.selectedDate.month &&
+            widget.budget.year == widget.selectedDate.year;
+
+    if (widget.budget.budgetId == 0 || !isSameMonth) {
+      budgetBloc.add(CreateBudget(newBudget));
+    } else {
+      budgetBloc.add(UpdateBudget(newBudget));
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+
+    textAmountBudget = TextEditingController(
+      text: AppFormat.currency(widget.budget.budgetAmount),
+    );
+
+    focusNode = FocusNode();
+
+    focusNode.addListener(() {
+      final rawValue = _onlyNumber(textAmountBudget.text);
+
+      if (focusNode.hasFocus) {
+        textAmountBudget.text = rawValue;
+      } else {
+        _saveBudget();
+
+        final amount = double.tryParse(rawValue) ?? 0;
+        textAmountBudget.text = AppFormat.currency(amount);
+      }
+
+      textAmountBudget.selection = TextSelection.collapsed(
+        offset: textAmountBudget.text.length,
+      );
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _BudgetItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.budget.budgetAmount != widget.budget.budgetAmount) {
+      textAmountBudget.text = AppFormat.currency(widget.budget.budgetAmount);
+
+      textAmountBudget.selection = TextSelection.collapsed(
+        offset: textAmountBudget.text.length,
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    textAmountBudget.dispose();
+    focusNode.dispose();
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () async {
-        final result = await showModalBottomSheet<bool>(
-          context: context,
-          isScrollControlled: true,
-          builder: (_) => BlocProvider.value(
-            value: context.read<BudgetBloc>(),
-            child: FractionallySizedBox(
-              heightFactor: 0.93,
-              child: UpdateBudgetScreen(
-                budget: budget,
-                selectedDate: selectedDate,
+    final budget = widget.budget;
+    return SizedBox(
+      height: 60,
+      width: double.infinity,
+      child: Row(
+        children: [
+          Image.asset(
+            'assets/icons/expense/${budget.categoryIcon}',
+            height: 24,
+            width: 24,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            budget.categoryName,
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          Expanded(
+            child: Container(
+              height: 60,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.centerRight,
+              child: TextField(
+                controller: textAmountBudget,
+                keyboardType: TextInputType.number,
+                textAlign: TextAlign.right,
+                focusNode: focusNode,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                ),
               ),
             ),
           ),
-        );
-        if (result == true && context.mounted) {
-          context.read<BudgetBloc>().add(
-            LoadBudgetSummary(selectedDate.month, selectedDate.year),
-          );
-        }
-      },
-      child: SizedBox(
-        height: 60,
-        width: double.infinity,
-        child: Row(
-          children: [
-            Image.asset(
-              'assets/icons/expense/${budget.categoryIcon}',
-              height: 24,
-              width: 24,
-            ),
-            const SizedBox(width: 10),
-            Text(
-              budget.categoryName,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            Spacer(),
-            Text(
-              AppFormat.currency(budget.budgetAmount),
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -394,7 +483,7 @@ class _FilterBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Align(
-      alignment: AlignmentGeometry.center,
+      alignment: Alignment.center,
       child: Container(
         height: 50,
         // width: 200,

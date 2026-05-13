@@ -282,8 +282,6 @@ class _DetailBudgetSummary extends StatelessWidget {
 
   final BudgetSummaryModel budgetsSummary;
 
-  @override
-
 
   @override
   Widget build(BuildContext context) {
@@ -381,11 +379,12 @@ class _AddTransactionButton extends StatelessWidget {
               elevation: 1,
             ),
             onPressed: () {
+              final budgetBloc = context.read<BudgetBloc>();
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (_) => BlocProvider.value(
-                    value: context.read<BudgetBloc>(),
+                    value: budgetBloc,
                     child: AllBudgetsScreen(),
                   ),
                 ),
