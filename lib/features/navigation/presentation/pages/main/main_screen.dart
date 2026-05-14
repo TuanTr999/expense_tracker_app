@@ -1,4 +1,9 @@
+import 'package:dio/dio.dart';
 import 'package:expense_tracker_app/features/calendar/presentation/pages/calender_screen.dart';
+import 'package:expense_tracker_app/features/chatbot/data/datasources/gemini_service.dart';
+import 'package:expense_tracker_app/features/chatbot/data/repositories/chat_repository.dart';
+import 'package:expense_tracker_app/features/chatbot/presentation/blocs/chat_bloc.dart';
+import 'package:expense_tracker_app/features/chatbot/presentation/pages/chat_screen.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,17 +27,28 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    _pages = [HomeTab(), CalenderScreen() ,WalletScreen(), BudgetScreen(), SettingsScreen()];
+    _pages = [
+      HomeTab(),
+      CalenderScreen(),
+      WalletScreen(),
+      BudgetScreen(),
+      SettingsScreen(),
+    ];
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       extendBody: true,
-      body: BlocBuilder<NavigationBloc, NavigationState>(
-        builder: (context, state) {
-          return IndexedStack(index: state.currentIndex, children: _pages);
-        },
+      body: Stack(
+        children: [
+          BlocBuilder<NavigationBloc, NavigationState>(
+            builder: (context, state) {
+              return IndexedStack(index: state.currentIndex, children: _pages);
+            },
+          ),
+          _ChatBot(),
+        ],
       ),
       bottomNavigationBar: Container(
         color: Colors.white,
@@ -41,9 +57,7 @@ class _MainScreenState extends State<MainScreen> {
           child: Container(
             height: 66,
             width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.white,
-            ),
+            decoration: BoxDecoration(color: Colors.white),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -67,7 +81,7 @@ class _MainScreenState extends State<MainScreen> {
       onTap: () {
         context.read<NavigationBloc>().add(ChangePageEvent(index));
       },
-      child:  BlocBuilder<NavigationBloc, NavigationState>(
+      child: BlocBuilder<NavigationBloc, NavigationState>(
         builder: (context, state) {
           return SizedBox(
             height: double.infinity,
@@ -85,12 +99,55 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           child: Image.asset(iconPath, width: 24, height: 24),
                         ),
-                  Text(name, style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: state.currentIndex == index ? Colors.black : Colors.grey),),
+                  Text(
+                    name,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: state.currentIndex == index
+                          ? Colors.black
+                          : Colors.grey,
+                    ),
+                  ),
                 ],
               ),
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _ChatBot extends StatelessWidget {
+  const _ChatBot({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      bottom: 90,
+      right: 20,
+      child: Container(
+        height: 50,
+        width: 50,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white),
+        child: IconButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (_) => BlocProvider(
+                create: (_) => ChatBloc(ChatRepository(GeminiService(Dio()))),
+                child: const ChatbotScreen()
+
+              ),
+            );
+          },
+          icon: Image.asset(
+            'assets/icons/ui/chat_bot_2.png',
+            width: 30,
+            height: 30,
+          ),
+        ),
       ),
     );
   }

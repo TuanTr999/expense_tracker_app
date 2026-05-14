@@ -1,16 +1,21 @@
 import 'package:expense_tracker_app/core/network/dio_client.dart';
+import 'package:expense_tracker_app/features/auth/presentation/pages/auth_wrapper.dart';
 import 'package:expense_tracker_app/features/budget/data/datasources/budget_remote_datasource.dart';
 import 'package:expense_tracker_app/features/budget/data/repositories/budget_repository_impl.dart';
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bloc.dart';
 import 'package:expense_tracker_app/features/categories/data/datasources/category_remote_datasource.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/pages/main/main_screen.dart';
 import 'package:expense_tracker_app/features/transactions/data/datasources/transaction_remote_datasource.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'package:expense_tracker_app/features/navigation/presentation/blocs/navigation/navigation_bloc.dart';
 
+import '../features/auth/data/datasources/auth_service.dart';
+import '../features/auth/data/repositories/auth_repository_impl.dart';
+import '../features/auth/presentation/blocs/auth_bloc.dart';
 import '../features/categories/data/repositories/categoru_repository_impl.dart';
 import '../features/categories/presentation/blocs/category/category_bloc.dart';
 import '../features/transactions/data/repositories/transaction_repository_impl.dart';
@@ -69,8 +74,17 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _transactionBloc),
           BlocProvider.value(value: _categoryBloc),
           BlocProvider.value(value: _budgetBloc),
+          BlocProvider(
+            create: (_) => AuthBloc(
+              AuthRepositoryImpl(
+                AuthService(
+                  FirebaseAuth.instance,
+                ),
+              ),
+            ),
+          ),
         ],
-        child: const MainScreen(),
+        child: const AuthWrapper(),
       ),
     );
   }

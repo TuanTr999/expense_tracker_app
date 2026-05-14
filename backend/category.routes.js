@@ -102,13 +102,6 @@ router.post('/categories/reset', async (req, res) => {
          message: 'All categories deleted'
        });
 
-     } catch (error) {
-       console.error(error);
-
-       res.status(500).json({
-         message: 'Reset failed'
-       });
-
     // 3. Xóa category
     await db.query('DELETE FROM categories');
 
