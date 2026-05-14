@@ -44,6 +44,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   firebase_core: ^4.8.0
   firebase_auth: ^6.5.0
+  google_sign_in: ^7.2.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +72,7 @@ flutter:
     - assets/icons/income/
     - assets/icons/navigation/
     - assets/icons/ui/
+    - assets/icons/auth/
     - .env
 
   # To add assets to your application, add an assets section, like this:

@@ -145,8 +145,29 @@ class _LoginScreenState extends State<LoginScreen> {
                         );
                       },
                     ),
-
-                    const SizedBox(height: 20),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider.value(
+                                value: context.read<AuthBloc>(),
+                                child: ForgotPasswordScreen(),
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Quên mật khẩu?',
+                          style: TextStyle(
+                            color: Color(0xFF1877F2),
+                            fontSize: 15,
+                          ),
+                        ),
+                      ),
+                    ),
 
                     SizedBox(
                       width: double.infinity,
@@ -169,60 +190,59 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider.value(
-                              value: context.read<AuthBloc>(),
-                              child: ForgotPasswordScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Quên mật khẩu?',
-                        style: TextStyle(
-                          color: Color(0xFF1877F2),
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-
-                    const Divider(),
 
                     const SizedBox(height: 10),
 
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => BlocProvider.value(
-                                value: context.read<AuthBloc>(),
-                                child: RegisterScreen(),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text(
+                          'Chưa có tài khoản?',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => BlocProvider.value(
+                                  value: context.read<AuthBloc>(),
+                                  child: RegisterScreen(),
+                                ),
                               ),
+                            );
+                          },
+                          child: const Text(
+                            'Đăng ký ngay',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF42B72A),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF42B72A),
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
-                          'Tạo tài khoản mới',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Expanded(child: Divider(thickness: 2)),
+                        const SizedBox(width: 10),
+                        Text('Hoặc', style: TextStyle(fontSize: 16)),
+                        const SizedBox(width: 10),
+                        Expanded(child: Divider(thickness: 2)),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _Icon(
+                          function: () {
+                            context.read<AuthBloc>().add(GoogleLoginEvent());
+                          },
+                          icon: Image.asset('assets/icons/auth/google.png', width: 40, height: 40,),
                         ),
-                      ),
+                      ],
                     ),
                   ],
                 ),
@@ -243,6 +263,25 @@ class _LoginScreenState extends State<LoginScreen> {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Icon extends StatelessWidget {
+  const _Icon({required this.function, required this.icon});
+
+  final VoidCallback function;
+  final Widget icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      width: 60,
+      decoration: BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+      child: Center(
+        child: IconButton(onPressed: function, icon: icon),
       ),
     );
   }

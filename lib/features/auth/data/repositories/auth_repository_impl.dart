@@ -43,4 +43,9 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<void> forgotPassword(String email) {
     return service.forgotPassword(email);
   }
+
+  @override
+  Future<void> signInWithGoogle() {
+    return service.signInWithGoogle();
+  }
 }

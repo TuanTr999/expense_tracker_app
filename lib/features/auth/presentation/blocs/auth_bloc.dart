@@ -19,15 +19,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(state.copyWith(status: AppStatus.success));
       } on FirebaseAuthException catch (e) {
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: AuthErrorMapper.map(e.code),
-        ));
+        emit(
+          state.copyWith(
+            status: AppStatus.error,
+            error: AuthErrorMapper.map(e.code),
+          ),
+        );
       } catch (e) {
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: e.toString(),
-        ));
+        emit(state.copyWith(status: AppStatus.error, error: e.toString()));
       }
     });
 
@@ -39,15 +38,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(state.copyWith(status: AppStatus.success));
       } on FirebaseAuthException catch (e) {
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: AuthErrorMapper.map(e.code),
-        ));
+        emit(
+          state.copyWith(
+            status: AppStatus.error,
+            error: AuthErrorMapper.map(e.code),
+          ),
+        );
       } catch (e) {
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: e.toString(),
-        ));
+        emit(state.copyWith(status: AppStatus.error, error: e.toString()));
       }
     });
 
@@ -59,61 +57,57 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
         emit(state.copyWith(status: AppStatus.success));
       } on FirebaseAuthException catch (e) {
-
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: AuthErrorMapper.map(e.code),
-        ));
-
+        emit(
+          state.copyWith(
+            status: AppStatus.error,
+            error: AuthErrorMapper.map(e.code),
+          ),
+        );
       } catch (e) {
-
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: e.toString(),
-        ));
+        emit(state.copyWith(status: AppStatus.error, error: e.toString()));
       }
     });
 
     on<ForgotPasswordEvent>((event, emit) async {
-
       try {
+        emit(state.copyWith(status: AppStatus.loading, error: null));
 
-        emit(state.copyWith(
-          status: AppStatus.loading,
-          error: null,
-        ));
+        await repository.forgotPassword(event.email);
 
-        await repository.forgotPassword(
-          event.email,
-        );
-
-        emit(state.copyWith(
-          status: AppStatus.success,
-        ));
-
+        emit(state.copyWith(status: AppStatus.success));
       } on FirebaseAuthException catch (e) {
-
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: AuthErrorMapper.map(e.code),
-        ));
-
+        emit(
+          state.copyWith(
+            status: AppStatus.error,
+            error: AuthErrorMapper.map(e.code),
+          ),
+        );
       } catch (e) {
-
-        emit(state.copyWith(
-          status: AppStatus.error,
-          error: e.toString(),
-        ));
+        emit(state.copyWith(status: AppStatus.error, error: e.toString()));
       }
     });
 
     on<ResetAuthStateEvent>((event, emit) {
-      emit(
-        AuthState(
-          status: AppStatus.initial,
-          error: ''
-        ),
-      );
+      emit(AuthState(status: AppStatus.initial, error: ''));
+    });
+
+    on<GoogleLoginEvent>((event, emit) async {
+      try {
+        emit(state.copyWith(status: AppStatus.loading, error: null));
+
+        await repository.signInWithGoogle();
+
+        emit(state.copyWith(status: AppStatus.success));
+      } on FirebaseAuthException catch (e) {
+        emit(
+          state.copyWith(
+            status: AppStatus.error,
+            error: AuthErrorMapper.map(e.code),
+          ),
+        );
+      } catch (e) {
+        emit(state.copyWith(status: AppStatus.error, error: e.toString()));
+      }
     });
   }
 }

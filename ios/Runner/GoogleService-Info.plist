@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>854404638527-9o5vqjt2jf63b4bhpahnjlmgqamigv8e.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.854404638527-9o5vqjt2jf63b4bhpahnjlmgqamigv8e</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>854404638527-kn2pgut1k67b7peafg44bdicv0ug5f5m.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyA6wG1RBvI6_m5nTrqErkRo25jQwWAONvU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>854404638527</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.tuantr.expensetracker</string>
+	<key>PROJECT_ID</key>
+	<string>expense-tracker-app-tuantr</string>
+	<key>STORAGE_BUCKET</key>
+	<string>expense-tracker-app-tuantr.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:854404638527:ios:be943e14f0ec222bf9958a</string>
+</dict>
+</plist>
