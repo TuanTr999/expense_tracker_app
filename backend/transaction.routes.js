@@ -20,7 +20,9 @@ router.get('/transactions/balance', async (req, res) => {
   const currentDay = day ? Number(day) : null;
 
   try {
-    // MODE 1: có day + month + year
+    // MODE 1: day + month + year
+    // previousBalance = tổng tồn lũy kế trước ngày hiện tại
+    // currentBalance = tồn riêng ngày hiện tại
     if (currentDay && currentMonth) {
       const [currentRows] = await db.query(
         `
@@ -40,7 +42,29 @@ router.get('/transactions/balance', async (req, res) => {
         [userId, currentDay, currentMonth, currentYear]
       );
 
+      const [previousRows] = await db.query(
+        `
+        SELECT COALESCE(SUM(
+          CASE
+            WHEN type = 'income' THEN amount
+            WHEN type = 'expense' THEN -amount
+            ELSE 0
+          END
+        ), 0) AS balance
+        FROM transactions
+        WHERE user_id = ?
+          AND DATE(date) < ?
+        `,
+        [
+          userId,
+          `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(
+            currentDay
+          ).padStart(2, '0')}`,
+        ]
+      );
+
       const currentBalance = Number(currentRows[0].balance);
+      const previousBalance = Number(previousRows[0].balance);
 
       return res.json({
         type: 'daily',
@@ -48,19 +72,15 @@ router.get('/transactions/balance', async (req, res) => {
         month: currentMonth,
         year: currentYear,
         currentBalance,
+        previousBalance,
+        totalBalance: previousBalance + currentBalance,
       });
     }
 
-    // MODE 2: có month + year
+    // MODE 2: month + year
+    // previousBalance = tổng tồn lũy kế trước tháng hiện tại
+    // currentBalance = tồn riêng tháng hiện tại
     if (currentMonth) {
-      let previousMonth = currentMonth - 1;
-      let previousYear = currentYear;
-
-      if (previousMonth === 0) {
-        previousMonth = 12;
-        previousYear = currentYear - 1;
-      }
-
       const [currentRows] = await db.query(
         `
         SELECT COALESCE(SUM(
@@ -89,10 +109,12 @@ router.get('/transactions/balance', async (req, res) => {
         ), 0) AS balance
         FROM transactions
         WHERE user_id = ?
-          AND MONTH(date) = ?
-          AND YEAR(date) = ?
+          AND (
+            YEAR(date) < ?
+            OR (YEAR(date) = ? AND MONTH(date) < ?)
+          )
         `,
-        [userId, previousMonth, previousYear]
+        [userId, currentYear, currentYear, currentMonth]
       );
 
       const currentBalance = Number(currentRows[0].balance);
@@ -102,17 +124,15 @@ router.get('/transactions/balance', async (req, res) => {
         type: 'monthly',
         month: currentMonth,
         year: currentYear,
-        previousMonth,
-        previousYear,
         currentBalance,
         previousBalance,
-        totalBalance: currentBalance + previousBalance,
+        totalBalance: previousBalance + currentBalance,
       });
     }
 
-    // MODE 3: chỉ có year
-    const previousYear = currentYear - 1;
-
+    // MODE 3: year
+    // previousBalance = tổng tồn lũy kế trước năm hiện tại
+    // currentBalance = tồn riêng năm hiện tại
     const [currentRows] = await db.query(
       `
       SELECT COALESCE(SUM(
@@ -140,9 +160,9 @@ router.get('/transactions/balance', async (req, res) => {
       ), 0) AS balance
       FROM transactions
       WHERE user_id = ?
-        AND YEAR(date) = ?
+        AND YEAR(date) < ?
       `,
-      [userId, previousYear]
+      [userId, currentYear]
     );
 
     const currentBalance = Number(currentRows[0].balance);
@@ -151,10 +171,9 @@ router.get('/transactions/balance', async (req, res) => {
     return res.json({
       type: 'yearly',
       year: currentYear,
-      previousYear,
       currentBalance,
       previousBalance,
-      totalBalance: currentBalance + previousBalance,
+      totalBalance: previousBalance + currentBalance,
     });
   } catch (error) {
     console.error(error);
