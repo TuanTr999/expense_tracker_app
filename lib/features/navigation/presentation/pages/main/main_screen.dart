@@ -29,7 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     super.initState();
     _pages = [
       HomeTab(),
-      CalenderScreen(),
+      CalendarScreen(),
       WalletScreen(),
       BudgetScreen(),
       SettingsScreen(),
@@ -125,7 +125,7 @@ class _ChatBot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      bottom: 90,
+      bottom: 92,
       right: 20,
       child: Container(
         height: 50,

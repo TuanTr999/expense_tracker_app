@@ -1,4 +1,5 @@
 import 'package:expense_tracker_app/features/transactions/data/datasources/transaction_remote_datasource.dart';
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_balance_model.dart';
 import 'package:expense_tracker_app/features/transactions/data/repositories/transaction_repository.dart';
 
 import '../datasources/transaction_local_datasource.dart';
@@ -35,5 +36,10 @@ class TransactionRepositoryImpl implements TransactionRepository {
   @override
   Future<void> deleteTransaction(String id) {
     return remote.deleteTransaction(id);
+  }
+
+  @override
+  Future<BalanceModel> getTransactionsBalance({int? day,int? month, int? year}) {
+    return remote.getTransactionsBalance(day: day,month: month, year: year);
   }
 }

@@ -27,7 +27,7 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    context.read<TransactionBloc>().add(LoadTransactions());
+    context.read<TransactionBloc>().add(LoadTransactions(categoryId: null, month: null, year: null));
   }
 
   @override

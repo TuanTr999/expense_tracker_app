@@ -166,7 +166,7 @@ class _AllCategoryState extends State<AllCategory> {
       body: BlocListener<CategoryBloc, CategoryState>(
         listenWhen: (pre, cur) => cur.status == AppStatus.deleted,
         listener: (context, state) {
-          context.read<TransactionBloc>().add(LoadTransactions());
+          context.read<TransactionBloc>().add(LoadTransactions(categoryId: null, month: null, year: null));
         },
         child: Stack(
           children: [

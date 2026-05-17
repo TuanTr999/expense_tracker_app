@@ -7,7 +7,13 @@ abstract class TransactionEvent {}
 // =====================
 // CRUD
 // =====================
-class LoadTransactions extends TransactionEvent {}
+class LoadTransactions extends TransactionEvent {
+  final int? categoryId;
+  final int? month;
+  final int? year;
+
+  LoadTransactions({this.categoryId,this.month, this.year});
+}
 
 class AddTransaction extends TransactionEvent {
   final TransactionModel transaction;
@@ -46,3 +52,12 @@ class NextDate extends TransactionEvent {}
 class PreviousDate extends TransactionEvent {}
 
 class ResetFilter extends TransactionEvent {}
+
+class LoadTransactionBalance extends TransactionEvent{
+  final int? day;
+  final int? month;
+  final int? year;
+
+
+  LoadTransactionBalance(this.day,this.month, this.year);
+}

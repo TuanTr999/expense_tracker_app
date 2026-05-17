@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_balance_model.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/core/utils/transaction_group.dart';
 import 'package:expense_tracker_app/core/enums/app_type.dart';
@@ -16,6 +17,8 @@ class TransactionState {
   final DateTime? fromDate;
   final DateTime? toDate;
 
+  final BalanceModel? balance;
+
   final bool reset;
 
   const TransactionState({
@@ -28,6 +31,7 @@ class TransactionState {
     this.fromDate,
     this.toDate,
     required this.reset,
+    this.balance
   });
 
   TransactionState copyWith({
@@ -40,6 +44,7 @@ class TransactionState {
     DateTime? fromDate,
     DateTime? toDate,
     bool? reset,
+    BalanceModel? balance
   }) {
     return TransactionState(
       allTransactions: allTransactions ?? this.allTransactions,
@@ -51,6 +56,7 @@ class TransactionState {
       fromDate: fromDate ?? this.fromDate,
       toDate: toDate ?? this.toDate,
       reset: reset ?? this.reset,
+      balance: balance ?? this.balance
     );
   }
 }

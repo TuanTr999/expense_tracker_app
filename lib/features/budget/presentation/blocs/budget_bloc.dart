@@ -134,7 +134,7 @@ class BudgetBloc extends Bloc<BudgetEvent, BudgetState> {
           : emit(
               state.copyWith(
                 type: event.type,
-                reset: true,
+                // reset: true,
                 status: AppStatus.success,
               ),
             );

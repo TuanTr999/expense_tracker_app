@@ -1,3 +1,4 @@
+import 'package:expense_tracker_app/features/transactions/data/models/transaction_balance_model.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
@@ -31,6 +32,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<NextDate>(_next);
     on<PreviousDate>(_prev);
     on<ResetFilter>(_reset);
+    on<LoadTransactionBalance>(_loadTransactionBalance);
   }
 
   // =====================
@@ -41,7 +43,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoadTransactions event,
     Emitter<TransactionState> emit,
   ) async {
-    final data = await repository.getTransactions();
+    final data = await repository.getTransactions(categoryId: event.categoryId ,month: event.month, year: event.year);
 
     final newState = state.copyWith(allTransactions: data);
 
@@ -206,5 +208,10 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     final newState = state.copyWith(selectedDate: DateTime.now(), reset: false);
 
     emit(_applyFilter(newState));
+  }
+
+  void _loadTransactionBalance(LoadTransactionBalance event, Emitter<TransactionState> emit) async{
+    BalanceModel balanceModel = await repository.getTransactionsBalance(day: event.day,month: event.month, year: event.year);
+    emit(state.copyWith(balance: balanceModel));
   }
 }
