@@ -2,6 +2,7 @@ import 'package:expense_tracker_app/features/categories/presentation/blocs/categ
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_page.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -395,25 +396,96 @@ class _DatePickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () async {
-        final picked = await showDatePicker(
+      onTap: () {
+        DateTime tempDate = date ?? DateTime.now();
+
+        showModalBottomSheet(
           context: context,
-          initialDate: DateTime.now(),
-          firstDate: DateTime(2020),
-          lastDate: DateTime(2100),
+          backgroundColor: Colors.white,
+
+          builder: (_) {
+            return SizedBox(
+              height: 300,
+
+              child: Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                      children: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+
+                          child: const Text(
+                            'Bỏ qua',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+
+                        TextButton(
+                          onPressed: () {
+                            onPicked(tempDate);
+
+                            Navigator.pop(context);
+                          },
+
+                          child: const Text(
+                            'OK',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Expanded(
+                    child: CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.date,
+
+                      initialDateTime: tempDate,
+
+                      minimumDate: DateTime(2020),
+                      maximumDate: DateTime(2100),
+
+                      onDateTimeChanged: (value) {
+                        tempDate = value;
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         );
-        if (picked != null) onPicked(picked);
       },
+
       child: Container(
         width: 110,
         height: 40,
+
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(10),
         ),
+
         child: Center(
           child: Text(
             formatDate(filterType, date),
+
             style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,

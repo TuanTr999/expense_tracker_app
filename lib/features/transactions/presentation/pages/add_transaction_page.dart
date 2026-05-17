@@ -6,6 +6,7 @@ import 'package:expense_tracker_app/features/categories/presentation/blocs/categ
 import 'package:expense_tracker_app/features/categories/presentation/pages/all_category.dart';
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -163,18 +164,81 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 SizedBox(width: 20),
                 Expanded(
                   child: InkWell(
-                    onTap: () async {
-                      final pickedDate = await showDatePicker(
+                    onTap: () {
+                      DateTime tempDate = selectedDate;
+
+                      showModalBottomSheet(
                         context: context,
-                        initialDate: DateTime.now(),
-                        firstDate: DateTime(2020),
-                        lastDate: DateTime(2100),
+                        backgroundColor: Colors.white,
+                        builder: (_) {
+                          return SizedBox(
+                            height: 300,
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+                                    children: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+
+                                        child: const Text(
+                                          'Bỏ qua',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+
+                                      TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            selectedDate = tempDate;
+                                          });
+
+                                          Navigator.pop(context);
+                                        },
+
+                                        child: const Text(
+                                          'OK',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Expanded(
+                                  child: CupertinoDatePicker(
+                                    mode: CupertinoDatePickerMode.date,
+
+                                    initialDateTime: selectedDate,
+
+                                    minimumDate: DateTime(2020),
+                                    maximumDate: DateTime(2100),
+
+                                    onDateTimeChanged: (value) {
+                                      tempDate = value;
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       );
-                      if (pickedDate != null) {
-                        setState(() {
-                          selectedDate = pickedDate;
-                        });
-                      }
                     },
                     child: Container(
                       width: 110,
