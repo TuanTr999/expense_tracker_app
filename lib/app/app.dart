@@ -6,6 +6,8 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_bl
 import 'package:expense_tracker_app/features/categories/data/datasources/category_remote_datasource.dart';
 import 'package:expense_tracker_app/features/navigation/presentation/pages/main/main_screen.dart';
 import 'package:expense_tracker_app/features/transactions/data/datasources/transaction_remote_datasource.dart';
+import 'package:expense_tracker_app/features/wallet/data/datasources/wallet_remote_datasource.dart';
+import 'package:expense_tracker_app/features/wallet/data/repositories/wallet_repository_impl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -20,6 +22,8 @@ import '../features/categories/data/repositories/categoru_repository_impl.dart';
 import '../features/categories/presentation/blocs/category/category_bloc.dart';
 import '../features/transactions/data/repositories/transaction_repository_impl.dart';
 import '../features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import '../features/wallet/data/repositories/wallet_repository.dart';
+import '../features/wallet/presentation/blocs/wallet_bloc.dart';
 
 class App extends StatefulWidget {
   const App({super.key});
@@ -32,6 +36,7 @@ class _AppState extends State<App> {
   late final TransactionBloc _transactionBloc;
   late final CategoryBloc _categoryBloc;
   late final BudgetBloc _budgetBloc;
+  late final WalletBloc _walletBloc;
 
   @override
   void initState() {
@@ -44,9 +49,8 @@ class _AppState extends State<App> {
     _categoryBloc = CategoryBloc(
       CategoryRepositoryImpl(CategoryRemoteDataSource(dio)),
     );
-    _budgetBloc = BudgetBloc(
-      BudgetRepositoryImpl(BudgetRemoteDatasource(dio)),
-    );
+    _budgetBloc = BudgetBloc(BudgetRepositoryImpl(BudgetRemoteDatasource(dio)));
+    _walletBloc = WalletBloc(WalletRepositoryImpl(WalletRemoteDataSource(dio)));
   }
 
   @override
@@ -76,12 +80,11 @@ class _AppState extends State<App> {
           BlocProvider.value(value: _budgetBloc),
           BlocProvider(
             create: (_) => AuthBloc(
-              AuthRepositoryImpl(
-                AuthService(
-                  FirebaseAuth.instance,
-                ),
-              ),
+              AuthRepositoryImpl(AuthService(FirebaseAuth.instance)),
             ),
+          ),
+          BlocProvider(
+            create: (_) => _walletBloc,
           ),
         ],
         child: const AuthWrapper(),

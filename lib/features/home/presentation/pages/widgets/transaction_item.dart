@@ -1,5 +1,6 @@
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/transaction_detail_page.dart';
+import 'package:expense_tracker_app/features/wallet/presentation/blocs/wallet_bloc.dart';
 import 'package:flutter/material.dart';
 
 import 'package:expense_tracker_app/core/utils/format.dart';
@@ -26,6 +27,7 @@ class TransactionItem extends StatelessWidget {
               providers: [
                 BlocProvider.value(value: context.read<TransactionBloc>()),
                 BlocProvider.value(value: context.read<CategoryBloc>()),
+                BlocProvider.value(value: context.read<WalletBloc>())
               ],
               child: TransactionDetail(transactionId: transaction.id),
             ),

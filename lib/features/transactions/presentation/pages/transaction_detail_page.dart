@@ -3,6 +3,7 @@ import 'package:expense_tracker_app/core/utils/format.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/update_transaction_page.dart';
+import 'package:expense_tracker_app/features/wallet/presentation/blocs/wallet_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -128,6 +129,9 @@ class TransactionDetail extends StatelessWidget {
 
                       if (confirm == true) {
                         bloc.add(DeleteTransaction(transaction.id));
+
+                        if (!context.mounted) return;
+
                         Navigator.pop(context);
                       }
                     },
@@ -146,7 +150,7 @@ class TransactionDetail extends StatelessWidget {
             padding: EdgeInsets.all(20),
             child: Container(
               width: double.infinity,
-              height: 320,
+              // height: 320,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(20),
@@ -154,6 +158,7 @@ class TransactionDetail extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(
@@ -237,6 +242,49 @@ class TransactionDetail extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
+                    SizedBox(height: 20),
+                    Text(
+                      'Nguồn tiền',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Row(
+                      children: [
+                        Container(
+                          width: 18,
+                          height: 18,
+                          padding: const EdgeInsets.all(2),
+                          child: Image.asset(
+                            'assets/icons/wallet/${transaction.walletIcon}',
+                            errorBuilder: (_, __, ___) {
+                              return const Icon(
+                                Icons.account_balance_wallet_rounded,
+                                size: 20,
+                                color: Colors.grey,
+                              );
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(width: 5),
+
+                        Expanded(
+                          child: Text(
+                            transaction.walletName ?? '',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -264,6 +312,7 @@ class TransactionDetail extends StatelessWidget {
                           BlocProvider.value(
                             value: context.read<CategoryBloc>(),
                           ),
+                          BlocProvider.value(value: context.read<WalletBloc>())
                         ],
                         child: UpdateTransactionPage(
                           currentTransaction: transaction,

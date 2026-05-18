@@ -5,6 +5,15 @@ const db = require('./db');
 // giả lập user
 const userId = 1;
 
+function getWalletChange(type, amount) {
+  const value = Number(amount);
+
+  if (type === 'income') return value;
+  if (type === 'expense') return -value;
+
+  return 0;
+}
+
 // GET BALANCE
 router.get('/transactions/balance', async (req, res) => {
   const { day, month, year } = req.query;
@@ -20,9 +29,6 @@ router.get('/transactions/balance', async (req, res) => {
   const currentDay = day ? Number(day) : null;
 
   try {
-    // MODE 1: day + month + year
-    // previousBalance = tổng tồn lũy kế trước ngày hiện tại
-    // currentBalance = tồn riêng ngày hiện tại
     if (currentDay && currentMonth) {
       const [currentRows] = await db.query(
         `
@@ -77,9 +83,6 @@ router.get('/transactions/balance', async (req, res) => {
       });
     }
 
-    // MODE 2: month + year
-    // previousBalance = tổng tồn lũy kế trước tháng hiện tại
-    // currentBalance = tồn riêng tháng hiện tại
     if (currentMonth) {
       const [currentRows] = await db.query(
         `
@@ -130,9 +133,6 @@ router.get('/transactions/balance', async (req, res) => {
       });
     }
 
-    // MODE 3: year
-    // previousBalance = tổng tồn lũy kế trước năm hiện tại
-    // currentBalance = tồn riêng năm hiện tại
     const [currentRows] = await db.query(
       `
       SELECT COALESCE(SUM(
@@ -188,76 +188,242 @@ router.get('/transactions/balance', async (req, res) => {
 router.get('/transactions', async (req, res) => {
   const { categoryId, month, year } = req.query;
 
-  let query = `
-    SELECT t.*, c.icon AS category_icon
-    FROM transactions t
-    LEFT JOIN categories c ON t.category_id = c.id
-    WHERE t.user_id = ?
-  `;
+  try {
+    let query = `
+      SELECT
+        t.*,
+        c.icon AS category_icon,
+        c.name AS category_name,
+        w.name AS wallet_name,
+        w.icon AS wallet_icon,
+        w.type AS wallet_type
+      FROM transactions t
+      LEFT JOIN categories c ON t.category_id = c.id
+      LEFT JOIN wallets w ON t.wallet_id = w.id
+      WHERE t.user_id = ?
+    `;
 
-  let params = [userId];
+    const params = [userId];
 
-  if (categoryId) {
-    query += ' AND t.category_id = ?';
-    params.push(categoryId);
+    if (categoryId) {
+      query += ' AND t.category_id = ?';
+      params.push(categoryId);
+    }
+
+    if (month && year) {
+      query += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
+      params.push(month, year);
+    } else if (year) {
+      query += ' AND YEAR(t.date) = ?';
+      params.push(year);
+    }
+
+    query += ' ORDER BY t.date DESC';
+
+    const [rows] = await db.query(query, params);
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Failed to get transactions',
+    });
   }
-
-  // có month + year → lọc theo tháng
-  if (month && year) {
-    query += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
-    params.push(month, year);
-  }
-
-  // chỉ có year → lọc theo năm
-  else if (year) {
-    query += ' AND YEAR(t.date) = ?';
-    params.push(year);
-  }
-
-  // không có year → không thêm điều kiện gì (lấy tất cả)
-
-  query += ' ORDER BY t.date DESC';
-
-  const [rows] = await db.query(query, params);
-  res.json(rows);
 });
 
 // POST
 router.post('/transactions', async (req, res) => {
-  const { id, title, amount, date, type, category_id } = req.body;
+  const { id, title, amount, date, type, category_id, wallet_id } = req.body;
 
-  await db.query(
-    `INSERT INTO transactions
-    (id, title, amount, date, type, category_id, user_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`,
-    [id, title, amount, date, type, category_id, userId]
-  );
+  if (!wallet_id) {
+    return res.status(400).json({
+      message: 'wallet_id is required',
+    });
+  }
 
-  res.json({ message: 'Added' });
+  const value = Number(amount);
+  const walletChange = getWalletChange(type, value);
+
+  try {
+    await db.query('START TRANSACTION');
+
+    await db.query(
+      `
+      INSERT INTO transactions
+      (id, title, amount, date, type, category_id, wallet_id, user_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      [id, title, value, date, type, category_id, wallet_id, userId]
+    );
+
+    await db.query(
+      `
+      UPDATE wallets
+      SET balance = balance + ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [walletChange, wallet_id, userId]
+    );
+
+    await db.query('COMMIT');
+
+    res.json({ message: 'Added' });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Failed to add transaction',
+    });
+  }
 });
 
 // PUT
 router.put('/transactions/:id', async (req, res) => {
-  const { title, amount, date, type, category_id } = req.body;
+  const { title, amount, date, type, category_id, wallet_id } = req.body;
 
-  await db.query(
-    `UPDATE transactions
-     SET title=?, amount=?, date=?, type=?, category_id=?
-     WHERE id=? AND user_id=?`,
-    [title, amount, date, type, category_id, req.params.id, userId]
-  );
+  if (!wallet_id) {
+    return res.status(400).json({
+      message: 'wallet_id is required',
+    });
+  }
 
-  res.json({ message: 'Updated' });
+  try {
+    await db.query('START TRANSACTION');
+
+    const [oldRows] = await db.query(
+      `
+      SELECT amount, type, wallet_id
+      FROM transactions
+      WHERE id = ? AND user_id = ?
+      `,
+      [req.params.id, userId]
+    );
+
+    if (oldRows.length === 0) {
+      await db.query('ROLLBACK');
+
+      return res.status(404).json({
+        message: 'Transaction not found',
+      });
+    }
+
+    const oldTransaction = oldRows[0];
+
+    const oldChange = getWalletChange(
+      oldTransaction.type,
+      oldTransaction.amount
+    );
+
+    await db.query(
+      `
+      UPDATE wallets
+      SET balance = balance - ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [oldChange, oldTransaction.wallet_id, userId]
+    );
+
+    const newAmount = Number(amount);
+    const newChange = getWalletChange(type, newAmount);
+
+    await db.query(
+      `
+      UPDATE transactions
+      SET title = ?, amount = ?, date = ?, type = ?, category_id = ?, wallet_id = ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [
+        title,
+        newAmount,
+        date,
+        type,
+        category_id,
+        wallet_id,
+        req.params.id,
+        userId,
+      ]
+    );
+
+    await db.query(
+      `
+      UPDATE wallets
+      SET balance = balance + ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [newChange, wallet_id, userId]
+    );
+
+    await db.query('COMMIT');
+
+    res.json({ message: 'Updated' });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Failed to update transaction',
+    });
+  }
 });
 
 // DELETE
 router.delete('/transactions/:id', async (req, res) => {
-  await db.query(
-    'DELETE FROM transactions WHERE id=? AND user_id=?',
-    [req.params.id, userId]
-  );
+  try {
+    await db.query('START TRANSACTION');
 
-  res.json({ message: 'Deleted' });
+    const [oldRows] = await db.query(
+      `
+      SELECT amount, type, wallet_id
+      FROM transactions
+      WHERE id = ? AND user_id = ?
+      `,
+      [req.params.id, userId]
+    );
+
+    if (oldRows.length === 0) {
+      await db.query('ROLLBACK');
+
+      return res.status(404).json({
+        message: 'Transaction not found',
+      });
+    }
+
+    const oldTransaction = oldRows[0];
+
+    const oldChange = getWalletChange(
+      oldTransaction.type,
+      oldTransaction.amount
+    );
+
+    await db.query(
+      `
+      UPDATE wallets
+      SET balance = balance - ?
+      WHERE id = ? AND user_id = ?
+      `,
+      [oldChange, oldTransaction.wallet_id, userId]
+    );
+
+    await db.query(
+      `
+      DELETE FROM transactions
+      WHERE id = ? AND user_id = ?
+      `,
+      [req.params.id, userId]
+    );
+
+    await db.query('COMMIT');
+
+    res.json({ message: 'Deleted' });
+  } catch (error) {
+    await db.query('ROLLBACK');
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Failed to delete transaction',
+    });
+  }
 });
 
 module.exports = router;

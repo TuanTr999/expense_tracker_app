@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:expense_tracker_app/core/constants/app_colors.dart';
 import 'package:expense_tracker_app/core/enums/app_status.dart';
 import 'package:expense_tracker_app/features/categories/data/models/category_model.dart';
@@ -14,6 +15,10 @@ import '../../../../core/constants/app_icon.dart';
 import '../../../../core/enums/app_type.dart';
 import '../../../../core/utils/current_date.dart';
 import '../../../categories/presentation/blocs/category/category_bloc.dart';
+import '../../../wallet/data/models/wallet_model.dart';
+import '../../../wallet/presentation/blocs/wallet_bloc.dart';
+import '../../../wallet/presentation/blocs/wallet_event.dart';
+import '../../../wallet/presentation/blocs/wallet_state.dart';
 import '../blocs/transaction/transaction_event.dart';
 import '../blocs/transaction/transaction_state.dart';
 
@@ -30,6 +35,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
   DateTime selectedDate = DateTime.now();
   AppType? type;
   CategoryModel? selectedCategory;
+  WalletModel? selectedWallet;
 
   @override
   void initState() {
@@ -38,6 +44,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
     type = AppType.expense;
 
     context.read<CategoryBloc>().add(LoadCategoryByTypeEvent(AppType.expense));
+    context.read<WalletBloc>().add(LoadWalletsEvent());
   }
 
   @override
@@ -49,15 +56,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
         automaticallyImplyLeading: false,
         backgroundColor: AppColors.primary,
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             AppCircleButton(
               onTap: () {
                 Navigator.pop(context);
               },
-              child: Icon(Icons.close, size: 30,),
+              child: Icon(Icons.close, size: 30),
             ),
-            SizedBox(width: 20),
             Container(
               width: 240,
               height: 40,
@@ -87,7 +93,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           color: type == AppType.expense
                               ? Colors.red
                               : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: Center(
                           child: Text(
@@ -120,7 +126,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                           color: type == AppType.income
                               ? Colors.green
                               : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(18),
                         ),
                         child: Center(
                           child: Text(
@@ -138,6 +144,25 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 ),
               ),
             ),
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => MultiBlocProvider(
+                      providers: [
+                        BlocProvider.value(value: context.read<CategoryBloc>()),
+                        BlocProvider.value(
+                          value: context.read<TransactionBloc>(),
+                        ),
+                      ],
+                      child: AllCategory(),
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.settings),
+            ),
           ],
         ),
       ),
@@ -149,7 +174,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             Row(
               children: [
                 SizedBox(
-                  width: 80,
+                  width: 110,
                   child: Center(
                     child: Text(
                       'Ngày',
@@ -170,7 +195,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                       showModalBottomSheet(
                         context: context,
                         backgroundColor: Colors.white,
-                        builder: (_) {
+                        builder: (sheetContext) {
                           return SizedBox(
                             height: 300,
                             child: Column(
@@ -182,12 +207,13 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                   ),
 
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
 
                                     children: [
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.pop(context);
+                                          Navigator.pop(sheetContext);
                                         },
 
                                         child: const Text(
@@ -205,7 +231,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                                             selectedDate = tempDate;
                                           });
 
-                                          Navigator.pop(context);
+                                          Navigator.pop(sheetContext);
                                         },
 
                                         child: const Text(
@@ -242,10 +268,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                     },
                     child: Container(
                       width: 110,
-                      height: 40,
+                      height: 50,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(18),
                       ),
                       child: Center(
                         child: Text(
@@ -266,7 +292,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             Row(
               children: [
                 SizedBox(
-                  width: 80,
+                  width: 110,
                   child: Center(
                     child: Text(
                       'Tiền',
@@ -281,10 +307,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 SizedBox(width: 25),
                 Expanded(
                   child: Container(
-                    height: 40,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     alignment: Alignment.center,
                     child: TextField(
@@ -310,7 +336,7 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             Row(
               children: [
                 SizedBox(
-                  width: 80,
+                  width: 110,
                   child: Center(
                     child: Text(
                       'Ghi chú',
@@ -325,10 +351,10 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 SizedBox(width: 25),
                 Expanded(
                   child: Container(
-                    height: 40,
+                    height: 50,
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(18),
                     ),
                     alignment: Alignment.center,
                     child: TextField(
@@ -352,107 +378,318 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
             ),
             Divider(color: Colors.grey, thickness: 1, height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Danh mục',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                const SizedBox(
+                  width: 110,
+                  child: Center(
+                    child: Text(
+                      'Danh mục',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
-                IconButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => MultiBlocProvider(
-                          providers: [
-                            BlocProvider.value(
-                              value: context.read<CategoryBloc>(),
+
+                const SizedBox(width: 25),
+
+                Expanded(
+                  child: BlocBuilder<CategoryBloc, CategoryState>(
+                    builder: (context, state) {
+                      if (state.status == AppStatus.loading) {
+                        return const SizedBox(
+                          height: 40,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final categories = state.categories;
+
+                      if (categories.isEmpty) {
+                        return Container(
+                          height: 58,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Text(
+                            'Không có danh mục',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
                             ),
-                            BlocProvider.value(value: context.read<TransactionBloc>())
-                          ],
-                          child: AllCategory(),
-                        ),
-                      ),
-                    );
-                  },
-                  icon: Icon(Icons.settings),
-                ),
-              ],
-            ),
-            Expanded(
-              child: BlocBuilder<CategoryBloc, CategoryState>(
-                builder: (context, state) {
-                  if (state.status == AppStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+                          ),
+                        );
+                      }
 
-                  final categories = state.categories;
+                      return DropdownButtonHideUnderline(
+                        child: DropdownButton2<CategoryModel>(
+                          isExpanded: true,
 
-                  if (categories.isEmpty) {
-                    return SizedBox();
-                  }
+                          valueListenable: ValueNotifier(selectedCategory),
 
-                  return GridView.builder(
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 10,
-                      mainAxisSpacing: 10,
-                    ),
-                    itemCount: categories.length,
-                    itemBuilder: (context, index) {
-                      final item = categories[index];
-                      return GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            selectedCategory = item;
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          child: Container(
+                          hint: const Text(
+                            'Chọn danh mục',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+
+                          items: categories.map<DropdownItem<CategoryModel>>((
+                            item,
+                          ) {
+                            final isSelected = selectedCategory?.id == item.id;
+
+                            return DropdownItem<CategoryModel>(
+                              value: item,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    padding: const EdgeInsets.all(8),
+                                    child: Image.asset(
+                                      'assets/icons/${item.type.name}/${item.icon}',
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      item.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Colors.blue
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCategory = value;
+                            });
+                          },
+
+                          buttonStyleData: ButtonStyleData(
+                            height: 58,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+
                             decoration: BoxDecoration(
                               color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: selectedCategory?.id == item.id
-                                    ? Colors.blue
-                                    : Colors.transparent,
-                                width: 2,
-                              ),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Image.asset(
-                                  'assets/icons/${item.type.name}/${item.icon}',
-                                  width: 40,
-                                  height: 40,
-                                ),
-                                SizedBox(height: 5),
-                                Text(
-                                  item.name,
-                                  style: TextStyle(
-                                    overflow: TextOverflow.ellipsis,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: item.id == selectedCategory?.id
-                                        ? Colors.black
-                                        : Colors.grey,
-                                  ),
+
+                              borderRadius: BorderRadius.circular(18),
+
+                              border: Border.all(color: Colors.grey.shade200),
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
                           ),
+
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.blue,
+                              size: 28,
+                            ),
+                          ),
+
+                          dropdownStyleData: DropdownStyleData(
+                            maxHeight: 300,
+
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+
+                            elevation: 4,
+                          ),
+
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                          ),
                         ),
                       );
                     },
-                  );
-                },
-              ),
+                  ),
+                ),
+              ],
+            ),
+            Divider(color: Colors.grey, thickness: 1, height: 20),
+
+            Row(
+              children: [
+                const SizedBox(
+                  width: 110,
+                  child: Center(
+                    child: Text(
+                      'Nguồn tiền',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(width: 25),
+
+                Expanded(
+                  child: BlocBuilder<WalletBloc, WalletState>(
+                    builder: (context, state) {
+                      if (state.status == AppStatus.loading) {
+                        return const SizedBox(
+                          height: 40,
+                          child: Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      final wallets = state.wallets;
+
+                      if (wallets.isEmpty) {
+                        return Container(
+                          height: 50,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: const Text(
+                            'Không có nguồn tiền',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        );
+                      }
+
+                      return DropdownButtonHideUnderline(
+                        child: DropdownButton2<WalletModel>(
+                          isExpanded: true,
+
+                          valueListenable: ValueNotifier(selectedWallet),
+
+                          hint: const Text(
+                            'Chọn nguồn tiền',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+
+                          items: wallets.map<DropdownItem<WalletModel>>((item) {
+                            final isSelected = selectedWallet?.id == item.id;
+
+                            return DropdownItem<WalletModel>(
+                              value: item,
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    padding: const EdgeInsets.all(8),
+                                    child: Image.asset(
+                                      'assets/icons/wallet/${item.icon}',
+                                      errorBuilder: (_, __, ___) {
+                                        return const Icon(
+                                          Icons.account_balance_wallet_rounded,
+                                          color: Colors.grey,
+                                        );
+                                      },
+                                    ),
+                                  ),
+
+                                  const SizedBox(width: 8),
+
+                                  Expanded(
+                                    child: Text(
+                                      item.name,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                        color: isSelected
+                                            ? Colors.blue
+                                            : Colors.black,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+
+                          onChanged: (value) {
+                            setState(() {
+                              selectedWallet = value;
+                            });
+                          },
+
+                          buttonStyleData: ButtonStyleData(
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(horizontal: 14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(color: Colors.grey.shade200),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          iconStyleData: const IconStyleData(
+                            icon: Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.blue,
+                              size: 28,
+                            ),
+                          ),
+
+                          dropdownStyleData: DropdownStyleData(
+                            maxHeight: 300,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            elevation: 4,
+                          ),
+
+                          menuItemStyleData: const MenuItemStyleData(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -483,6 +720,8 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 error = 'Chọn loại giao dịch';
               } else if (selectedCategory == null) {
                 error = 'Chọn danh mục';
+              } else if (selectedWallet == null) {
+                error = 'Chọn nguồn tiền';
               }
 
               if (error.isNotEmpty) {
@@ -498,10 +737,14 @@ class _AddTransactionPageState extends State<AddTransactionPage> {
                 amount: amount!,
                 date: selectedDate,
                 type: type!,
-                categoryId: selectedCategory!.id!,
+                categoryId: selectedCategory!.id!, walletId: selectedWallet!.id!,
               );
 
-              context.read<TransactionBloc>().add(AddTransaction(transaction));
+              final transactionBloc = context.read<TransactionBloc>();
+
+              transactionBloc.add(AddTransaction(transaction));
+
+              if (!context.mounted) return;
 
               Navigator.pop(context);
             },

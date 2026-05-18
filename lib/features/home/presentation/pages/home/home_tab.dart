@@ -2,6 +2,7 @@ import 'package:expense_tracker_app/features/categories/presentation/blocs/categ
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_bloc.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/pages/all_transactions_page.dart';
+import 'package:expense_tracker_app/features/wallet/presentation/blocs/wallet_bloc.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -242,6 +243,7 @@ class _TransactionListHeader extends StatelessWidget {
                           value: context.read<TransactionBloc>(),
                         ),
                         BlocProvider.value(value: context.read<CategoryBloc>()),
+                        BlocProvider.value(value: context.read<WalletBloc>())
                       ],
                       child: AllTransactionsScreen(
                         transactions: state.groupedTransactions,
@@ -337,6 +339,7 @@ class _AddTransactionButton extends StatelessWidget {
                         value: context.read<TransactionBloc>(),
                       ),
                       BlocProvider.value(value: context.read<CategoryBloc>()),
+                      BlocProvider.value(value: context.read<WalletBloc>())
                     ],
                     child: AddTransactionPage(),
                   ),

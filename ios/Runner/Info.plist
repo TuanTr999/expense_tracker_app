@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
+
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
@@ -59,5 +60,14 @@
             </array>
           </dict>
         </array>
+
+        <key>NSPhotoLibraryUsageDescription</key>
+        <string>Ứng dụng cần truy cập thư viện ảnh</string>
+
+        <key>NSCameraUsageDescription</key>
+        <string>Ứng dụng cần truy cập camera</string>
+
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>Ứng dụng cần lưu ảnh vào thư viện</string>
 </dict>
 </plist>
