@@ -33,6 +33,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<PreviousDate>(_prev);
     on<ResetFilter>(_reset);
     on<LoadTransactionBalance>(_loadTransactionBalance);
+    on<LoadBudgetTransactions>(_loadBudgetTransactions);
   }
 
   // =====================
@@ -213,5 +214,24 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   void _loadTransactionBalance(LoadTransactionBalance event, Emitter<TransactionState> emit) async{
     BalanceModel balanceModel = await repository.getTransactionsBalance(day: event.day,month: event.month, year: event.year);
     emit(state.copyWith(balance: balanceModel));
+  }
+
+  Future<void> _loadBudgetTransactions(
+      LoadBudgetTransactions event,
+      Emitter<TransactionState> emit,
+      ) async {
+    final data = await repository.getTransactions(
+      categoryId: event.categoryId,
+      month: event.month,
+      year: event.year,
+    );
+
+    emit(
+      state.copyWith(
+        allTransactions: data,
+        filteredTransactions: data,
+        groupedTransactions: groupByDate(data),
+      ),
+    );
   }
 }

@@ -281,7 +281,7 @@ class _WeekDayItem extends StatelessWidget {
 }
 
 class _Statistical extends StatelessWidget {
-  const _Statistical({super.key});
+  const _Statistical();
 
   @override
   Widget build(BuildContext context) {
@@ -306,13 +306,13 @@ class _Statistical extends StatelessWidget {
                   _StatItem(
                     widthC: MediaQuery.of(context).size.width / 4,
                     title: 'Thu nhập',
-                    value: AppFormat.currency(income ?? 0),
+                    value: AppFormat.currency(income),
                     colorC: Colors.green,
                   ),
                   _StatItem(
                     widthC: MediaQuery.of(context).size.width / 4,
                     title: 'Chi tiêu',
-                    value: AppFormat.currency(expense ?? 0),
+                    value: AppFormat.currency(expense),
                     colorC: Colors.red,
                   ),
                   _StatItem(
@@ -372,7 +372,7 @@ class _StatItem extends StatelessWidget {
         children: [
           Text(
             title,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 4),
           AutoSizeText(

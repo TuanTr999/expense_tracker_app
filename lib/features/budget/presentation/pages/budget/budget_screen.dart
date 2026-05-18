@@ -7,11 +7,18 @@ import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_ev
 import 'package:expense_tracker_app/features/budget/presentation/blocs/budget_state.dart';
 import 'package:expense_tracker_app/features/budget/presentation/pages/budget/all_budgets_screen.dart';
 import 'package:expense_tracker_app/features/budget/presentation/widgets/budget_app_bar.dart';
+import 'package:expense_tracker_app/features/budget/presentation/widgets/transaction_budget_item.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_bloc.dart';
 import 'package:expense_tracker_app/features/categories/presentation/blocs/category/category_event.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/utils/current_date.dart';
+import '../../../../home/presentation/pages/widgets/transaction_item.dart';
+import '../../../../transactions/presentation/blocs/transaction/transaction_bloc.dart';
+import '../../../../transactions/presentation/blocs/transaction/transaction_event.dart';
 
 class BudgetScreen extends StatefulWidget {
   const BudgetScreen({super.key});
@@ -31,7 +38,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
     super.didChangeDependencies();
 
     context.read<CategoryBloc>().add(LoadCategoryEvent());
-    context.read<BudgetBloc>().add(LoadBudgetSummary(DateTime.now().month, DateTime.now().year));
+    context.read<BudgetBloc>().add(
+      LoadBudgetSummary(DateTime.now().month, DateTime.now().year),
+    );
   }
 
   @override
@@ -260,20 +269,54 @@ class _BudgetSummaryCard extends StatelessWidget {
   }
 }
 
-class _ListBudgetsSummary extends StatelessWidget {
+class _ListBudgetsSummary extends StatefulWidget {
   const _ListBudgetsSummary();
+
+  @override
+  State<_ListBudgetsSummary> createState() => _ListBudgetsSummaryState();
+}
+
+class _ListBudgetsSummaryState extends State<_ListBudgetsSummary> {
+  int? expandedCategoryId;
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<BudgetBloc, BudgetState>(
-      // buildWhen: (pre, cur) => pre.budgetsSummary != cur.budgetsSummary,
       builder: (context, state) {
         final budgetsSummary = state.budgetsSummary.where((e) {
           return e.budgetAmount != 0;
         }).toList();
+
         return ListView.separated(
           itemBuilder: (context, index) {
-            return _DetailBudgetSummary(budgetsSummary: budgetsSummary[index]);
+            final item = budgetsSummary[index];
+
+            return _DetailBudgetSummary(
+              budgetsSummary: item,
+              isExpanded: expandedCategoryId == item.categoryId,
+              onTap: () {
+                final budgetState = context.read<BudgetBloc>().state;
+
+                setState(() {
+                  expandedCategoryId =
+                  expandedCategoryId == item.categoryId
+                      ? null
+                      : item.categoryId;
+                });
+
+                if (expandedCategoryId == item.categoryId) {
+                  context.read<TransactionBloc>().add(
+                    LoadBudgetTransactions(
+                      categoryId: item.categoryId,
+                      month: budgetState.type == FilterType.month
+                          ? budgetState.selectedDate.month
+                          : null,
+                      year: budgetState.selectedDate.year,
+                    ),
+                  );
+                }
+              },
+            );
           },
           separatorBuilder: (context, index) {
             return const SizedBox(height: 10);
@@ -286,83 +329,166 @@ class _ListBudgetsSummary extends StatelessWidget {
 }
 
 class _DetailBudgetSummary extends StatelessWidget {
-  const _DetailBudgetSummary({required this.budgetsSummary});
+  const _DetailBudgetSummary({
+    required this.budgetsSummary,
+    required this.isExpanded,
+    required this.onTap,
+  });
 
   final BudgetSummaryModel budgetsSummary;
-
+  final bool isExpanded;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
+    return BlocBuilder<TransactionBloc, TransactionState>(
+      builder: (context, transactionState) {
+        final groupedTransactions = transactionState.groupedTransactions;
+
+        return Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(30),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Image.asset(
-                  'assets/icons/expense/${budgetsSummary.categoryIcon}',
-                  width: 30,
-                  height: 30,
+                Row(
+                  children: [
+                    Image.asset(
+                      'assets/icons/expense/${budgetsSummary.categoryIcon}',
+                      width: 30,
+                      height: 30,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      budgetsSummary.categoryName,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const Spacer(),
+                    InkWell(
+                      onTap: onTap,
+                      child: Icon(
+                        isExpanded
+                            ? Icons.keyboard_arrow_up
+                            : Icons.keyboard_arrow_down,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  budgetsSummary.categoryName,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+                const SizedBox(height: 10),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Ngân sách',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      AppFormat.currency(budgetsSummary.budgetAmount),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
                 ),
-                Spacer(),
-                Icon(Icons.keyboard_arrow_down),
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Ngân sách',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Chi tiêu',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    Text(
+                      AppFormat.currency(budgetsSummary.spentAmount),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+
+                if (isExpanded) ...[
+                  const SizedBox(height: 12),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.only(
+                      top: 8,
+                      bottom: 8,
+                      left: 12,
+                      right: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: groupedTransactions.isEmpty
+                        ? const Text(
+                      'Không có giao dịch',
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                        : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: groupedTransactions.map((group) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              formatDate(FilterType.day, group.date),
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                            const SizedBox(height: 5),
+                            ...group.items.map((item) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 10),
+                                child: TransactionBudgetItem(
+                                  transaction: item,
+                                ),
+                              );
+                            }).toList(),
+                          ],
+                        );
+                      }).toList(),
+                    ),
                   ),
-                ),
-                SizedBox(width: 20),
-                Text(
-                  AppFormat.currency(budgetsSummary.budgetAmount),
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
+                ],
               ],
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Chi tiêu',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey,
-                  ),
-                ),
-                SizedBox(width: 20),
-                Text(
-                  AppFormat.currency(budgetsSummary.spentAmount),
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
+
+
 
 class _AddTransactionButton extends StatelessWidget {
   const _AddTransactionButton();

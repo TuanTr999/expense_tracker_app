@@ -61,3 +61,15 @@ class LoadTransactionBalance extends TransactionEvent{
 
   LoadTransactionBalance(this.day,this.month, this.year);
 }
+
+class LoadBudgetTransactions extends TransactionEvent {
+  final int? categoryId;
+  final int? month;
+  final int? year;
+
+  LoadBudgetTransactions({
+    this.categoryId,
+    this.month,
+    this.year,
+  });
+}
