@@ -6,12 +6,16 @@ class CalendarDayItem extends StatelessWidget {
   final DateTime date;
   final bool isCurrentMonth;
   final double balance;
+  final VoidCallback onTap;
+  final bool isSelected;
 
   const CalendarDayItem({
     super.key,
     required this.date,
     required this.isCurrentMonth,
     required this.balance,
+    required this.onTap,
+    required this.isSelected
   });
 
   @override
@@ -21,68 +25,77 @@ class CalendarDayItem extends StatelessWidget {
     final isToday =
         date.day == now.day && date.month == now.month && date.year == now.year;
 
-    return Container(
-      padding: const EdgeInsets.all(1),
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(1),
 
-      decoration: BoxDecoration(
-        color: isToday
-            ? const Color(0xFFFFF3E0)
-            : isCurrentMonth
-            ? Colors.white
-            : Colors.grey.shade400,
+        decoration: BoxDecoration(
+          color: isSelected
+              ? const Color(0xFFFFF3E0)
+              : isToday
+              ? Colors.orangeAccent
+              : isCurrentMonth
+              ? Colors.white
+              : Colors.grey.shade400,
 
-        border: Border.all(color: Colors.grey.shade300, width: 0.5),
-      ),
-
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Align(
-            alignment: Alignment.topLeft,
-
-            child: Text(
-              '${date.day}',
-
-              style: TextStyle(
-                fontSize: 12,
-
-                fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
-
-                color: date.weekday == 6
-                    ? Colors.blue
-                    : date.weekday == 7
-                    ? Colors.red
-                    : Colors.black,
-              ),
-            ),
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 0.5,
           ),
+        ),
 
-          balance < 0 ? Spacer() : SizedBox.shrink(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
 
-          if (balance != 0)
-            SizedBox(
-              width: double.infinity,
-
-              child: AutoSizeText(
-                AppFormat.currencyNoVND(balance.abs()),
-
-                textAlign: TextAlign.center,
-
-                maxLines: 1,
-
-                minFontSize: 4,
-
-                overflow: TextOverflow.ellipsis,
+              child: Text(
+                '${date.day}',
 
                 style: TextStyle(
-                  fontSize: 8,
-                  fontWeight: FontWeight.bold,
-                  color: balance < 0 ? Colors.red : Colors.green,
+                  fontSize: 12,
+
+                  fontWeight: isToday ? FontWeight.bold : FontWeight.normal,
+
+                  color: date.weekday == 6
+                      ? Colors.blue
+                      : date.weekday == 7
+                      ? Colors.red
+                      : Colors.black,
                 ),
               ),
             ),
-        ],
+
+            balance < 0 ? Spacer() : SizedBox.shrink(),
+
+            if (balance != 0)
+              SizedBox(
+                width: double.infinity,
+
+                child: AutoSizeText(
+                  AppFormat.currencyNoVND(balance.abs()),
+
+                  textAlign: TextAlign.center,
+
+                  maxLines: 1,
+
+                  minFontSize: 4,
+
+                  overflow: TextOverflow.ellipsis,
+
+                  style: TextStyle(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: balance < 0 ? Colors.red : Colors.green,
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
+
   }
 }

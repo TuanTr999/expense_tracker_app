@@ -9,11 +9,13 @@ class TransactionRemoteDataSource {
 
   Future<List<TransactionModel>> getTransactions({
     int? categoryId,
+    int? day,
     int? month,
     int? year,
   }) async {
     final query = {
       if (categoryId != null) 'categoryId': categoryId,
+      if (day != null) 'day': day,
       if (month != null) 'month': month,
       if (year != null) 'year': year,
     };

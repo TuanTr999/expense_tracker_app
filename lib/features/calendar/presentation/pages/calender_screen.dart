@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/calendar_bloc.dart';
+import '../blocs/calendar_event.dart';
 import '../blocs/calendar_state.dart';
 import '../widgets/calendar_app_bar.dart';
 import '../widgets/calendar_day_item.dart';
@@ -20,27 +21,39 @@ class CalendarScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final transactionRepository = context.read<TransactionBloc>().repository;
 
+    final now = DateTime.now();
+
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => CalendarBloc()),
+        BlocProvider(
+          create: (_) => CalendarBloc(),
+        ),
+
         BlocProvider(
           create: (_) => TransactionBloc(transactionRepository)
             ..add(
               LoadTransactions(
-                categoryId: null,
-                month: DateTime.now().month,
-                year: DateTime.now().year,
+                month: now.month,
+                year: now.year,
+              ),
+            )
+            ..add(
+              LoadDayTransactions(
+                day: now.day,
+                month: now.month,
+                year: now.year,
               ),
             )
             ..add(
               LoadTransactionBalance(
                 null,
-                DateTime.now().month,
-                DateTime.now().year,
+                now.month,
+                now.year,
               ),
             ),
         ),
       ],
+
       child: const _CalendarView(),
     );
   }
@@ -51,36 +64,44 @@ class _CalendarView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CalendarBloc, CalendarState>(
-      listenWhen: (pre, cur) => pre.selectedDate != cur.selectedDate,
-      listener: (context, state) {
-        context.read<TransactionBloc>().add(
-          LoadTransactionBalance(
-            null,
-            state.selectedDate.month,
-            state.selectedDate.year,
-          ),
-        );
-        context.read<TransactionBloc>().add(
-          LoadTransactions(
-            categoryId: null,
-            month: state.selectedDate.month,
-            year: state.selectedDate.year,
-          ),
-        );
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CalendarBloc, CalendarState>(
+          listener: (context, state) {
+            _reloadCalendarData(context, state);
+          },
+        ),
+
+        BlocListener<TransactionBloc, TransactionState>(
+          listenWhen: (previous, current) {
+            return previous.allTransactions.length != current.allTransactions.length;
+          },
+          listener: (context, transactionState) {
+            final calendarState = context.read<CalendarBloc>().state;
+
+            _reloadCalendarData(context, calendarState);
+          },
+        ),
+      ],
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F5F5),
         appBar: const CalendarAppBar(),
-        body: const SingleChildScrollView(
-          child: Column(
-            children: [
-              SizedBox(height: 22),
-              _Calendar(),
-              SizedBox(height: 22),
-              _Statistical(),
-              SizedBox(height: 22),
-            ],
+        body: MediaQuery.removePadding(
+          context: context,
+          removeBottom: true,
+          removeTop: true,
+          child: SingleChildScrollView(
+            child: Column(
+              children: const [
+                SizedBox(height: 22),
+                _Calendar(),
+                SizedBox(height: 22),
+                _Statistical(),
+                SizedBox(height: 22),
+                _TransactionListByDay(),
+                SizedBox(height: 22),
+              ],
+            ),
           ),
         ),
       ),
@@ -88,23 +109,59 @@ class _CalendarView extends StatelessWidget {
   }
 }
 
+void _reloadCalendarData(
+    BuildContext context,
+    CalendarState state,
+    ) {
+  final month = state.selectedMonth;
+
+  context.read<TransactionBloc>().add(
+    LoadTransactions(
+      month: month.month,
+      year: month.year,
+    ),
+  );
+
+  context.read<TransactionBloc>().add(
+    LoadTransactionBalance(
+      null,
+      month.month,
+      month.year,
+    ),
+  );
+
+  context.read<TransactionBloc>().add(
+    LoadDayTransactions(
+      day: state.selectedDate.day,
+      month: state.selectedDate.month,
+      year: state.selectedDate.year,
+    ),
+  );
+}
+
 class _Calendar extends StatelessWidget {
   const _Calendar();
 
-  double calculateDayBalance(DateTime date, TransactionState transactionState) {
+  double calculateDayBalance(
+      DateTime date,
+      List transactions,
+      ) {
     double balance = 0;
 
-    for (final t in transactionState.allTransactions) {
+    for (final t in transactions) {
+
       final sameDay =
           t.date.year == date.year &&
-          t.date.month == date.month &&
-          t.date.day == date.day;
+              t.date.month == date.month &&
+              t.date.day == date.day;
 
       if (!sameDay) continue;
 
       if (t.type == AppType.income) {
         balance += t.amount;
-      } else {
+      }
+
+      else {
         balance -= t.amount;
       }
     }
@@ -114,46 +171,63 @@ class _Calendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TransactionBloc, TransactionState>(
-      builder: (context, transactionState) {
-        return BlocBuilder<CalendarBloc, CalendarState>(
-          builder: (context, state) {
-            final selectedDate = state.selectedDate;
 
-            final firstDayOfMonth = DateTime(
-              selectedDate.year,
-              selectedDate.month,
-              1,
-            );
+    return BlocBuilder<CalendarBloc, CalendarState>(
+      builder: (context, calendarState) {
 
-            final daysInMonth = DateTime(
-              selectedDate.year,
-              selectedDate.month + 1,
-              0,
-            ).day;
+        final selectedMonth =
+            calendarState.selectedMonth;
 
-            final previousMonthDays = DateTime(
-              selectedDate.year,
-              selectedDate.month,
-              0,
-            ).day;
+        final selectedDate =
+            calendarState.selectedDate;
 
-            final emptyDaysBefore = firstDayOfMonth.weekday - 1;
+        final firstDayOfMonth = DateTime(
+          selectedMonth.year,
+          selectedMonth.month,
+          1,
+        );
 
-            final totalItems = ((emptyDaysBefore + daysInMonth) / 7).ceil() * 7;
+        final daysInMonth = DateTime(
+          selectedMonth.year,
+          selectedMonth.month + 1,
+          0,
+        ).day;
+
+        final previousMonthDays = DateTime(
+          selectedMonth.year,
+          selectedMonth.month,
+          0,
+        ).day;
+
+        final emptyDaysBefore =
+            firstDayOfMonth.weekday - 1;
+
+        final totalItems =
+            ((emptyDaysBefore + daysInMonth) / 7)
+                .ceil() *
+                7;
+
+        return BlocBuilder<TransactionBloc, TransactionState>(
+          builder: (context, transactionState) {
 
             return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 12),
+
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.black,
                   borderRadius: BorderRadius.circular(20),
                 ),
+
                 padding: const EdgeInsets.all(1),
+
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(19),
+
                   child: Column(
                     children: [
+
                       const Row(
                         children: [
                           _WeekDayItem('T2'),
@@ -170,51 +244,73 @@ class _Calendar extends StatelessWidget {
                         context: context,
                         removeTop: true,
                         removeBottom: true,
+
                         child: GridView.builder(
                           shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
+
+                          physics:
+                          const NeverScrollableScrollPhysics(),
+
                           padding: EdgeInsets.zero,
+
                           itemCount: totalItems,
+
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 7,
-                                childAspectRatio: 1.2,
-                              ),
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 7,
+                            childAspectRatio: 1.2,
+                          ),
+
                           itemBuilder: (context, index) {
+
                             DateTime date;
+
                             bool isCurrentMonth;
 
                             if (index < emptyDaysBefore) {
+
                               final previousDay =
                                   previousMonthDays -
-                                  emptyDaysBefore +
-                                  index +
-                                  1;
+                                      emptyDaysBefore +
+                                      index +
+                                      1;
 
                               date = DateTime(
-                                selectedDate.year,
-                                selectedDate.month - 1,
+                                selectedMonth.year,
+                                selectedMonth.month - 1,
                                 previousDay,
                               );
 
                               isCurrentMonth = false;
-                            } else {
-                              final currentDay = index - emptyDaysBefore + 1;
+                            }
+
+                            else {
+
+                              final currentDay =
+                                  index -
+                                      emptyDaysBefore +
+                                      1;
 
                               if (currentDay <= daysInMonth) {
+
                                 date = DateTime(
-                                  selectedDate.year,
-                                  selectedDate.month,
+                                  selectedMonth.year,
+                                  selectedMonth.month,
                                   currentDay,
                                 );
 
                                 isCurrentMonth = true;
-                              } else {
-                                final nextMonthDay = currentDay - daysInMonth;
+                              }
+
+                              else {
+
+                                final nextMonthDay =
+                                    currentDay -
+                                        daysInMonth;
 
                                 date = DateTime(
-                                  selectedDate.year,
-                                  selectedDate.month + 1,
+                                  selectedMonth.year,
+                                  selectedMonth.month + 1,
                                   nextMonthDay,
                                 );
 
@@ -222,13 +318,46 @@ class _Calendar extends StatelessWidget {
                               }
                             }
 
+                            final isSelected =
+                                date.day ==
+                                    selectedDate.day &&
+                                    date.month ==
+                                        selectedDate.month &&
+                                    date.year ==
+                                        selectedDate.year;
+
                             return CalendarDayItem(
                               date: date,
-                              isCurrentMonth: isCurrentMonth,
+
+                              isCurrentMonth:
+                              isCurrentMonth,
+
+                              isSelected: isSelected,
+
                               balance: calculateDayBalance(
                                 date,
-                                transactionState,
+                                transactionState
+                                    .allTransactions,
                               ),
+
+                              onTap: () {
+
+                                context
+                                    .read<CalendarBloc>()
+                                    .add(
+                                  SetCalendarDate(date),
+                                );
+
+                                context
+                                    .read<TransactionBloc>()
+                                    .add(
+                                  LoadDayTransactions(
+                                    day: date.day,
+                                    month: date.month,
+                                    year: date.year,
+                                  ),
+                                );
+                              },
                             );
                           },
                         ),
@@ -252,21 +381,31 @@ class _WeekDayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     final isSunday = title == 'CN';
+
     final isSaturday = title == 'T7';
 
     return Expanded(
       child: Container(
         height: 32,
+
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300, width: 0.5),
+
+          border: Border.all(
+            color: Colors.grey.shade300,
+            width: 0.5,
+          ),
         ),
+
         child: Center(
           child: Text(
             title,
+
             style: TextStyle(
               fontWeight: FontWeight.bold,
+
               color: isSunday
                   ? Colors.red
                   : isSaturday
@@ -285,65 +424,224 @@ class _Statistical extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return BlocBuilder<TransactionBloc, TransactionState>(
       builder: (context, state) {
+
         final balance = state.balance;
-        final expense = calculateTotalExpense(state.allTransactions);
-        final income = calculateTotalIncome(state.allTransactions);
+
+        final expense =
+        calculateTotalExpense(
+          state.allTransactions,
+        );
+
+        final income =
+        calculateTotalIncome(
+          state.allTransactions,
+        );
 
         return Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
+          margin:
+          const EdgeInsets.symmetric(horizontal: 12),
+
           padding: const EdgeInsets.all(4),
+
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
           ),
+
           child: Column(
             children: [
+
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
+
                 children: [
+
                   _StatItem(
-                    widthC: MediaQuery.of(context).size.width / 4,
+                    widthC:
+                    MediaQuery.of(context)
+                        .size
+                        .width /
+                        4,
+
                     title: 'Thu nhập',
-                    value: AppFormat.currency(income),
+
+                    value:
+                    AppFormat.currency(income),
+
                     colorC: Colors.green,
                   ),
+
                   _StatItem(
-                    widthC: MediaQuery.of(context).size.width / 4,
+                    widthC:
+                    MediaQuery.of(context)
+                        .size
+                        .width /
+                        4,
+
                     title: 'Chi tiêu',
-                    value: AppFormat.currency(expense),
+
+                    value:
+                    AppFormat.currency(expense),
+
                     colorC: Colors.red,
                   ),
+
                   _StatItem(
-                    widthC: MediaQuery.of(context).size.width / 4,
+                    widthC:
+                    MediaQuery.of(context)
+                        .size
+                        .width /
+                        4,
+
                     title: 'Tổng',
-                    value: AppFormat.currency(balance?.currentBalance ?? 0),
-                    colorC: (balance?.currentBalance ?? 0) >= 0
+
+                    value: AppFormat.currency(
+                      balance?.currentBalance ?? 0,
+                    ),
+
+                    colorC:
+                    (balance?.currentBalance ?? 0) >=
+                        0
                         ? Colors.green
                         : Colors.red,
                   ),
                 ],
               ),
+
               const SizedBox(height: 10),
+
               const Divider(height: 1),
+
               const SizedBox(height: 10),
+
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                mainAxisAlignment:
+                MainAxisAlignment.spaceAround,
+
                 children: [
+
                   _StatItem(
-                    widthC: MediaQuery.of(context).size.width / 3,
+                    widthC:
+                    MediaQuery.of(context)
+                        .size
+                        .width /
+                        3,
+
                     title: 'Số dư đầu kì',
-                    value: AppFormat.currency(balance?.previousBalance ?? 0),
+
+                    value: AppFormat.currency(
+                      balance?.previousBalance ?? 0,
+                    ),
                   ),
+
                   _StatItem(
-                    widthC: MediaQuery.of(context).size.width / 3,
+                    widthC:
+                    MediaQuery.of(context)
+                        .size
+                        .width /
+                        3,
+
                     title: 'Số dư',
-                    value: AppFormat.currency(balance?.totalBalance ?? 0),
+
+                    value: AppFormat.currency(
+                      balance?.totalBalance ?? 0,
+                    ),
                   ),
                 ],
               ),
             ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _TransactionListByDay extends StatelessWidget {
+  const _TransactionListByDay();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<TransactionBloc, TransactionState>(
+      builder: (context, state) {
+        final transactions = state.selectedDayTransactions;
+
+        if (transactions.isEmpty) {
+          return Container(
+            margin: const EdgeInsets.symmetric(horizontal: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Center(
+              child: Text(
+                'Không có giao dịch trong ngày này',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }
+
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ListView.separated(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: transactions.length,
+            separatorBuilder: (_, __) => const Divider(height: 1),
+            itemBuilder: (context, index) {
+              final t = transactions[index];
+              final isIncome = t.type == AppType.income;
+
+              return ListTile(
+                leading: CircleAvatar(
+                  backgroundColor:
+                  isIncome
+                      ? Colors.green.withOpacity(0.12)
+                      : Colors.red.withOpacity(0.12),
+                  child: Icon(
+                    isIncome
+                        ? Icons.arrow_downward
+                        : Icons.arrow_upward,
+                    color:
+                    isIncome
+                        ? Colors.green
+                        : Colors.red,
+                  ),
+                ),
+                title: Text(
+                  t.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                subtitle: Text(
+                  '${t.date.day}/${t.date.month}/${t.date.year}',
+                ),
+                trailing: Text(
+                  '${isIncome ? '+' : '-'}${AppFormat.currency(t.amount)}',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color:
+                    isIncome
+                        ? Colors.green
+                        : Colors.red,
+                  ),
+                ),
+              );
+            },
           ),
         );
       },
@@ -366,15 +664,24 @@ class _StatItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return SizedBox(
       width: widthC,
+
       child: Column(
         children: [
+
           Text(
             title,
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
+
           const SizedBox(height: 4),
+
           AutoSizeText(
             value,
 
@@ -385,6 +692,7 @@ class _StatItem extends StatelessWidget {
             minFontSize: 10,
 
             overflow: TextOverflow.ellipsis,
+
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,

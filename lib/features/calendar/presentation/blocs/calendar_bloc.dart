@@ -7,8 +7,13 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
   CalendarBloc()
       : super(
     CalendarState(
+      selectedMonth: DateTime(
+        DateTime.now().year,
+        DateTime.now().month,
+        1,
+      ),
       selectedDate: DateTime.now(),
-      reset: false
+      reset: false,
     ),
   ) {
     on<NextCalendarMonth>(_nextMonth);
@@ -21,16 +26,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       NextCalendarMonth event,
       Emitter<CalendarState> emit,
       ) {
-    final current = state.selectedDate;
+    final current = state.selectedMonth;
+    final nextMonth = DateTime(current.year, current.month + 1, 1);
 
     emit(
       state.copyWith(
-        selectedDate: DateTime(
-          current.year,
-          current.month + 1,
-          1,
-        ),
-        reset: true
+        selectedMonth: nextMonth,
+        selectedDate: nextMonth,
+        reset: true,
       ),
     );
   }
@@ -39,16 +42,14 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       PreviousCalendarMonth event,
       Emitter<CalendarState> emit,
       ) {
-    final current = state.selectedDate;
+    final current = state.selectedMonth;
+    final previousMonth = DateTime(current.year, current.month - 1, 1);
 
     emit(
       state.copyWith(
-        selectedDate: DateTime(
-          current.year,
-          current.month - 1,
-          1,
-        ),
-        reset: true
+        selectedMonth: previousMonth,
+        selectedDate: previousMonth,
+        reset: true,
       ),
     );
   }
@@ -57,10 +58,13 @@ class CalendarBloc extends Bloc<CalendarEvent, CalendarState> {
       ResetCalendarMonth event,
       Emitter<CalendarState> emit,
       ) {
+    final now = DateTime.now();
+
     emit(
       state.copyWith(
-        selectedDate: DateTime.now(),
-        reset: false
+        selectedMonth: DateTime(now.year, now.month, 1),
+        selectedDate: now,
+        reset: false,
       ),
     );
   }

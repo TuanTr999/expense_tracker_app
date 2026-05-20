@@ -1,5 +1,4 @@
 import 'package:expense_tracker_app/features/transactions/data/models/transaction_model.dart';
-import 'package:expense_tracker_app/core/enums/app_type.dart';
 import 'package:expense_tracker_app/features/transactions/presentation/blocs/transaction/transaction_state.dart';
 
 abstract class TransactionEvent {}
@@ -9,15 +8,28 @@ abstract class TransactionEvent {}
 // =====================
 class LoadTransactions extends TransactionEvent {
   final int? categoryId;
+  final int? day;
   final int? month;
   final int? year;
 
-  LoadTransactions({this.categoryId,this.month, this.year});
+  LoadTransactions({this.day,this.categoryId,this.month, this.year});
 }
 
 class AddTransaction extends TransactionEvent {
   final TransactionModel transaction;
   AddTransaction(this.transaction);
+}
+
+class LoadDayTransactions extends TransactionEvent {
+  final int day;
+  final int month;
+  final int year;
+
+  LoadDayTransactions({
+    required this.day,
+    required this.month,
+    required this.year,
+  });
 }
 
 class UpdateTransaction extends TransactionEvent {

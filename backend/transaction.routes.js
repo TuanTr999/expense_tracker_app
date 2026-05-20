@@ -186,7 +186,7 @@ router.get('/transactions/balance', async (req, res) => {
 
 // GET
 router.get('/transactions', async (req, res) => {
-  const { categoryId, month, year } = req.query;
+  const { categoryId, day, month, year } = req.query;
 
   try {
     let query = `
@@ -210,10 +210,20 @@ router.get('/transactions', async (req, res) => {
       params.push(categoryId);
     }
 
-    if (month && year) {
+    // có day + month + year → lọc theo ngày
+    if (day && month && year) {
+      query += ' AND DAY(t.date) = ? AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
+      params.push(day, month, year);
+    }
+
+    // có month + year → lọc theo tháng
+    else if (month && year) {
       query += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
       params.push(month, year);
-    } else if (year) {
+    }
+
+    // chỉ có year → lọc theo năm
+    else if (year) {
       query += ' AND YEAR(t.date) = ?';
       params.push(year);
     }

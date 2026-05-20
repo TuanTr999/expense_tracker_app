@@ -119,7 +119,7 @@ class _WalletGroup extends StatelessWidget {
         .where(
           (e) =>
       e.type == type &&
-          e.balance > 0,
+          e.balance != 0,
     )
         .toList();
 
@@ -274,7 +274,7 @@ class _WalletItemState extends State<_WalletItem> {
         children: [
           _WalletIcon(wallet: wallet),
 
-
+          const SizedBox(width: 10,),
           Text(
             wallet.name,
             style: const TextStyle(
@@ -395,7 +395,7 @@ class _EmptyWalletItem extends StatelessWidget {
       child: Row(
         children: [
           _DefaultIcon(type: type),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           const Expanded(
             child: Text(
               'Chưa có tài khoản',

@@ -9,6 +9,7 @@ class TransactionState {
   final List<TransactionModel> allTransactions;
   final List<TransactionModel> filteredTransactions;
   final List<TransactionGroup> groupedTransactions;
+  final List<TransactionModel> selectedDayTransactions;
 
   final FilterType filterType;
   final AppType? transactionType;
@@ -25,6 +26,7 @@ class TransactionState {
     required this.allTransactions,
     required this.filteredTransactions,
     required this.groupedTransactions,
+    required this.selectedDayTransactions,
     required this.filterType,
     this.transactionType,
     required this.selectedDate,
@@ -38,6 +40,7 @@ class TransactionState {
     List<TransactionModel>? allTransactions,
     List<TransactionModel>? filteredTransactions,
     List<TransactionGroup>? groupedTransactions,
+    List<TransactionModel>? selectedDayTransactions,
     FilterType? filterType,
     AppType? transactionType,
     DateTime? selectedDate,
@@ -50,6 +53,7 @@ class TransactionState {
       allTransactions: allTransactions ?? this.allTransactions,
       filteredTransactions: filteredTransactions ?? this.filteredTransactions,
       groupedTransactions: groupedTransactions ?? this.groupedTransactions,
+      selectedDayTransactions: selectedDayTransactions ?? this.selectedDayTransactions,
       filterType: filterType ?? this.filterType,
       transactionType: transactionType ?? this.transactionType,
       selectedDate: selectedDate ?? this.selectedDate,

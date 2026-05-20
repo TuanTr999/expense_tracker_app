@@ -17,6 +17,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
           allTransactions: [],
           filteredTransactions: [],
           groupedTransactions: [],
+          selectedDayTransactions: [],
           filterType: FilterType.day,
           selectedDate: DateTime.now(),
           reset: false,
@@ -34,6 +35,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     on<ResetFilter>(_reset);
     on<LoadTransactionBalance>(_loadTransactionBalance);
     on<LoadBudgetTransactions>(_loadBudgetTransactions);
+    on<LoadDayTransactions>(_loadDayTransactions);
   }
 
   // =====================
@@ -44,7 +46,7 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
     LoadTransactions event,
     Emitter<TransactionState> emit,
   ) async {
-    final data = await repository.getTransactions(categoryId: event.categoryId ,month: event.month, year: event.year);
+    final data = await repository.getTransactions(categoryId: event.categoryId ,day: event.day,month: event.month, year: event.year);
 
     final newState = state.copyWith(allTransactions: data);
 
@@ -231,6 +233,23 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         allTransactions: data,
         filteredTransactions: data,
         groupedTransactions: groupByDate(data),
+      ),
+    );
+  }
+
+  Future<void> _loadDayTransactions(
+      LoadDayTransactions event,
+      Emitter<TransactionState> emit,
+      ) async {
+    final data = await repository.getTransactions(
+      day: event.day,
+      month: event.month,
+      year: event.year,
+    );
+
+    emit(
+      state.copyWith(
+        selectedDayTransactions: data,
       ),
     );
   }
