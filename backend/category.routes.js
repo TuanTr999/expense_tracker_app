@@ -1,16 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
+const verifyFirebaseToken = require('./middleware/auth.middleware');
 
 // GET ALL
-router.get('/categories', async (req, res) => {
+router.get('/categories', verifyFirebaseToken, async (req, res) => {
   const { type } = req.query;
+  const userId = req.user.uid;
 
-  let query = 'SELECT * FROM categories';
-  let params = [];
+  let query = 'SELECT * FROM categories WHERE user_id = ?';
+  let params = [userId];
 
   if (type) {
-    query += ' WHERE type = ?';
+    query += ' AND type = ?';
     params.push(type);
   }
 
@@ -18,94 +20,78 @@ router.get('/categories', async (req, res) => {
   res.json(rows);
 });
 
-
 // INSERT
-router.post('/categories', async (req, res) => {
+router.post('/categories', verifyFirebaseToken, async (req, res) => {
   const { name, icon, type } = req.body;
+  const userId = req.user.uid;
 
   await db.query(
-    'INSERT INTO categories (name, icon, type) VALUES (?, ?, ?)',
-    [name, icon, type]
+    'INSERT INTO categories (user_id, name, icon, type) VALUES (?, ?, ?, ?)',
+    [userId, name, icon, type]
   );
 
   res.json({ message: 'Category added' });
 });
 
-
 // UPDATE
-router.put('/categories/:id', async (req, res) => {
+router.put('/categories/:id', verifyFirebaseToken, async (req, res) => {
   const { name, icon, type } = req.body;
+  const userId = req.user.uid;
 
   await db.query(
-    'UPDATE categories SET name=?, icon=?, type=? WHERE id=?',
-    [name, icon, type, req.params.id]
+    'UPDATE categories SET name=?, icon=?, type=? WHERE id=? AND user_id=?',
+    [name, icon, type, req.params.id, userId]
   );
 
   res.json({ message: 'Category updated' });
 });
 
 // DELETE
-router.delete('/categories/:id', async (req, res) => {
+router.delete('/categories/:id', verifyFirebaseToken, async (req, res) => {
   const id = req.params.id;
+  const userId = req.user.uid;
 
   try {
-    // 1. Xóa transaction trước
     await db.query(
-      'DELETE FROM transactions WHERE category_id = ?',
-      [id]
+      'DELETE FROM transactions WHERE category_id = ? AND user_id = ?',
+      [id, userId]
     );
 
-    // 2. Xóa category
     await db.query(
-      'DELETE FROM categories WHERE id = ?',
-      [id]
+      'DELETE FROM categories WHERE id = ? AND user_id = ?',
+      [id, userId]
     );
 
     res.json({
       message: 'Đã xóa category và toàn bộ transaction liên quan'
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Delete failed' });
   }
 });
 
-// HAS TRANSACTION
-//router.get('/categories/:id/has-transaction', async (req, res) => {
-//  const [rows] = await db.query(
-//    'SELECT id FROM transactions WHERE category_id=? LIMIT 1',
-//    [req.params.id]
-//  );
-//
-//  res.json({ hasTransaction: rows.length > 0 });
-//});
-
-
 // RESET DEFAULT
-// RESET DEFAULT
-router.post('/categories/reset', async (req, res) => {
+router.post('/categories/reset', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
 
-   // 1. Xóa transaction có category
-       await db.query(`
-         DELETE FROM transactions
-         WHERE category_id IN (
-           SELECT id FROM categories
-         )
-       `);
+    await db.query(
+      `
+      DELETE FROM transactions
+      WHERE user_id = ?
+        AND category_id IN (
+          SELECT id FROM categories WHERE user_id = ?
+        )
+      `,
+      [userId, userId]
+    );
 
-       // 2. Xóa categories
-       await db.query('DELETE FROM categories');
+    await db.query(
+      'DELETE FROM categories WHERE user_id = ?',
+      [userId]
+    );
 
-       res.json({
-         message: 'All categories deleted'
-       });
-
-    // 3. Xóa category
-    await db.query('DELETE FROM categories');
-
-    // 4. Insert default categories
     const defaults = [
       ['Ăn uống', 'food.png', 'expense'],
       ['Giải trí', 'entertainment.png', 'expense'],
@@ -122,15 +108,14 @@ router.post('/categories/reset', async (req, res) => {
 
     for (let item of defaults) {
       await db.query(
-        'INSERT INTO categories (name, icon, type) VALUES (?, ?, ?)',
-        item
+        'INSERT INTO categories (user_id, name, icon, type) VALUES (?, ?, ?, ?)',
+        [userId, ...item]
       );
     }
 
     res.json({
       message: 'Reset categories thành công'
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).json({

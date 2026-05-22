@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
+const verifyFirebaseToken = require('./middleware/auth.middleware');
 
 // =========================
 // HELPER
@@ -12,9 +13,10 @@ const isValidNumber = (value) => {
 // =========================
 // GET ALL BUDGETS
 // =========================
-router.get('/budgets', async (req, res) => {
+router.get('/budgets', verifyFirebaseToken, async (req, res) => {
   try {
     const { month, year, categoryId } = req.query;
+    const userId = req.user.uid;
 
     let query = `
       SELECT
@@ -24,16 +26,14 @@ router.get('/budgets', async (req, res) => {
       FROM budgets b
       LEFT JOIN categories c
         ON c.id = b.category_id
-      WHERE 1=1
+      WHERE b.user_id = ?
     `;
 
-    let params = [];
+    let params = [userId];
 
     if (month) {
       if (!isValidNumber(month)) {
-        return res.status(400).json({
-          message: 'Invalid month',
-        });
+        return res.status(400).json({ message: 'Invalid month' });
       }
 
       query += ' AND b.month = ?';
@@ -42,9 +42,7 @@ router.get('/budgets', async (req, res) => {
 
     if (year) {
       if (!isValidNumber(year)) {
-        return res.status(400).json({
-          message: 'Invalid year',
-        });
+        return res.status(400).json({ message: 'Invalid year' });
       }
 
       query += ' AND b.year = ?';
@@ -53,9 +51,7 @@ router.get('/budgets', async (req, res) => {
 
     if (categoryId) {
       if (!isValidNumber(categoryId)) {
-        return res.status(400).json({
-          message: 'Invalid categoryId',
-        });
+        return res.status(400).json({ message: 'Invalid categoryId' });
       }
 
       query += ' AND b.category_id = ?';
@@ -65,7 +61,6 @@ router.get('/budgets', async (req, res) => {
     const [rows] = await db.query(query, params);
 
     res.json(rows);
-
   } catch (err) {
     console.error(err);
 
@@ -78,12 +73,10 @@ router.get('/budgets', async (req, res) => {
 // =========================
 // GET SUMMARY
 // =========================
-// =========================
-// GET SUMMARY
-// =========================
-router.get('/budgets/summary', async (req, res) => {
+router.get('/budgets/summary', verifyFirebaseToken, async (req, res) => {
   try {
     const { month, year } = req.query;
+    const userId = req.user.uid;
 
     const hasMonth = month !== undefined && month !== null && month !== '';
     const hasYear = year !== undefined && year !== null && year !== '';
@@ -122,6 +115,7 @@ router.get('/budgets/summary', async (req, res) => {
           ON b.category_id = c.id
           AND b.month = ?
           AND b.year = ?
+          AND b.user_id = ?
 
         LEFT JOIN (
           SELECT
@@ -131,6 +125,7 @@ router.get('/budgets/summary', async (req, res) => {
           WHERE type = 'expense'
             AND MONTH(date) = ?
             AND YEAR(date) = ?
+            AND user_id = ?
           GROUP BY category_id
         ) t
           ON t.category_id = c.id
@@ -143,8 +138,10 @@ router.get('/budgets/summary', async (req, res) => {
         Number(year),
         Number(month),
         Number(year),
+        userId,
         Number(month),
         Number(year),
+        userId,
       ];
     } else {
       query = `
@@ -173,6 +170,7 @@ router.get('/budgets/summary', async (req, res) => {
             SUM(amount) AS budgetAmount
           FROM budgets
           WHERE year = ?
+            AND user_id = ?
           GROUP BY category_id
         ) b
           ON b.category_id = c.id
@@ -184,6 +182,7 @@ router.get('/budgets/summary', async (req, res) => {
           FROM transactions
           WHERE type = 'expense'
             AND YEAR(date) = ?
+            AND user_id = ?
           GROUP BY category_id
         ) t
           ON t.category_id = c.id
@@ -194,7 +193,9 @@ router.get('/budgets/summary', async (req, res) => {
       params = [
         Number(year),
         Number(year),
+        userId,
         Number(year),
+        userId,
       ];
     }
 
@@ -209,11 +210,14 @@ router.get('/budgets/summary', async (req, res) => {
     });
   }
 });
+
 // =========================
 // GET BY ID
 // =========================
-router.get('/budgets/:id', async (req, res) => {
+router.get('/budgets/:id', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
+
     const [rows] = await db.query(
       `
       SELECT
@@ -224,8 +228,9 @@ router.get('/budgets/:id', async (req, res) => {
       LEFT JOIN categories c
         ON c.id = b.category_id
       WHERE b.id = ?
+        AND b.user_id = ?
       `,
-      [req.params.id]
+      [req.params.id, userId]
     );
 
     if (rows.length === 0) {
@@ -235,7 +240,6 @@ router.get('/budgets/:id', async (req, res) => {
     }
 
     res.json(rows[0]);
-
   } catch (err) {
     console.error(err);
 
@@ -248,8 +252,10 @@ router.get('/budgets/:id', async (req, res) => {
 // =========================
 // CREATE BUDGET
 // =========================
-router.post('/budgets', async (req, res) => {
+router.post('/budgets', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
+
     const {
       category_id,
       amount,
@@ -268,30 +274,31 @@ router.post('/budgets', async (req, res) => {
       });
     }
 
-    // check duplicate
     const [existing] = await db.query(
       `
       SELECT id
       FROM budgets
-      WHERE category_id = ?
-      AND month = ?
-      AND year = ?
+      WHERE user_id = ?
+        AND category_id = ?
+        AND month = ?
+        AND year = ?
       `,
-      [category_id, month, year]
+      [userId, category_id, month, year]
     );
 
     if (existing.length > 0) {
-      // update luôn thay vì báo lỗi
       await db.query(
         `
         UPDATE budgets
         SET amount = ?
-        WHERE category_id = ?
-        AND month = ?
-        AND year = ?
+        WHERE user_id = ?
+          AND category_id = ?
+          AND month = ?
+          AND year = ?
         `,
         [
           amount,
+          userId,
           category_id,
           month,
           year,
@@ -303,18 +310,19 @@ router.post('/budgets', async (req, res) => {
       });
     }
 
-    // create new
     const [result] = await db.query(
       `
       INSERT INTO budgets (
+        user_id,
         category_id,
         amount,
         month,
         year
       )
-      VALUES (?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?)
       `,
       [
+        userId,
         category_id,
         amount,
         month,
@@ -326,7 +334,6 @@ router.post('/budgets', async (req, res) => {
       message: 'Budget created',
       id: result.insertId,
     });
-
   } catch (err) {
     console.error(err);
 
@@ -339,8 +346,10 @@ router.post('/budgets', async (req, res) => {
 // =========================
 // UPDATE BUDGET
 // =========================
-router.put('/budgets/:id', async (req, res) => {
+router.put('/budgets/:id', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
+
     const {
       category_id,
       amount,
@@ -357,6 +366,7 @@ router.put('/budgets/:id', async (req, res) => {
         month = ?,
         year = ?
       WHERE id = ?
+        AND user_id = ?
       `,
       [
         category_id,
@@ -364,6 +374,7 @@ router.put('/budgets/:id', async (req, res) => {
         month,
         year,
         req.params.id,
+        userId,
       ]
     );
 
@@ -376,7 +387,6 @@ router.put('/budgets/:id', async (req, res) => {
     res.json({
       message: 'Budget updated',
     });
-
   } catch (err) {
     console.error(err);
 
@@ -389,17 +399,19 @@ router.put('/budgets/:id', async (req, res) => {
 // =========================
 // DELETE ALL
 // =========================
-router.delete('/budgets', async (req, res) => {
+router.delete('/budgets', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
+
     const [result] = await db.query(
-      'DELETE FROM budgets'
+      'DELETE FROM budgets WHERE user_id = ?',
+      [userId]
     );
 
     res.json({
       message: 'All budgets deleted',
       affectedRows: result.affectedRows,
     });
-
   } catch (err) {
     console.error(err);
 
@@ -412,11 +424,13 @@ router.delete('/budgets', async (req, res) => {
 // =========================
 // DELETE BY ID
 // =========================
-router.delete('/budgets/:id', async (req, res) => {
+router.delete('/budgets/:id', verifyFirebaseToken, async (req, res) => {
   try {
+    const userId = req.user.uid;
+
     const [result] = await db.query(
-      'DELETE FROM budgets WHERE id = ?',
-      [req.params.id]
+      'DELETE FROM budgets WHERE id = ? AND user_id = ?',
+      [req.params.id, userId]
     );
 
     if (result.affectedRows === 0) {
@@ -428,7 +442,6 @@ router.delete('/budgets/:id', async (req, res) => {
     res.json({
       message: 'Budget deleted',
     });
-
   } catch (err) {
     console.error(err);
 

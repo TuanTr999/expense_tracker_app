@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../config/api_config.dart';
-
 
 class DioClient {
   late final Dio dio;
@@ -24,26 +24,40 @@ class DioClient {
   void _addInterceptors() {
     dio.interceptors.add(
       InterceptorsWrapper(
-        onRequest: (options, handler) {
+        onRequest: (options, handler) async {
+
+          final user = FirebaseAuth.instance.currentUser;
+
+          if (user != null) {
+            final token = await user.getIdToken();
+
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+
           print("➡️ REQUEST: ${options.method} ${options.uri}");
           print("➡️ HEADERS: ${options.headers}");
-          // print("➡️ DATA: ${options.data}");
+
           return handler.next(options);
         },
+
         onResponse: (response, handler) {
           print("✅ RESPONSE: ${response.statusCode}");
-          // print("✅ DATA: ${response.data}");
+
           return handler.next(response);
         },
+
         onError: (DioException e, handler) {
           print("❌ ERROR: ${e.message}");
 
           if (e.type == DioExceptionType.connectionTimeout) {
             print("⏰ Timeout kết nối server");
+
           } else if (e.type == DioExceptionType.receiveTimeout) {
             print("⏰ Timeout nhận dữ liệu");
+
           } else if (e.type == DioExceptionType.badResponse) {
             print("🚨 Server trả lỗi: ${e.response?.statusCode}");
+
           } else if (e.type == DioExceptionType.connectionError) {
             print("🚫 Không kết nối được server");
           }

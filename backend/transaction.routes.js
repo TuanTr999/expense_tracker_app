@@ -1,9 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
-
-// giả lập user
-const userId = 1;
+const verifyFirebaseToken = require('./middleware/auth.middleware');
 
 function getWalletChange(type, amount) {
   const value = Number(amount);
@@ -15,21 +13,134 @@ function getWalletChange(type, amount) {
 }
 
 // GET BALANCE
-router.get('/transactions/balance', async (req, res) => {
-  const { day, month, year } = req.query;
+router.get(
+  '/transactions/balance',
+  verifyFirebaseToken,
+  async (req, res) => {
 
-  if (!year) {
-    return res.status(400).json({
-      message: 'year is required',
-    });
-  }
+    const userId = req.user.uid;
 
-  const currentYear = Number(year);
-  const currentMonth = month ? Number(month) : null;
-  const currentDay = day ? Number(day) : null;
+    const { day, month, year } = req.query;
 
-  try {
-    if (currentDay && currentMonth) {
+    if (!year) {
+      return res.status(400).json({
+        message: 'year is required',
+      });
+    }
+
+    const currentYear = Number(year);
+    const currentMonth = month ? Number(month) : null;
+    const currentDay = day ? Number(day) : null;
+
+    try {
+
+      // DAY
+      if (currentDay && currentMonth) {
+
+        const [currentRows] = await db.query(
+          `
+          SELECT COALESCE(SUM(
+            CASE
+              WHEN type = 'income' THEN amount
+              WHEN type = 'expense' THEN -amount
+              ELSE 0
+            END
+          ), 0) AS balance
+          FROM transactions
+          WHERE user_id = ?
+            AND DAY(date) = ?
+            AND MONTH(date) = ?
+            AND YEAR(date) = ?
+          `,
+          [userId, currentDay, currentMonth, currentYear]
+        );
+
+        const [previousRows] = await db.query(
+          `
+          SELECT COALESCE(SUM(
+            CASE
+              WHEN type = 'income' THEN amount
+              WHEN type = 'expense' THEN -amount
+              ELSE 0
+            END
+          ), 0) AS balance
+          FROM transactions
+          WHERE user_id = ?
+            AND DATE(date) < ?
+          `,
+          [
+            userId,
+            `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(currentDay).padStart(2, '0')}`,
+          ]
+        );
+
+        const currentBalance = Number(currentRows[0].balance);
+        const previousBalance = Number(previousRows[0].balance);
+
+        return res.json({
+          type: 'daily',
+          day: currentDay,
+          month: currentMonth,
+          year: currentYear,
+          currentBalance,
+          previousBalance,
+          totalBalance: previousBalance + currentBalance,
+        });
+      }
+
+      // MONTH
+      if (currentMonth) {
+
+        const [currentRows] = await db.query(
+          `
+          SELECT COALESCE(SUM(
+            CASE
+              WHEN type = 'income' THEN amount
+              WHEN type = 'expense' THEN -amount
+              ELSE 0
+            END
+          ), 0) AS balance
+          FROM transactions
+          WHERE user_id = ?
+            AND MONTH(date) = ?
+            AND YEAR(date) = ?
+          `,
+          [userId, currentMonth, currentYear]
+        );
+
+        const [previousRows] = await db.query(
+          `
+          SELECT COALESCE(SUM(
+            CASE
+              WHEN type = 'income' THEN amount
+              WHEN type = 'expense' THEN -amount
+              ELSE 0
+            END
+          ), 0) AS balance
+          FROM transactions
+          WHERE user_id = ?
+            AND (
+              YEAR(date) < ?
+              OR (YEAR(date) = ? AND MONTH(date) < ?)
+            )
+          `,
+          [userId, currentYear, currentYear, currentMonth]
+        );
+
+        const currentBalance = Number(currentRows[0].balance);
+        const previousBalance = Number(previousRows[0].balance);
+
+        return res.json({
+          type: 'monthly',
+          month: currentMonth,
+          year: currentYear,
+          currentBalance,
+          previousBalance,
+          totalBalance: previousBalance + currentBalance,
+        });
+      }
+
+      // YEAR
       const [currentRows] = await db.query(
         `
         SELECT COALESCE(SUM(
@@ -41,11 +152,9 @@ router.get('/transactions/balance', async (req, res) => {
         ), 0) AS balance
         FROM transactions
         WHERE user_id = ?
-          AND DAY(date) = ?
-          AND MONTH(date) = ?
           AND YEAR(date) = ?
         `,
-        [userId, currentDay, currentMonth, currentYear]
+        [userId, currentYear]
       );
 
       const [previousRows] = await db.query(
@@ -59,136 +168,41 @@ router.get('/transactions/balance', async (req, res) => {
         ), 0) AS balance
         FROM transactions
         WHERE user_id = ?
-          AND DATE(date) < ?
+          AND YEAR(date) < ?
         `,
-        [
-          userId,
-          `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(
-            currentDay
-          ).padStart(2, '0')}`,
-        ]
+        [userId, currentYear]
       );
 
       const currentBalance = Number(currentRows[0].balance);
       const previousBalance = Number(previousRows[0].balance);
 
       return res.json({
-        type: 'daily',
-        day: currentDay,
-        month: currentMonth,
+        type: 'yearly',
         year: currentYear,
         currentBalance,
         previousBalance,
         totalBalance: previousBalance + currentBalance,
       });
-    }
 
-    if (currentMonth) {
-      const [currentRows] = await db.query(
-        `
-        SELECT COALESCE(SUM(
-          CASE
-            WHEN type = 'income' THEN amount
-            WHEN type = 'expense' THEN -amount
-            ELSE 0
-          END
-        ), 0) AS balance
-        FROM transactions
-        WHERE user_id = ?
-          AND MONTH(date) = ?
-          AND YEAR(date) = ?
-        `,
-        [userId, currentMonth, currentYear]
-      );
+    } catch (error) {
+      console.error(error);
 
-      const [previousRows] = await db.query(
-        `
-        SELECT COALESCE(SUM(
-          CASE
-            WHEN type = 'income' THEN amount
-            WHEN type = 'expense' THEN -amount
-            ELSE 0
-          END
-        ), 0) AS balance
-        FROM transactions
-        WHERE user_id = ?
-          AND (
-            YEAR(date) < ?
-            OR (YEAR(date) = ? AND MONTH(date) < ?)
-          )
-        `,
-        [userId, currentYear, currentYear, currentMonth]
-      );
-
-      const currentBalance = Number(currentRows[0].balance);
-      const previousBalance = Number(previousRows[0].balance);
-
-      return res.json({
-        type: 'monthly',
-        month: currentMonth,
-        year: currentYear,
-        currentBalance,
-        previousBalance,
-        totalBalance: previousBalance + currentBalance,
+      res.status(500).json({
+        message: 'Failed to calculate balance',
       });
     }
-
-    const [currentRows] = await db.query(
-      `
-      SELECT COALESCE(SUM(
-        CASE
-          WHEN type = 'income' THEN amount
-          WHEN type = 'expense' THEN -amount
-          ELSE 0
-        END
-      ), 0) AS balance
-      FROM transactions
-      WHERE user_id = ?
-        AND YEAR(date) = ?
-      `,
-      [userId, currentYear]
-    );
-
-    const [previousRows] = await db.query(
-      `
-      SELECT COALESCE(SUM(
-        CASE
-          WHEN type = 'income' THEN amount
-          WHEN type = 'expense' THEN -amount
-          ELSE 0
-        END
-      ), 0) AS balance
-      FROM transactions
-      WHERE user_id = ?
-        AND YEAR(date) < ?
-      `,
-      [userId, currentYear]
-    );
-
-    const currentBalance = Number(currentRows[0].balance);
-    const previousBalance = Number(previousRows[0].balance);
-
-    return res.json({
-      type: 'yearly',
-      year: currentYear,
-      currentBalance,
-      previousBalance,
-      totalBalance: previousBalance + currentBalance,
-    });
-  } catch (error) {
-    console.error(error);
-
-    res.status(500).json({
-      message: 'Failed to calculate balance',
-    });
   }
-});
+);
 
 // GET
-router.get('/transactions', async (req, res) => {
+router.get('/transactions', verifyFirebaseToken, async (req, res) => {
+
+  const userId = req.user.uid;
+
   const { categoryId, day, month, year } = req.query;
 
   try {
+
     let query = `
       SELECT
         t.*,
@@ -210,19 +224,16 @@ router.get('/transactions', async (req, res) => {
       params.push(categoryId);
     }
 
-    // có day + month + year → lọc theo ngày
     if (day && month && year) {
       query += ' AND DAY(t.date) = ? AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
       params.push(day, month, year);
     }
 
-    // có month + year → lọc theo tháng
     else if (month && year) {
       query += ' AND MONTH(t.date) = ? AND YEAR(t.date) = ?';
       params.push(month, year);
     }
 
-    // chỉ có year → lọc theo năm
     else if (year) {
       query += ' AND YEAR(t.date) = ?';
       params.push(year);
@@ -231,8 +242,11 @@ router.get('/transactions', async (req, res) => {
     query += ' ORDER BY t.date DESC';
 
     const [rows] = await db.query(query, params);
+
     res.json(rows);
+
   } catch (error) {
+
     console.error(error);
 
     res.status(500).json({
@@ -242,8 +256,19 @@ router.get('/transactions', async (req, res) => {
 });
 
 // POST
-router.post('/transactions', async (req, res) => {
-  const { id, title, amount, date, type, category_id, wallet_id } = req.body;
+router.post('/transactions', verifyFirebaseToken, async (req, res) => {
+
+  const userId = req.user.uid;
+
+  const {
+    id,
+    title,
+    amount,
+    date,
+    type,
+    category_id,
+    wallet_id
+  } = req.body;
 
   if (!wallet_id) {
     return res.status(400).json({
@@ -255,6 +280,7 @@ router.post('/transactions', async (req, res) => {
   const walletChange = getWalletChange(type, value);
 
   try {
+
     await db.query('START TRANSACTION');
 
     await db.query(
@@ -263,7 +289,16 @@ router.post('/transactions', async (req, res) => {
       (id, title, amount, date, type, category_id, wallet_id, user_id)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
       `,
-      [id, title, value, date, type, category_id, wallet_id, userId]
+      [
+        id,
+        title,
+        value,
+        date,
+        type,
+        category_id,
+        wallet_id,
+        userId
+      ]
     );
 
     await db.query(
@@ -277,9 +312,14 @@ router.post('/transactions', async (req, res) => {
 
     await db.query('COMMIT');
 
-    res.json({ message: 'Added' });
+    res.json({
+      message: 'Added'
+    });
+
   } catch (error) {
+
     await db.query('ROLLBACK');
+
     console.error(error);
 
     res.status(500).json({
@@ -289,8 +329,18 @@ router.post('/transactions', async (req, res) => {
 });
 
 // PUT
-router.put('/transactions/:id', async (req, res) => {
-  const { title, amount, date, type, category_id, wallet_id } = req.body;
+router.put('/transactions/:id', verifyFirebaseToken, async (req, res) => {
+
+  const userId = req.user.uid;
+
+  const {
+    title,
+    amount,
+    date,
+    type,
+    category_id,
+    wallet_id
+  } = req.body;
 
   if (!wallet_id) {
     return res.status(400).json({
@@ -299,6 +349,7 @@ router.put('/transactions/:id', async (req, res) => {
   }
 
   try {
+
     await db.query('START TRANSACTION');
 
     const [oldRows] = await db.query(
@@ -311,6 +362,7 @@ router.put('/transactions/:id', async (req, res) => {
     );
 
     if (oldRows.length === 0) {
+
       await db.query('ROLLBACK');
 
       return res.status(404).json({
@@ -366,9 +418,14 @@ router.put('/transactions/:id', async (req, res) => {
 
     await db.query('COMMIT');
 
-    res.json({ message: 'Updated' });
+    res.json({
+      message: 'Updated'
+    });
+
   } catch (error) {
+
     await db.query('ROLLBACK');
+
     console.error(error);
 
     res.status(500).json({
@@ -378,8 +435,12 @@ router.put('/transactions/:id', async (req, res) => {
 });
 
 // DELETE
-router.delete('/transactions/:id', async (req, res) => {
+router.delete('/transactions/:id', verifyFirebaseToken, async (req, res) => {
+
+  const userId = req.user.uid;
+
   try {
+
     await db.query('START TRANSACTION');
 
     const [oldRows] = await db.query(
@@ -392,6 +453,7 @@ router.delete('/transactions/:id', async (req, res) => {
     );
 
     if (oldRows.length === 0) {
+
       await db.query('ROLLBACK');
 
       return res.status(404).json({
@@ -425,9 +487,14 @@ router.delete('/transactions/:id', async (req, res) => {
 
     await db.query('COMMIT');
 
-    res.json({ message: 'Deleted' });
+    res.json({
+      message: 'Deleted'
+    });
+
   } catch (error) {
+
     await db.query('ROLLBACK');
+
     console.error(error);
 
     res.status(500).json({

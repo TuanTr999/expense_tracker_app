@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const db = require('./db');
-
-const userId = 1;
+const verifyFirebaseToken = require('./middleware/auth.middleware');
 
 // Lấy toàn bộ ví / thẻ
-router.get('/wallets', async (req, res) => {
+router.get('/wallets', verifyFirebaseToken, async (req, res) => {
+  const userId = req.user.uid;
+
   try {
     const [rows] = await db.query(
       `
@@ -29,7 +30,8 @@ router.get('/wallets', async (req, res) => {
 });
 
 // Thêm ví / thẻ
-router.post('/wallets', async (req, res) => {
+router.post('/wallets', verifyFirebaseToken, async (req, res) => {
+  const userId = req.user.uid;
   const { name, type, icon, balance } = req.body;
 
   if (!name || !type) {
@@ -71,7 +73,8 @@ router.post('/wallets', async (req, res) => {
 });
 
 // Xóa ví / thẻ
-router.delete('/wallets/:id', async (req, res) => {
+router.delete('/wallets/:id', verifyFirebaseToken, async (req, res) => {
+  const userId = req.user.uid;
   const { id } = req.params;
 
   try {
@@ -94,7 +97,8 @@ router.delete('/wallets/:id', async (req, res) => {
   }
 });
 
-router.put('/wallets/:id/balance', async (req, res) => {
+router.put('/wallets/:id/balance', verifyFirebaseToken, async (req, res) => {
+  const userId = req.user.uid;
   const { id } = req.params;
   const { balance } = req.body;
 
